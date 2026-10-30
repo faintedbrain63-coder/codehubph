@@ -1,0 +1,16 @@
+{% extends "accounts/security_base.html" %}
+{% block title %}Check your email · {% endblock %}
+{% block content %}
+<div class="auth-shell">
+  {% include "accounts/_auth_aside.html" with aside_eyebrow="Secure registration" aside_title="Your next step starts in your inbox." aside_text="Verify your email address to activate your account and keep your project communications secure." %}
+  <div class="auth-form">
+    <span class="icon-tile icon-tile-lg mb-4" aria-hidden="true"><i class="bi bi-envelope-check"></i></span>
+    <span class="eyebrow d-block">Email verification</span>
+    <h1 class="h3 mb-3">Check your inbox</h1>
+    <p class="text-body-secondary">If your account is awaiting verification, we will email you an activation link. Open it and confirm your email address before signing in.</p>
+    <div class="border rounded-3 p-3 my-4"><h2 class="h6">Can't find the message?</h2><p class="small text-body-secondary mb-0">Allow a few minutes for delivery and check your spam folder. You can request another link below. Delivery requests are limited to protect your inbox.</p></div>
+    <a href="{% url 'accounts:login' %}" class="btn btn-primary w-100">Back to sign in</a>
+    <p class="text-center small mt-4 mb-0"><a href="{% url 'accounts:resend_verification' %}">Resend verification email</a></p>
+  </div>
+</div>
+{% endblock %}

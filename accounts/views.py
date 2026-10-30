@@ -1,19 +1,27 @@
+from urllib.parse import urlencode
+
 from django.contrib import messages
 from django.conf import settings as django_settings
-from django.contrib.auth import login, views as auth_views
+from django.contrib.auth import get_user_model, views as auth_views
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.db.models import Q
 from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
+from django.utils.decorators import method_decorator
+from django.utils.encoding import force_str
+from django.utils.http import urlsafe_base64_decode
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_http_methods, require_POST
 from django.views.decorators.debug import sensitive_post_parameters
+from django.views.decorators.cache import never_cache
 
-from accounts.forms import LoginForm, ProfileForm, RegisterForm
+from accounts.forms import LoginForm, ProfileForm, RegisterForm, SecurityEmailForm
+from accounts.models import AuthEmailJob
+from accounts.email_security import allow_auth_email, queue_auth_email, verification_token_valid
 from accounts.settings import account_settings_forms
 from capstone.models import CapstoneRequest
 from core.forms import ProjectTestimonialForm, TestimonialForm
@@ -23,23 +31,88 @@ from orders.views import resume_purchase
 from payments.models import Payment
 
 
+@sensitive_post_parameters("password1", "password2")
+@never_cache
 @require_http_methods(["GET", "POST"])
 def register(request):
     if request.user.is_authenticated:
         return redirect("accounts:dashboard")
     form = RegisterForm(request.POST if request.method == "POST" else None)
     if request.method == "POST" and form.is_valid():
-        user = form.save()
-        login(request, user, backend="accounts.backends.EmailBackend")
-        messages.success(request, f"Welcome, {user.first_name}! Your account is ready.")
-        resumed = resume_purchase(request)
-        if resumed:
-            return resumed
-        next_url = request.POST.get("next") or request.GET.get("next", "")
-        if next_url and url_has_allowed_host_and_scheme(next_url, {request.get_host()}, request.is_secure()):
-            return redirect(next_url)
-        return redirect("accounts:dashboard")
+        if not allow_auth_email(request, form.cleaned_data["email"], "verify"):
+            form.add_error(None, "Too many requests. Please wait 15 minutes before trying again.")
+        else:
+            try:
+                with transaction.atomic():
+                    user = form.save()
+                    queue_auth_email(user, AuthEmailJob.Purpose.VERIFY)
+            except IntegrityError:
+                form.add_error("email", "An account with this email already exists. Try signing in instead.")
+            else:
+                next_url = request.POST.get("next") or request.GET.get("next", "")
+                if next_url and url_has_allowed_host_and_scheme(next_url, {request.get_host()}, request.is_secure()):
+                    request.session["verified_signup_next"] = next_url
+                return redirect("accounts:verification_sent")
     return render(request, "accounts/register.html", {"form": form, "next": request.POST.get("next") or request.GET.get("next", "")})
+
+
+@never_cache
+@require_http_methods(["GET"])
+def verification_sent(request):
+    return render(request, "accounts/verification_sent.html")
+
+
+@never_cache
+@require_http_methods(["GET", "POST"])
+def resend_verification(request):
+    form = SecurityEmailForm(request.POST if request.method == "POST" else None)
+    if request.method == "POST" and form.is_valid():
+        email = form.cleaned_data["email"]
+        if allow_auth_email(request, email, "verify"):
+            user = get_user_model().objects.filter(
+                email__iexact=email, is_active=False, email_verification_required=True, email_verified_at__isnull=True,
+            ).first()
+            if user and user.has_usable_password():
+                queue_auth_email(user, AuthEmailJob.Purpose.VERIFY)
+        return redirect("accounts:verification_sent")
+    return render(request, "accounts/resend_verification.html", {"form": form})
+
+
+def _verification_user(uidb64, lock=False):
+    try:
+        if len(uidb64) > 100:
+            return None
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        if not uid.isascii() or not uid.isdecimal() or len(uid) > 19 or int(uid) > 9223372036854775807:
+            return None
+        queryset = get_user_model().objects
+        if lock:
+            queryset = queryset.select_for_update()
+        return queryset.get(pk=uid)
+    except (ValueError, TypeError, OverflowError, UnicodeDecodeError, get_user_model().DoesNotExist):
+        return None
+
+
+@never_cache
+@require_http_methods(["GET", "POST"])
+def verify_email(request, uidb64, token):
+    # Email scanners may follow links. Activation always needs a CSRF-protected POST.
+    with transaction.atomic():
+        user = _verification_user(uidb64, lock=request.method == "POST")
+        valid = len(token) <= 1024 and verification_token_valid(user, token)
+        if request.method == "POST" and valid:
+            user.is_active, user.email_verified_at = True, timezone.now()
+            user.save(update_fields=["is_active", "email_verified_at"])
+            messages.success(request, "Email verified. You can now sign in securely.")
+            next_url = request.session.pop("verified_signup_next", "")
+            response = redirect("accounts:login")
+            if next_url and url_has_allowed_host_and_scheme(next_url, {request.get_host()}, request.is_secure()):
+                response["Location"] += "?" + urlencode({"next": next_url})
+            return response
+    response = render(request, "accounts/verify_email.html", {"validlink": valid})
+    response["Referrer-Policy"] = "no-referrer"
+    response["X-Robots-Tag"] = "noindex, nofollow"
+    return response
 
 
 class LoginView(auth_views.LoginView):
@@ -79,20 +152,44 @@ class PasswordChangeView(auth_views.PasswordChangeView):
         return super().form_valid(form)
 
 
+@method_decorator(never_cache, name="dispatch")
 class PasswordResetView(auth_views.PasswordResetView):
     template_name = "accounts/password_reset_form.html"
     email_template_name = "emails/password_reset.txt"
     subject_template_name = "emails/password_reset_subject.txt"
     success_url = reverse_lazy("accounts:password_reset_done")
+    form_class = SecurityEmailForm
+
+    def form_valid(self, form):
+        email = form.cleaned_data["email"]
+        if allow_auth_email(self.request, email, "reset"):
+            user = get_user_model().objects.filter(email__iexact=email, is_active=True).first()
+            if user and user.has_usable_password() and (not user.email_verification_required or user.email_verified_at):
+                queue_auth_email(user, AuthEmailJob.Purpose.RESET)
+        # Same response for unknown, disabled, throttled and eligible accounts.
+        return redirect(self.success_url)
 
 
 class PasswordResetDoneView(auth_views.PasswordResetDoneView):
     template_name = "accounts/password_reset_done.html"
 
 
+@method_decorator(transaction.atomic, name="dispatch")
 class PasswordResetConfirmView(auth_views.PasswordResetConfirmView):
     template_name = "accounts/password_reset_confirm.html"
     success_url = reverse_lazy("accounts:password_reset_complete")
+
+    def get_user(self, uidb64):
+        user = _verification_user(uidb64, lock=True)
+        if user and user.is_active and (not user.email_verification_required or user.email_verified_at):
+            return user
+        return None
+
+    def dispatch(self, request, *args, **kwargs):
+        response = super().dispatch(request, *args, **kwargs)
+        response["Referrer-Policy"] = "no-referrer"
+        response["X-Robots-Tag"] = "noindex, nofollow"
+        return response
 
 
 class PasswordResetCompleteView(auth_views.PasswordResetCompleteView):

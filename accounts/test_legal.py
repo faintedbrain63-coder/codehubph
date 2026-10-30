@@ -75,18 +75,19 @@ class RegistrationAgreementTests(BaseTestCase):
                     self.assertIn(field, response.context["form"].errors)
                     self.assertFalse(User.objects.exists())
 
-    def test_success_stores_server_time_and_versions_and_signs_in(self):
+    def test_success_stores_server_time_and_versions_before_verification(self):
         start = timezone.now()
         response = self.client.post(reverse("accounts:register"), self.payload(
             legal_accepted_at="1999-01-01T00:00:00Z", privacy_policy_version="forged", license_agreement_version="forged",
         ))
-        self.assertRedirects(response, reverse("accounts:dashboard"))
+        self.assertRedirects(response, reverse("accounts:verification_sent"))
         user = User.objects.get()
         self.assertGreaterEqual(user.legal_accepted_at, start)
         self.assertLessEqual(user.legal_accepted_at, timezone.now())
         self.assertEqual(user.privacy_policy_version, CURRENT_VERSIONS["privacy"])
         self.assertEqual(user.license_agreement_version, CURRENT_VERSIONS["license"])
-        self.assertEqual(int(self.client.session["_auth_user_id"]), user.pk)
+        self.assertNotIn("_auth_user_id", self.client.session)
+        self.assertFalse(user.is_active)
 
     def test_missing_or_tampered_policy_versions_are_rejected(self):
         for field in ("privacy_version", "license_version"):

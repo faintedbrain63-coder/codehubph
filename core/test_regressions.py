@@ -519,4 +519,5 @@ class WorkflowAndUIRegressionTests(BaseTestCase):
             "accept_privacy": "on", "accept_license": "on",
             "privacy_version": CURRENT_VERSIONS["privacy"], "license_version": CURRENT_VERSIONS["license"],
         })
-        self.assertRedirects(response, reverse("orders:cart"))
+        self.assertRedirects(response, reverse("accounts:verification_sent"))
+        self.assertRedirects(self.complete_registration(email="new@example.com"), reverse("orders:cart"))

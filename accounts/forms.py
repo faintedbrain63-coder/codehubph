@@ -10,10 +10,20 @@ from core.legal import CURRENT_VERSIONS, get_document
 User = get_user_model()
 
 
+class SecurityEmailForm(forms.Form):
+    email = forms.EmailField(
+        label="Email address", max_length=254,
+        widget=forms.EmailInput(attrs={"autocomplete": "email", "autofocus": True}),
+    )
+
+    def clean_email(self):
+        return self.cleaned_data["email"].strip().lower()
+
+
 class RegisterForm(UserCreationForm):
     first_name = forms.CharField(max_length=150)
     last_name = forms.CharField(max_length=150)
-    email = forms.EmailField(help_text="We send receipts and download links here.")
+    email = forms.EmailField(help_text="We will send a verification link to this address before you can sign in.")
     phone_number = forms.CharField(max_length=20, required=False, label="Phone number")
     school = forms.CharField(max_length=150, required=False, label="School / organization")
     accept_privacy = forms.BooleanField(
@@ -74,6 +84,8 @@ class RegisterForm(UserCreationForm):
 
     def save(self, commit=True):
         user = super().save(commit=False)
+        user.is_active = False
+        user.email_verification_required = True
         user.legal_accepted_at = timezone.now()
         user.privacy_policy_version = CURRENT_VERSIONS["privacy"]
         user.license_agreement_version = CURRENT_VERSIONS["license"]
@@ -131,6 +143,9 @@ class ProfileForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        if self.instance.email_verification_required:
+            self.fields["email"].disabled = True
+            self.fields["email"].help_text = "Your verified sign-in address. Contact support if you need to change it."
         self.fields["phone_number"].widget.attrs.update({
             "autocomplete": "tel",
             "placeholder": "+63 917 000 0000",

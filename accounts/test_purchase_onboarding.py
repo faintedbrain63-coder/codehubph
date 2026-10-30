@@ -42,6 +42,9 @@ class SignedOutPurchaseTests(BaseTestCase):
         self.assertContains(page, "Create a free account to buy")
 
         response = self.client.post(expected, registration(next=self.product.get_absolute_url()))
+        self.assertRedirects(response, reverse("accounts:verification_sent"))
+        self.assertFalse(Order.objects.exists())
+        response = self.complete_registration()
         order = Order.objects.get(user__email="maria@example.com")
         self.assertRedirects(response, order.get_payment_url(), fetch_redirect_response=False)
         self.assertEqual([item.product for item in order.items.all()], [self.product])
@@ -67,6 +70,8 @@ class SignedOutPurchaseTests(BaseTestCase):
         session[PURCHASE_INTENT_KEY] = intent
         session.save()
         response = self.client.post(reverse("accounts:register"), registration())
+        self.assertRedirects(response, reverse("accounts:verification_sent"))
+        response = self.complete_registration()
         self.assertRedirects(response, reverse("accounts:dashboard"), fetch_redirect_response=False)
         self.assertFalse(Order.objects.exists())
 
@@ -74,6 +79,8 @@ class SignedOutPurchaseTests(BaseTestCase):
         self.client.post(reverse("orders:buy_now", args=[self.product.slug]))
         Product.objects.filter(pk=self.product.pk).update(status=Product.Status.DRAFT)
         response = self.client.post(reverse("accounts:register"), registration(next="/products/"))
+        self.assertRedirects(response, reverse("accounts:verification_sent"))
+        response = self.complete_registration()
         self.assertRedirects(response, "/products/", fetch_redirect_response=False)
         self.assertFalse(Order.objects.exists())
 
@@ -94,6 +101,8 @@ class SignedOutPurchaseTests(BaseTestCase):
         url = reverse("capstone:request_create", args=[project.slug])
         self.assertIn(reverse("accounts:register"), self.client.get(url)["Location"])
         response = self.client.post(reverse("accounts:register"), registration(next=url))
+        self.assertRedirects(response, reverse("accounts:verification_sent"))
+        response = self.complete_registration()
         self.assertRedirects(response, url, fetch_redirect_response=False)
         self.assertEqual(self.client.get(url).status_code, 200)
 
@@ -101,6 +110,7 @@ class SignedOutPurchaseTests(BaseTestCase):
 class OnboardingTests(BaseTestCase):
     def test_new_customer_sees_tutorial_until_it_is_finished(self):
         self.client.post(reverse("accounts:register"), registration())
+        self.complete_registration()
         response = self.client.get(reverse("accounts:dashboard"))
         self.assertContains(response, 'id="onboarding"')
         self.assertContains(response, "data-onboarding-autostart")

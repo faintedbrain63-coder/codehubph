@@ -1,0 +1,18 @@
+{% autoescape off %}{{ heading }}
+
+Hi {{ user.first_name|default:"there" }},
+
+{{ introduction }}
+
+{{ button }}:
+{{ action_url }}
+
+This link expires in {{ expiry_minutes }} minutes and can be used once.
+{% if verification %}You will be asked to confirm activation before your account is enabled.{% else %}Your password will not change until you choose and save a new one.{% endif %}
+
+If you did not request this, ignore this email. Do not share this link with anyone.
+{{ site_name }} will never ask you to reply with your password.
+
+Sign-in email: {{ user.email }}
+{{ site_name }} | Account security
+{% endautoescape %}

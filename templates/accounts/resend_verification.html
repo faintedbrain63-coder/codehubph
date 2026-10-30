@@ -1,0 +1,17 @@
+{% extends "accounts/security_base.html" %}
+{% block title %}Resend verification · {% endblock %}
+{% block content %}
+<div class="auth-shell">
+  {% include "accounts/_auth_aside.html" with aside_eyebrow="Account activation" aside_title="One verified address. One secure account." aside_text="Confirm ownership of your email address before accessing your project workspace." %}
+  <div class="auth-form">
+    <span class="eyebrow">Email verification</span>
+    <h1 class="h3 mb-2">Request a new verification link</h1>
+    <p class="text-body-secondary mb-4">Enter the email you used to register. If your account needs verification, we will send a new link.</p>
+    <form method="post" class="needs-validation" novalidate>
+      {% csrf_token %}{% include "partials/_form.html" %}
+      <button class="btn btn-primary w-100" type="submit" data-loading-text="Requesting…">Send verification link</button>
+    </form>
+    <p class="text-center small mt-4 mb-0"><a href="{% url 'accounts:login' %}">Back to sign in</a></p>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "accounts/security_base.html" %}
+{% block title %}Verify email · {% endblock %}
+{% block extra_head %}<meta name="referrer" content="no-referrer"><meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block content %}
+<div class="auth-shell">
+  {% include "accounts/_auth_aside.html" with aside_eyebrow="Account security" aside_title="A secure start for your next project." aside_text="Confirm your email address, then sign in to your private workspace." %}
+  <div class="auth-form">
+    <span class="icon-tile icon-tile-lg mb-4" aria-hidden="true"><i class="bi bi-shield-check"></i></span>
+    {% if validlink %}
+      <span class="eyebrow d-block">One more step</span><h1 class="h3 mb-3">Verify your email address</h1>
+      <p class="text-body-secondary mb-4">Confirm below to activate the account you requested. Only continue if you created this account.</p>
+      <form method="post">{% csrf_token %}<button class="btn btn-primary w-100" type="submit" data-loading-text="Verifying…">Verify and activate account</button></form>
+      <p class="small text-body-secondary mt-4 mb-0">If you did not create this account, close this page. No account will be activated.</p>
+    {% else %}
+      <span class="eyebrow d-block">Link unavailable</span><h1 class="h3 mb-3">This link is no longer valid</h1>
+      <p class="text-body-secondary mb-4">It may have expired, been used already, or been replaced. If you still need to verify your account, request another link.</p>
+      <a class="btn btn-primary w-100" href="{% url 'accounts:resend_verification' %}">Request a new verification link</a>
+      <p class="text-center small mt-4 mb-0"><a href="{% url 'accounts:login' %}">Already verified? Sign in</a></p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

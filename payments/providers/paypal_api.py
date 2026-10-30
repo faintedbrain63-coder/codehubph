@@ -27,13 +27,16 @@ class PayPalError(Exception):
 
 
 def is_configured():
-    return bool(settings.PAYPAL_CLIENT_ID and settings.PAYPAL_SECRET)
+    return bool(settings.PAYPAL_ENV in {"sandbox", "live"}
+                and settings.PAYPAL_CLIENT_ID.strip() and settings.PAYPAL_SECRET.strip())
 
 
 def base_url():
     if settings.PAYPAL_ENV == "live":
         return "https://api-m.paypal.com"
-    return "https://api-m.sandbox.paypal.com"
+    if settings.PAYPAL_ENV == "sandbox":
+        return "https://api-m.sandbox.paypal.com"
+    raise PayPalError("PAYPAL_ENV must be sandbox or live.")
 
 
 def _access_token():

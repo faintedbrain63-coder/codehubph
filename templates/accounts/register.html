@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "accounts/security_base.html" %}
 {% block title %}Create account · {% endblock %}
 {% block content %}
 <div class="auth-shell">
@@ -57,6 +57,7 @@
           or personalized ads, authorize public portfolio disclosure, or waive rights protected by law.
           School/organization is optional at registration; educational information is processed for your requested services as explained in the Policy.</p>
       </fieldset>
+      <p class="small text-body-secondary"><i class="bi bi-envelope-check me-1" aria-hidden="true"></i>Verify your email before signing in. We will send you a secure activation link.</p>
       <button type="submit" class="btn btn-primary w-100" data-loading-text="Creating account…">Create account</button>
     </form>
     <p class="text-center small text-body-secondary mt-4 mb-0">Already have an account? <a href="{% url 'accounts:login' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Sign in</a></p>

@@ -172,6 +172,10 @@ reviews on a real store misleads customers.
 Emails (order confirmations, payment approvals, password resets) print to the console by default. Set the `EMAIL_*`
 values in `.env` to send real mail over SMTP.
 
+New signups must verify their email before signing in. Verification and password-reset messages use a
+durable delivery queue; run `python manage.py send_auth_emails --loop` alongside the web server.
+See [account email setup](docs/ACCOUNT_EMAIL.md) for Yahoo SMTP, migrations, worker deployment and recovery.
+
 ## Admin catalog and uploads
 
 Sign in with a staff account and open `/manage/` (**Admin portal** in the account menu), or use the **Store console**
@@ -338,6 +342,11 @@ doesn't match, the payment is recorded as **Failed** and nothing unlocks.
 
 **Going live:** set `PAYPAL_ENV=live`, replace the client ID, secret and webhook ID with the Live app's values, and
 register the webhook again against the Live app. Test the whole flow once with a small real payment.
+
+Run `python manage.py check_paypal --authenticate-only` to validate the saved API credentials without creating
+an order or charge. Before deployment, run `python manage.py check_paypal --production --connect` against the
+actual production settings. This checks live mode, secure hosting settings, authentication, webhook URL and
+required event subscriptions. See [PayPal production setup](docs/PAYPAL_PRODUCTION.md).
 
 ### GCash
 

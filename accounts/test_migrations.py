@@ -13,7 +13,7 @@ from orders.models import Order
 class EmailOnlyMigrationTests(TransactionTestCase):
     def test_existing_account_and_orders_survive_username_removal(self):
         before = [("accounts", "0002_unique_username_ci")]
-        after = [("accounts", "0005_onboarding")]
+        after = MigrationExecutor(connection).loader.graph.leaf_nodes("accounts")
         executor = MigrationExecutor(connection)
         executor.migrate(before)
         self.addCleanup(lambda: MigrationExecutor(connection).migrate(after))

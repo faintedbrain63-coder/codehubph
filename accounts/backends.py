@@ -14,6 +14,10 @@ def lockout_email(request, credentials=None):
 class EmailBackend(ModelBackend):
     """Authenticate exclusively by email; username is Django's internal credential argument."""
 
+    def user_can_authenticate(self, user):
+        return (super().user_can_authenticate(user)
+                and (not user.email_verification_required or user.email_verified_at is not None))
+
     def authenticate(self, request, username=None, password=None, email=None, **kwargs):
         User = get_user_model()
         identifier = email if email is not None else username

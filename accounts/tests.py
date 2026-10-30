@@ -31,12 +31,15 @@ class RegistrationTests(BaseTestCase):
         data.update(overrides)
         return data
 
-    def test_register_creates_customer_and_signs_in(self):
+    def test_register_creates_pending_customer_then_verifies_and_signs_in(self):
         response = self.client.post(reverse("accounts:register"), self._payload())
-        self.assertRedirects(response, reverse("accounts:dashboard"))
+        self.assertRedirects(response, reverse("accounts:verification_sent"))
         user = User.objects.get(email="maria@example.com")
         self.assertEqual(user.email, "maria@example.com")  # normalised
         self.assertFalse(user.is_staff)
+        self.assertFalse(user.is_active)
+        self.assertNotIn("_auth_user_id", self.client.session)
+        self.assertRedirects(self.complete_registration(), reverse("accounts:dashboard"))
         self.assertEqual(int(self.client.session["_auth_user_id"]), user.pk)
 
     def test_email_is_required(self):
@@ -53,7 +56,9 @@ class RegistrationTests(BaseTestCase):
 
     def test_register_ignores_external_next(self):
         response = self.client.post(reverse("accounts:register") + "?next=https://evil.example/", self._payload())
-        self.assertRedirects(response, reverse("accounts:dashboard"))
+        self.assertRedirects(response, reverse("accounts:verification_sent"))
+        self.assertNotIn("verified_signup_next", self.client.session)
+        self.assertRedirects(self.complete_registration(), reverse("accounts:dashboard"))
 
 
 class LoginTests(BaseTestCase):
@@ -92,6 +97,8 @@ class LoginTests(BaseTestCase):
 
     def test_password_reset_sends_email(self):
         self.client.post(reverse("accounts:password_reset"), {"email": "bob@example.com"})
+        from accounts.email_security import deliver_auth_emails
+        deliver_auth_emails()
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn("/account/password-reset/", mail.outbox[0].body)
         self.assertIn("Sign-in email: bob@example.com", mail.outbox[0].body)

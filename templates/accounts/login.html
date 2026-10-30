@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "accounts/security_base.html" %}
 {% block title %}Sign in · {% endblock %}
 {% block content %}
 <div class="auth-shell">
@@ -32,6 +32,7 @@
       </div>
       <button type="submit" class="btn btn-primary w-100" data-loading-text="Signing in…">Sign in</button>
     </form>
+    <p class="text-center small mt-3 mb-0"><a href="{% url 'accounts:resend_verification' %}">Need to verify your email?</a></p>
     <p class="text-center small text-body-secondary mt-4 mb-0">
       New here? <a href="{% url 'accounts:register' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Create a free account</a>
     </p>

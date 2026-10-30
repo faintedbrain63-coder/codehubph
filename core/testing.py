@@ -32,6 +32,7 @@ def zip_upload(name="app.zip", content=b"PK\x05\x06" + b"\x00" * 18):
 
 
 @override_settings(
+    SITE_URL="https://testserver",
     # Legacy commerce tests keep exercising historical records and in-flight payments.
     # Service-only tests explicitly use the production value (False).
     PRODUCT_SALES_ENABLED=True,
@@ -45,6 +46,19 @@ def zip_upload(name="app.zip", content=b"PK\x05\x06" + b"\x00" * 18):
 class BaseTestCase(TestCase):
     def setUp(self):
         cache.clear()
+
+    def complete_registration(self, email="maria@example.com"):
+        """Complete the real activation and login steps in customer journey tests."""
+        from accounts.email_security import verification_path
+        from django.urls import reverse
+        from urllib.parse import parse_qs, urlsplit
+
+        user = get_user_model().objects.get(email=email)
+        self.assertNotIn("_auth_user_id", self.client.session)
+        confirmed = self.client.post(verification_path(user))
+        self.assertEqual(confirmed.status_code, 302)
+        next_url = parse_qs(urlsplit(confirmed["Location"]).query).get("next", [""])[0]
+        return self.client.post(reverse("accounts:login"), {"email": email, "password": PASSWORD, "next": next_url})
 
     @staticmethod
     def make_user(name="alice", staff=False, **extra):
