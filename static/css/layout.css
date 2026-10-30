@@ -4,6 +4,11 @@
    Text, forms and documents keep their own reading measure inside the container. */
 :root { font-size: 18px; --page-gutter: clamp(16px, 2vw, 40px); --page-max: 1920px; --measure: 72ch; }
 body { font-size: 1rem; }
+/* Pages never scroll sideways: decorative layers and long unbroken text must not widen the document.
+   Set on body only: the browser applies it to the window, so the sticky navbar keeps working and
+   Bootstrap's modal scroll lock (inline overflow on body) still takes over. Setting it on html as well
+   would stop that hand-off. Tables and rails that scroll sideways set their own overflow-x. */
+body { overflow-x: hidden; }
 .container, .container-sm, .container-md, .container-lg, .container-xl, .container-xxl, .container-fluid {
   width: 100%; max-width: var(--page-max); padding-inline: var(--page-gutter);
 }
