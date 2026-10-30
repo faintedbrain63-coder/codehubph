@@ -294,6 +294,20 @@ a { text-underline-offset: 0.18em; }
 }
 .nav-util:hover { color: var(--ink); border-color: var(--line-strong); background: var(--surface-alt); }
 .nav-util::after { display: none !important; }
+.site-navbar .nav-visitors {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: 2.5rem;
+  padding: 0 0.85rem !important;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: default;
+}
 .cart-count {
   position: absolute;
   top: -0.35rem;

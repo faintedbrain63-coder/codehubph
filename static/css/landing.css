@@ -48,6 +48,11 @@ html:has(.landing) { scroll-padding-top: calc(var(--nav-h) + 0.5rem); }
   background: rgba(148, 163, 184, 0.08);
   border-color: rgba(148, 163, 184, 0.24);
 }
+.landing .site-navbar .nav-visitors {
+  color: #cbd5e1;
+  background: rgba(148, 163, 184, 0.08);
+  border-color: rgba(148, 163, 184, 0.24);
+}
 .landing .site-navbar .nav-util:hover { color: #fff; background: rgba(148, 163, 184, 0.16); }
 .landing .site-navbar .nav-account {
   color: #e2e8f0;
@@ -64,6 +69,11 @@ html:has(.landing) { scroll-padding-top: calc(var(--nav-h) + 0.5rem); }
 .landing .site-navbar.is-past-hero .nav-link.active,
 .landing .site-navbar.is-past-hero .nav-link[aria-current="page"] { color: var(--ink); }
 .landing .site-navbar.is-past-hero .nav-util {
+  color: var(--muted);
+  background: var(--surface);
+  border-color: var(--line);
+}
+.landing .site-navbar.is-past-hero .nav-visitors {
   color: var(--muted);
   background: var(--surface);
   border-color: var(--line);

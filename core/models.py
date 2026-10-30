@@ -350,3 +350,26 @@ class ChunkedUpload(models.Model):
         except FileNotFoundError:
             pass
         self.delete()
+
+
+class VisitorCounter(models.Model):
+    """Single-row running total of unique visitors (see core/visitors.py).
+
+    Kept apart from SiteSettings so saving the settings form never overwrites the count.
+    """
+
+    total = models.PositiveBigIntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.total} visitors"
+
+    @classmethod
+    def increment(cls):
+        if not cls.objects.filter(pk=1).update(total=models.F("total") + 1):
+            obj, created = cls.objects.get_or_create(pk=1, defaults={"total": 1})
+            if not created:
+                cls.objects.filter(pk=1).update(total=models.F("total") + 1)
+
+    @classmethod
+    def current(cls):
+        return cls.objects.filter(pk=1).values_list("total", flat=True).first() or 0

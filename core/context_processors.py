@@ -1,6 +1,6 @@
 from django.conf import settings
 
-from core.models import SiteSettings
+from core.models import SiteSettings, VisitorCounter
 from core.legal import get_document
 from payments.providers import get_checkout_providers
 from orders.models import Order
@@ -14,6 +14,7 @@ def site(request):
     return {
         "site": site_settings,
         "SITE_NAME": site_settings.name,
+        "visitor_count": VisitorCounter.current(),
         "PRODUCT_SALES_ENABLED": settings.PRODUCT_SALES_ENABLED,
         "has_order_history": request.user.is_authenticated and Order.objects.filter(user=request.user).exists(),
         "CURRENCY": settings.CURRENCY,

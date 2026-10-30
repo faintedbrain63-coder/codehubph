@@ -61,6 +61,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "core.visitors.VisitorCounterMiddleware",
     # Must be last: locks out repeated failed logins.
     "axes.middleware.AxesMiddleware",
 ]
