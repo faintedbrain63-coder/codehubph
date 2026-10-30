@@ -96,7 +96,9 @@ after a day. Jobs older than 24 hours are cancelled before sending.
   `BEHIND_PROXY` when clients can directly reach the application server.
 - Queued jobs contain an email snapshot and credential fingerprint, not tokens or message bodies.
   The worker cancels jobs when the address or password changed or the account is no longer eligible.
-- Security forms do not load advertising scripts. Token pages prevent caching and referrer leakage.
+- Security forms do not load advertising scripts. Token pages prevent caching and use an origin-only
+  referrer policy, keeping token paths out of referrers while preserving CSRF origin checks. Do not
+  use `no-referrer` on these forms: browsers can send `Origin: null` and Django will reject the POST.
   Configure access logs and error-reporting tools to redact verification/reset URL tokens and never
   collect passwords or SMTP secrets. A recipient can always copy the plain-text fallback link.
 - For accounts created through verified registration, the sign-in email is read-only in profile settings.

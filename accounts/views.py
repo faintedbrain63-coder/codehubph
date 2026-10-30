@@ -110,7 +110,7 @@ def verify_email(request, uidb64, token):
                 response["Location"] += "?" + urlencode({"next": next_url})
             return response
     response = render(request, "accounts/verify_email.html", {"validlink": valid})
-    response["Referrer-Policy"] = "no-referrer"
+    response["Referrer-Policy"] = "origin"
     response["X-Robots-Tag"] = "noindex, nofollow"
     return response
 
@@ -187,7 +187,7 @@ class PasswordResetConfirmView(auth_views.PasswordResetConfirmView):
 
     def dispatch(self, request, *args, **kwargs):
         response = super().dispatch(request, *args, **kwargs)
-        response["Referrer-Policy"] = "no-referrer"
+        response["Referrer-Policy"] = "origin"
         response["X-Robots-Tag"] = "noindex, nofollow"
         return response
 

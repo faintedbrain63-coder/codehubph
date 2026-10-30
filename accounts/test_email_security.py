@@ -69,7 +69,7 @@ class AccountEmailSecurityTests(BaseTestCase):
         path = verification_path(user)
         response = self.client.get(path)
         self.assertContains(response, "Verify and activate account")
-        self.assertEqual(response["Referrer-Policy"], "no-referrer")
+        self.assertEqual(response["Referrer-Policy"], "origin")
         self.assertIn("no-store", response["Cache-Control"])
         user.refresh_from_db()
         self.assertFalse(user.is_active)
