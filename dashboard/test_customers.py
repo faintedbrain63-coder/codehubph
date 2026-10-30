@@ -1,6 +1,8 @@
 from django.contrib.auth import get_user_model
+from django.test import RequestFactory
 from django.urls import reverse
 
+from accounts.backends import EmailBackend
 from core.testing import PASSWORD, BaseTestCase
 from orders.models import Order
 
@@ -73,6 +75,24 @@ class CustomerAdminTests(BaseTestCase):
         self.assertEqual(self.customer.last_name, "Santos")
         self.assertEqual(self.customer.school, "New School")
         self.assertTrue(self.customer.check_password(PASSWORD))
+
+    def test_staff_can_activate_a_customer_whose_verification_email_failed(self):
+        pending = self.make_user("pending", is_active=False, email_verification_required=True)
+        page = self.client.get(reverse("dashboard:customer_list"), {"status": "inactive"})
+        self.assertContains(page, "Awaiting email")
+        self.assertContains(page, "Activate")
+        response = self.client.post(reverse("dashboard:customer_activate", args=[pending.pk]))
+        self.assertRedirects(response, reverse("dashboard:customer_list"))
+        pending.refresh_from_db()
+        self.assertTrue(pending.is_active)
+        self.assertIsNotNone(pending.email_verified_at)
+        signed_in = EmailBackend().authenticate(
+            RequestFactory().post("/account/login/"), email=pending.email, password=PASSWORD,
+        )
+        self.assertEqual(signed_in, pending)
+        self.client.logout()
+        self.client.force_login(self.customer)
+        self.assertEqual(self.client.post(reverse("dashboard:customer_activate", args=[pending.pk])).status_code, 403)
 
     def test_staff_accounts_are_not_editable_here(self):
         self.assertEqual(self.client.get(reverse("dashboard:customer_edit", args=[self.staff.pk])).status_code, 404)

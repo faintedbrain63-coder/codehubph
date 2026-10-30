@@ -48,6 +48,7 @@ urlpatterns = [
     path("customers/", views.customer_list, name="customer_list"),
     path("customers/new/", views.customer_form, name="customer_create"),
     path("customers/<int:pk>/edit/", views.customer_form, name="customer_edit"),
+    path("customers/<int:pk>/activate/", views.customer_activate, name="customer_activate"),
     path("customers/<int:pk>/delete/", views.customer_delete, name="customer_delete"),
     path("messages/", views.message_list, name="message_list"),
     path("messages/<int:pk>/resolve/", views.message_resolve, name="message_resolve"),

@@ -298,6 +298,8 @@ class CustomerAdminForm(forms.ModelForm):
         user = super().save(commit=False)
         user.is_staff = False
         user.is_superuser = False
+        if user.is_active and user.email_verification_required and user.email_verified_at is None:
+            user.email_verified_at = timezone.now()
         password = self.cleaned_data.get("password1")
         if password:
             user.set_password(password)

@@ -19,9 +19,16 @@
           <td><a href="{% url 'dashboard:order_list' %}?q={{ c.email|urlencode }}">{{ c.order_count }}</a></td>
           <td><a href="{% url 'dashboard:capstone_request_list' %}?q={{ c.email|urlencode }}">{{ c.request_count }}</a></td>
           <td>{{ c.paid_total|default:0|money }}</td>
-          <td>{% if c.is_active %}{% status_badge "active" "Can sign in" %}{% else %}{% status_badge "inactive" "Sign-in blocked" %}{% endif %}</td>
+          <td>{% if c.email_verification_required and not c.email_verified_at %}{% status_badge "pending" "Awaiting email" %}{% elif c.is_active %}{% status_badge "active" "Can sign in" %}{% else %}{% status_badge "inactive" "Sign-in blocked" %}{% endif %}</td>
           <td class="small text-body-secondary">{{ c.date_joined|date:"M j, Y" }}</td>
           <td class="text-end text-nowrap">
+            {% if not c.is_active or c.email_verification_required and not c.email_verified_at %}
+            <form method="post" action="{% url 'dashboard:customer_activate' c.pk %}" class="d-inline" data-confirm="Activate {{ c.display_name }} so they can sign in without the verification email?">
+              {% csrf_token %}
+              <input type="hidden" name="next" value="{{ request.get_full_path }}">
+              <button type="submit" class="btn btn-sm btn-primary">Activate</button>
+            </form>
+            {% endif %}
             <a href="{% url 'dashboard:customer_edit' c.pk %}" class="btn btn-sm btn-soft">Edit</a>
             <form method="post" action="{% url 'dashboard:customer_delete' c.pk %}" class="d-inline" data-confirm="Delete {{ c.display_name }}? Accounts with orders, payments or project requests will be deactivated instead.">
               {% csrf_token %}<button type="submit" class="btn btn-sm btn-link text-danger" aria-label="Delete {{ c.display_name }}"><i class="bi bi-trash" aria-hidden="true"></i></button>

@@ -652,6 +652,23 @@ def customer_form(request, pk=None):
 
 @staff_required
 @require_POST
+def customer_activate(request, pk):
+    """Let a customer sign in when their verification email never arrived."""
+    customer = get_object_or_404(User, pk=pk, is_staff=False)
+    already = customer.is_active and (not customer.email_verification_required or customer.email_verified_at)
+    if already:
+        messages.info(request, f"{customer.display_name} can already sign in.")
+    else:
+        customer.is_active = True
+        if customer.email_verified_at is None:
+            customer.email_verified_at = timezone.now()
+        customer.save(update_fields=["is_active", "email_verified_at"])
+        messages.success(request, f"{customer.display_name} can now sign in. Email verification was confirmed by staff.")
+    return redirect(_safe_next(request, "dashboard:customer_list"))
+
+
+@staff_required
+@require_POST
 def customer_delete(request, pk):
     customer = get_object_or_404(User, pk=pk, is_staff=False)
     label = customer.display_name
