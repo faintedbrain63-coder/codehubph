@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.forms import inlineformset_factory
+from django.forms.formsets import DELETION_FIELD_NAME
 from django.forms.models import BaseInlineFormSet
 from urllib.parse import urlsplit
 
@@ -204,6 +205,13 @@ class PortfolioScreenshotForm(forms.ModelForm):
 
 
 class BasePortfolioScreenshotFormSet(BaseInlineFormSet):
+    def add_fields(self, form, index):
+        super().add_fields(form, index)
+        delete_field = form.fields.get(DELETION_FIELD_NAME)
+        if delete_field is not None:
+            delete_field.label = "Delete this picture"
+            delete_field.help_text = "The image file is removed from the server when you save."
+
     def clean(self):
         super().clean()
         if any(self.errors):

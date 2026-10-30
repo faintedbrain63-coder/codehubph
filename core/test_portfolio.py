@@ -238,6 +238,49 @@ class PortfolioTests(BaseTestCase):
         self.assertTrue(CapstoneRequest.objects.filter(pk=req.pk).exists())
         self.assertFalse(storage.exists(name))
 
+    def test_removing_a_screenshot_deletes_its_file(self):
+        project = self.project()
+        kept = PortfolioScreenshot.objects.create(project=project, image=png_upload("kept.png"), sort_order=0)
+        removed = PortfolioScreenshot.objects.create(project=project, image=png_upload("removed.png"), sort_order=1)
+        kept_name, removed_name = kept.image.name, removed.image.name
+        storage = removed.image.storage
+        self.assertTrue(storage.exists(kept_name))
+        self.assertTrue(storage.exists(removed_name))
+        edit_page = self.client.get(reverse("dashboard:portfolio_edit", args=[project.pk]))
+        self.assertContains(edit_page, "Delete this picture")
+        self.assertContains(edit_page, "removed from the server")
+        data = self.payload(**{
+            "images-TOTAL_FORMS": "3", "images-INITIAL_FORMS": "2",
+            "images-0-id": str(kept.pk), "images-0-caption": "", "images-0-sort_order": "0",
+            "images-1-id": str(removed.pk), "images-1-caption": "", "images-1-sort_order": "1",
+            "images-1-DELETE": "on",
+            "images-2-caption": "", "images-2-sort_order": "0",
+        })
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.client.post(reverse("dashboard:portfolio_edit", args=[project.pk]), data)
+        self.assertRedirects(response, reverse("dashboard:portfolio_list"))
+        self.assertTrue(PortfolioScreenshot.objects.filter(pk=kept.pk).exists())
+        self.assertFalse(PortfolioScreenshot.objects.filter(pk=removed.pk).exists())
+        self.assertTrue(storage.exists(kept_name))
+        self.assertFalse(storage.exists(removed_name))
+
+    def test_replacing_a_screenshot_deletes_the_previous_file(self):
+        project = self.project()
+        shot = PortfolioScreenshot.objects.create(project=project, image=png_upload("original.png"))
+        storage, previous = shot.image.storage, shot.image.name
+        data = self.payload(**{
+            "images-TOTAL_FORMS": "1", "images-INITIAL_FORMS": "1",
+            "images-0-id": str(shot.pk), "images-0-caption": "Updated", "images-0-sort_order": "0",
+            "images-0-image": png_upload("replacement.png"),
+        })
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.client.post(reverse("dashboard:portfolio_edit", args=[project.pk]), data)
+        self.assertRedirects(response, reverse("dashboard:portfolio_list"))
+        shot.refresh_from_db()
+        self.assertNotEqual(shot.image.name, previous)
+        self.assertTrue(storage.exists(shot.image.name))
+        self.assertFalse(storage.exists(previous))
+
     def test_portfolio_content_and_review_text_are_escaped(self):
         project = self.project(title='<script>alert("project")</script>')
         Testimonial.objects.create(portfolio_project=project, user=self.customer, name="Client",
