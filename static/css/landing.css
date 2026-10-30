@@ -1047,9 +1047,9 @@ html:has(.landing) { scroll-padding-top: calc(var(--nav-h) + 0.5rem); }
   .lp-motion-section .lp-section-head h2, .lp-motion-section .portfolio-heading h2 { color: var(--ink); background: none; }
 }
 
-/* Cinematic engineering sequence. The document scroll remains native. */
-.lp-experience { position: relative; height: 250svh; background: #040814; color: #edf4ff; --experience: 0; }
-.lp-experience-stage { position: sticky; top: var(--nav-h, 80px); height: calc(100svh - var(--nav-h, 80px)); min-height: 660px; overflow: hidden; isolation: isolate; background: radial-gradient(ellipse at 73% 43%, #101f40 0, #060d20 40%, #040814 75%); }
+/* Cinematic engineering sequence. It plays on a loop; the page scrolls past it normally. */
+.lp-experience { position: relative; background: #040814; color: #edf4ff; --experience: 0; }
+.lp-experience-stage { position: relative; height: calc(100svh - var(--nav-h, 80px)); min-height: 660px; overflow: hidden; isolation: isolate; background: radial-gradient(ellipse at 73% 43%, #101f40 0, #060d20 40%, #040814 75%); }
 .lp-experience-content { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; padding-top: 2rem; padding-bottom: 1.5rem; }
 .lp-experience-top, .lp-experience-bottom { display: flex; justify-content: space-between; gap: 1rem; font: 500 .65rem/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: .16em; color: #99aecb; }
 .lp-experience-top { padding-bottom: 1.25rem; border-bottom: 1px solid #a5c9ff20; }
@@ -1097,7 +1097,6 @@ html:has(.landing) { scroll-padding-top: calc(var(--nav-h) + 0.5rem); }
   .lp-motion-section .lp-path:hover { box-shadow: 0 28px 65px -35px #6366f199, inset 0 1px #a5b4fc80; }
 }
 @media (max-width: 767.98px), (max-height: 740px) {
-  .lp-experience { height: 190svh; }
   .lp-experience-stage { min-height: 580px; }
   .lp-experience-content { padding-top: 1.25rem; padding-bottom: 1rem; }
   .lp-experience-coordinate { display: none; }
@@ -1119,11 +1118,9 @@ html:has(.landing) { scroll-padding-top: calc(var(--nav-h) + 0.5rem); }
   .lp-js .lp-motion-section [data-reveal].is-visible { transform: none; }
 }
 /* A static presentation is the default until the enhancement is ready. */
-.lp-experience:not(.is-enhanced) { height: auto; }
-.lp-experience:not(.is-enhanced) .lp-experience-stage { position: relative; top: auto; height: auto; min-height: 760px; }
+.lp-experience:not(.is-enhanced) .lp-experience-stage { height: auto; min-height: 760px; }
 @media (prefers-reduced-motion: reduce) {
-  .lp-experience, .lp-experience.is-enhanced { height: auto; }
-  .lp-experience .lp-experience-stage { position: relative; top: auto; height: auto; min-height: 720px; }
+  .lp-experience .lp-experience-stage { height: auto; min-height: 720px; }
   .lp-experience-grid, .lp-experience-halo, .lp-experience-orbit, .lp-orbit-ring, .lp-orbit-core { transform: none; }
   .lp-experience-orbit { transform: translate(-50%, -50%); }
   .lp-experience-canvas, .lp-reveal-sweep { display: none; }

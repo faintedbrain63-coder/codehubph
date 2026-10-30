@@ -252,7 +252,7 @@
     });
   }
 
-  // ----- Scroll-directed 3D engineering sequence -----------------------------
+  // ----- Continuous 3D engineering sequence ----------------------------------
   const experience = document.querySelector("[data-experience]");
   if (experience) {
     const surface = experience.querySelector("[data-experience-canvas]");
@@ -262,17 +262,15 @@
     const counter = experience.querySelector(".lp-experience-counter");
     const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
     let experienceVisible = false, experienceFrame = null, lastPaint = 0;
-    let sceneWidth = 0, sceneHeight = 0, targetProgress = 0, sceneProgress = 0;
+    let sceneWidth = 0, sceneHeight = 0, sceneProgress = 0;
+    // One full pass through the three platforms; the sequence then loops.
+    const cycleDuration = 12000;
     const vertices = Array.from({ length: 96 }, function (_, index) {
       const y = 1 - (index / 95) * 2;
       const radius = Math.sqrt(1 - y * y);
       const angle = index * Math.PI * (3 - Math.sqrt(5));
       return { x: Math.cos(angle) * radius, y: y, z: Math.sin(angle) * radius, angle: angle };
     });
-    function measureExperience() {
-      const rect = experience.getBoundingClientRect();
-      targetProgress = Math.max(0, Math.min(1, -rect.top / Math.max(1, experience.offsetHeight - stage.offsetHeight)));
-    }
     function sizeExperience() {
       if (!context) return;
       sceneWidth = stage.clientWidth;
@@ -281,15 +279,17 @@
       surface.width = Math.round(sceneWidth * ratio);
       surface.height = Math.round(sceneHeight * ratio);
       context.setTransform(ratio, 0, 0, ratio, 0, 0);
-      measureExperience();
     }
     function paintExperience(now) {
       experienceFrame = null;
       if (!experienceVisible || document.hidden || motionPreference.matches) return;
       if (now - lastPaint >= 32) {
+        // Clamp the step so resuming after a pause does not skip ahead.
+        sceneProgress = (sceneProgress + Math.min(now - lastPaint, 100) / cycleDuration) % 1;
         lastPaint = now;
-        sceneProgress += (targetProgress - sceneProgress) * .12;
-        experience.style.setProperty("--experience", sceneProgress.toFixed(5));
+        // Eases 0 → 1 → 0 across a cycle so the loop has no visible seam.
+        const wave = (1 - Math.cos(sceneProgress * Math.PI * 2)) / 2;
+        experience.style.setProperty("--experience", wave.toFixed(5));
         const phase = Math.min(2, Math.floor(sceneProgress * 3));
         platforms.forEach(function (panel, index) {
           panel.classList.toggle("is-current", index === phase);
@@ -303,7 +303,7 @@
           const centerY = sceneHeight * (mobile ? .39 : .44);
           const radius = Math.min(sceneWidth * (mobile ? .3 : .185), sceneHeight * .31);
           const rotation = sceneProgress * Math.PI * 2 + now * .000055;
-          const morph = Math.sin(sceneProgress * Math.PI);
+          const morph = wave;
           const projected = vertices.map(function (point) {
             // The sphere opens into a helical system, then resolves into a sphere.
             const spiral = point.angle + sceneProgress * 4;
@@ -356,9 +356,8 @@
     sizeExperience();
     if ("IntersectionObserver" in window) new IntersectionObserver(function (entries) {
       experienceVisible = entries[0].isIntersecting;
-      if (experienceVisible) { measureExperience(); resumeExperience(); } else pauseExperience();
+      if (experienceVisible) resumeExperience(); else pauseExperience();
     }).observe(experience);
-    window.addEventListener("scroll", function () { if (experienceVisible) measureExperience(); }, { passive: true });
     window.addEventListener("resize", sizeExperience, { passive: true });
     document.addEventListener("visibilitychange", function () { if (document.hidden) pauseExperience(); else resumeExperience(); });
     motionPreference.addEventListener("change", function () {
