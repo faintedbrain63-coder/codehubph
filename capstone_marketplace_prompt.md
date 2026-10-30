@@ -1,6 +1,6 @@
 # Prompt for Claude Code: Digital Marketplace + Capstone Service Platform
 
-You are a senior full-stack engineer. Build a complete, production-ready web application. The project is named **`codehub_ph`** (this is also the name of the Django project package that contains `settings.py`). The public-facing store name is **"FaintedBrain Digital Store"** (use a configurable `SITE_NAME` setting so I can rename it later).
+You are a senior full-stack engineer. Build a complete, production-ready web application. The project is named **`codehubph`** (this is also the name of the Django project package that contains `settings.py`). The public-facing store name is **"FaintedBrain Digital Store"** (use a configurable `SITE_NAME` setting so I can rename it later).
 
 ## 1. Purpose
 
@@ -15,10 +15,10 @@ Follow these steps in order, in the current empty project folder:
 
 1. **Create a virtual environment first:** `python -m venv venv`, then activate it (`venv\Scripts\activate` on Windows, `source venv/bin/activate` on macOS/Linux). All packages must be installed inside this venv. Never install globally.
 2. Upgrade pip, then install Django, `psycopg[binary]`, `python-decouple` (or `django-environ`), Pillow, WhiteNoise, Gunicorn, and any other dependencies, and save them with `pip freeze > requirements.txt`.
-3. Create the Django project **only after** the venv is active and dependencies are installed. The project name is **`codehub_ph`**:
-   - Name the project folder `codehub_ph` and create the Django project with `django-admin startproject codehub_ph .` (or inside the `codehub_ph` folder, so that `manage.py` sits at that folder's root).
-   - The Django project package (where `settings.py`, `urls.py`, `wsgi.py` and `asgi.py` live) must also be named **`codehub_ph`**, so the settings file is at `codehub_ph/settings.py`.
-   - Use `codehub_ph.settings` for `DJANGO_SETTINGS_MODULE` (in `manage.py`, `wsgi.py`, `asgi.py`) and `codehub_ph.wsgi:application` for Gunicorn.
+3. Create the Django project **only after** the venv is active and dependencies are installed. The project name is **`codehubph`**:
+   - Name the project folder `codehubph` and create the Django project with `django-admin startproject codehubph .` (or inside the `codehubph` folder, so that `manage.py` sits at that folder's root).
+   - The Django project package (where `settings.py`, `urls.py`, `wsgi.py` and `asgi.py` live) must also be named **`codehubph`**, so the settings file is at `codehubph/settings.py`.
+   - Use `codehubph.settings` for `DJANGO_SETTINGS_MODULE` (in `manage.py`, `wsgi.py`, `asgi.py`) and `codehubph.wsgi:application` for Gunicorn.
    - Then create the apps listed in section 5 with `python manage.py startapp <name>`.
 4. **Create a `.env` file** in the project root (next to `manage.py`) with these values, and make `settings.py` read **all** configuration from it:
 
@@ -129,7 +129,7 @@ Supported methods: **PayPal, GCash, Debit/Credit Card**. Build a `payments` app 
 
 ## 8. Security and Quality
 
-- Keep a single `codehub_ph/settings.py` driven entirely by `.env` (do not split it into a settings package), with `DEBUG=False` in production, `ALLOWED_HOSTS`, secure cookies, HSTS, CSRF everywhere, password validators, rate limiting on login (e.g. `django-axes` or simple throttling).
+- Keep a single `codehubph/settings.py` driven entirely by `.env` (do not split it into a settings package), with `DEBUG=False` in production, `ALLOWED_HOSTS`, secure cookies, HSTS, CSRF everywhere, password validators, rate limiting on login (e.g. `django-axes` or simple throttling).
 - Private file storage with permission-checked download views. Validate and sanitize all uploads and user input. Use `select_related`/`prefetch_related` and database indexes where appropriate.
 - Use Django transactions for order/payment state changes. Use `Decimal` for money.
 - Include automated tests for: authentication, product visibility (Draft vs Published), purchase access control (cannot download unpaid files), payment approval flow, capstone workflow and permissions.

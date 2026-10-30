@@ -1,5 +1,5 @@
 """
-Django settings for codehub_ph.
+Django settings for codehubph.
 
 Every value that differs between environments is read from the `.env` file
 (next to manage.py) through python-decouple. Do not hard-code secrets here.
@@ -65,7 +65,7 @@ MIDDLEWARE = [
     "axes.middleware.AxesMiddleware",
 ]
 
-ROOT_URLCONF = "codehub_ph.urls"
+ROOT_URLCONF = "codehubph.urls"
 
 TEMPLATES = [
     {
@@ -85,7 +85,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "codehub_ph.wsgi.application"
+WSGI_APPLICATION = "codehubph.wsgi.application"
 
 # --------------------------------------------------------------------------
 # Database (PostgreSQL only)

@@ -1,4 +1,4 @@
-# CodehubPh (`codehub_ph`)
+# CodehubPh (`codehubph`)
 
 A Django 5.2 project development service for custom **web applications, mobile applications and software**.
 Clients include students working on capstone projects, local government units, military organizations and businesses.
@@ -15,7 +15,7 @@ Bootstrap 5.3 + vanilla JavaScript, PostgreSQL only.
 ## Project layout
 
 ```
-codehub_ph/            settings, root URLs, WSGI/ASGI
+codehubph/            settings, root URLs, WSGI/ASGI
 accounts/              custom User (email-only login), registration, profile, customer dashboard
 catalog/               historical Product records; public product sales retired
 orders/                historical Order/OrderItem records, invoices, secure paid downloads
@@ -478,7 +478,7 @@ If the machine has a conflicting global `PYTHONHOME`, invoke Python with `-E`, f
 Optional isolated visual checks (Node.js 22+ and Chrome):
 
 ```powershell
-.\venv\Scripts\python.exe -E -c "import os; os.environ['CODEHUB_RENDER_PREVIEW']='1'; os.environ.setdefault('DJANGO_SETTINGS_MODULE','codehub_ph.settings'); from django.core.management import execute_from_command_line; execute_from_command_line(['manage.py','test','dashboard.test_workspace.WorkspaceTests.test_workspace_shell_and_section_pages','--noinput'])"
+.\venv\Scripts\python.exe -E -c "import os; os.environ['CODEHUB_RENDER_PREVIEW']='1'; os.environ.setdefault('DJANGO_SETTINGS_MODULE','codehubph.settings'); from django.core.management import execute_from_command_line; execute_from_command_line(['manage.py','test','dashboard.test_workspace.WorkspaceTests.test_workspace_shell_and_section_pages','--noinput'])"
 .\venv\Scripts\python.exe -E -m http.server 8766 --bind 127.0.0.1 --directory .qa/site
 # In a second terminal:
 node tests/browser-render.cjs
@@ -508,7 +508,7 @@ with the production environment loaded.
 - [ ] Serve over HTTPS. With `DEBUG=False` the app enables SSL redirect, secure cookies and HSTS; set
       `X-Forwarded-Proto` at the proxy.
 - [ ] `python manage.py migrate` and `python manage.py collectstatic` (WhiteNoise serves `/static/`).
-- [ ] Run Gunicorn (`gunicorn codehub_ph.wsgi:application`) behind Nginx. Nginx serves `/media/` from `media/`.
+- [ ] Run Gunicorn (`gunicorn codehubph.wsgi:application`) behind Nginx. Nginx serves `/media/` from `media/`.
       **Never expose `private_media/`** through Nginx or any other public path.
 - [ ] Configure Nginx and Cloudflare Tunnel as shown in **Deploying behind Nginx + Cloudflare Tunnel** below.
 - [ ] Schedule `python manage.py cleanup_uploads` (e.g. hourly) to remove abandoned partial uploads.
@@ -549,7 +549,7 @@ server {
     # Cloudflare's own 100 MB limit applies regardless.
     client_max_body_size 100m;
 
-    location /media/ { alias /srv/codehub_ph/media/; }   # public images only
+    location /media/ { alias /srv/codehubph/media/; }   # public images only
     # Never add a location for private_media/.
 
     location / {
@@ -577,7 +577,7 @@ ingress:
   - service: http_status:404
 ```
 
-Gunicorn: `gunicorn codehub_ph.wsgi:application --bind 127.0.0.1:8000 --workers 3 --timeout 120`. An 8 MB
+Gunicorn: `gunicorn codehubph.wsgi:application --bind 127.0.0.1:8000 --workers 3 --timeout 120`. An 8 MB
 chunk finishes well within the timeout even on slow connections. If uploads report "The server rejected the chunk
 size" (HTTP 413), raise `client_max_body_size` or lower `UPLOAD_CHUNK_MB`. Set
 `ALLOWED_HOSTS=codehubph.tech`, `CSRF_TRUSTED_ORIGINS=https://codehubph.tech` and

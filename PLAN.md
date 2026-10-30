@@ -1,4 +1,4 @@
-# Build Plan: `codehub_ph` (FaintedBrain Digital Store)
+# Build Plan: `codehubph` (FaintedBrain Digital Store)
 
 This plan follows `capstone_marketplace_prompt.md` section by section. The build order matches section 10:
 project setup -> accounts -> catalog -> landing page -> orders -> payments -> capstone service -> admin portal -> tests -> README.
@@ -12,31 +12,31 @@ project setup -> accounts -> catalog -> landing page -> orders -> payments -> ca
 | Python | `python` is not on PATH; `py -V:Astral/CPython3.12.14` is available | Create the venv with Python 3.12.14 (prompt requires 3.12+) |
 | PostgreSQL | Service `postgresql-x64-14` running; `psql` at `C:\Program Files\PostgreSQL\14\bin` | Use it directly; credentials `postgres` / `root` verified |
 | Database | `codehubph_db` exists | Run migrations into it |
-| Workspace folder | `e:\Projects_2026\codehubph` (cannot be renamed to `codehub_ph`) | Use the prompt's alternative: create a `codehub_ph` folder inside the workspace with `manage.py` at its root |
+| Workspace folder | `e:\Projects_2026\codehubph` | Keep `manage.py` at the workspace root and the Django project package in `codehubph/` |
 
 ## 1. Folder layout
 
 ```
-codehubph/                      <- workspace (contains the prompt + this plan)
-└── codehub_ph/                 <- project folder (manage.py root)
-    ├── venv/                   <- virtual environment (created FIRST)
-    ├── .env / .env.example / .gitignore / requirements.txt / README.md
-    ├── manage.py
-    ├── codehub_ph/             <- Django project package
-    │   ├── settings.py         <- single settings file, 100% driven by .env
-    │   ├── urls.py / wsgi.py / asgi.py
-    ├── accounts/  catalog/  capstone/  orders/  payments/  dashboard/  core/
-    ├── templates/              <- base.html, partials/, per-app folders, emails/
-    ├── static/                 <- css/app.css, js/app.js, js/checkout.js, js/dashboard.js, img/
-    ├── media/                  <- PUBLIC uploads (thumbnails, screenshots, GCash QR)
-    └── private_media/          <- PRIVATE uploads (product files, capstone source/docs, payment proofs)
+codehubph/                      <- workspace and manage.py root
+|-- venv/                       <- virtual environment
+|-- .env / .env.example / .gitignore / requirements.txt / README.md
+|-- manage.py
+|-- codehubph/                  <- Django project package
+|   |-- __init__.py
+|   |-- settings.py             <- single settings file, driven by .env
+|   |-- urls.py / wsgi.py / asgi.py
+|-- accounts/  catalog/  capstone/  orders/  payments/  dashboard/  core/
+|-- templates/                  <- per-app pages, partials and emails
+|-- static/                     <- CSS, JavaScript and images
+|-- media/                      <- public uploads
+`-- private_media/              <- private project files and payment proofs
 ```
 
 ## 2. Setup steps (section 2 of the prompt, in order)
 
-1. `mkdir codehub_ph`, then `py -V:Astral/CPython3.12.14 -m venv venv` and activate it.
+1. From the workspace root, run `py -V:Astral/CPython3.12.14 -m venv venv` and activate it.
 2. Upgrade pip; install `Django 5.x`, `psycopg[binary]`, `python-decouple`, `Pillow`, `whitenoise`, `gunicorn`, `django-axes` (login rate limiting), `requests` (PayPal REST API); `pip freeze > requirements.txt`.
-3. `django-admin startproject codehub_ph .` inside the folder, then `python manage.py startapp` for the 7 apps.
+3. `django-admin startproject codehubph .` at the workspace root, then `python manage.py startapp` for the 7 apps.
 4. Create `.env` (values from the prompt + generated `SECRET_KEY`), `.env.example` (placeholders), `.gitignore` (`venv/`, `__pycache__/`, `media/`, `*.pyc`, plus `private_media/`, `staticfiles/`).
 5. `DATABASES` -> `django.db.backends.postgresql` from `DB_*` env vars.
 6. `python manage.py check` and `migrate` after each major step.
