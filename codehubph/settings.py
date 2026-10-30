@@ -221,6 +221,9 @@ DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default=f"{SITE_NAME} <no-repl
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
 PASSWORD_RESET_TIMEOUT = config("PASSWORD_RESET_TIMEOUT", default=3600, cast=int)
 EMAIL_VERIFICATION_TIMEOUT = config("EMAIL_VERIFICATION_TIMEOUT", default=86400, cast=int)
+# New jobs receive an automatic background attempt after their transaction commits.
+# "worker" keeps fully external delivery for installations with a supervised worker.
+AUTH_EMAIL_DELIVERY_MODE = config("AUTH_EMAIL_DELIVERY_MODE", default="background")
 AUTH_EMAIL_WINDOW_SECONDS = 900
 AUTH_EMAIL_PER_ADDRESS = 3
 AUTH_EMAIL_PER_IP = 15

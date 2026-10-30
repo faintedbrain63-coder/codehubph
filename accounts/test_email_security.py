@@ -42,6 +42,32 @@ class AccountEmailSecurityTests(BaseTestCase):
         self.client.post(reverse("accounts:login"), {"email": user.email, "password": PASSWORD})
         self.assertNotIn("_auth_user_id", self.client.session)
 
+    def test_signup_dispatches_its_job_only_after_transaction_commits(self):
+        with patch("accounts.email_security.dispatch_auth_email") as dispatch:
+            with self.captureOnCommitCallbacks(execute=True):
+                response = self.client.post(reverse("accounts:register"), registration())
+                self.assertEqual(response.status_code, 302)
+                dispatch.assert_not_called()
+            dispatch.assert_called_once_with(AuthEmailJob.objects.get().pk)
+
+    @override_settings(AUTH_EMAIL_DELIVERY_MODE="worker")
+    def test_worker_only_mode_does_not_schedule_in_process_delivery(self):
+        with patch("accounts.email_security.dispatch_auth_email") as dispatch:
+            with self.captureOnCommitCallbacks(execute=True):
+                self.client.post(reverse("accounts:register"), registration())
+            dispatch.assert_not_called()
+
+    def test_scoped_delivery_never_drains_another_customers_job(self):
+        first = queue_auth_email(self.pending(), "verify")
+        other = self.make_user("other-email", is_active=False, email_verification_required=True)
+        second = queue_auth_email(other, "verify")
+        deliver_auth_emails(limit=1, job_id=second.pk)
+        first.refresh_from_db()
+        second.refresh_from_db()
+        self.assertEqual(first.status, "pending")
+        self.assertEqual(second.status, "sent")
+        self.assertEqual(mail.outbox[0].to, [other.email])
+
     def test_active_flag_alone_cannot_bypass_verification(self):
         user = self.make_user("unverified-active", email_verification_required=True)
         self.client.post(reverse("accounts:login"), {"email": user.email, "password": PASSWORD})

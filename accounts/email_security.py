@@ -1,6 +1,10 @@
 """Account email tokens, durable delivery and cross-process abuse controls."""
 
+import logging
+import threading
+from concurrent.futures import ThreadPoolExecutor
 from datetime import timedelta
+from functools import partial
 from urllib.parse import urlsplit
 
 from django.conf import settings
@@ -8,7 +12,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core import signing
 from django.core.exceptions import ImproperlyConfigured
 from django.core.mail import EmailMultiAlternatives
-from django.db import transaction
+from django.db import close_old_connections, connections, transaction
 from django.db.models import Q
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -21,6 +25,45 @@ from accounts.models import AuthEmailJob, AuthEmailRateLimit
 from core.network import client_ip
 
 VERIFY_SALT = "accounts.verify-email.v1"
+logger = logging.getLogger(__name__)
+_dispatch_slots = threading.BoundedSemaphore(16)
+_dispatch_lock = threading.Lock()
+_dispatch_executor = None
+
+
+def _send_background_job(job_id):
+    try:
+        close_old_connections()
+        deliver_auth_emails(limit=1, job_id=job_id)
+    except Exception as exc:
+        # The durable job is still recoverable by the delivery worker.
+        logger.error("Account email job %s background attempt failed (%s); worker retry required.", job_id, type(exc).__name__)
+    finally:
+        try:
+            connections.close_all()
+        finally:
+            _dispatch_slots.release()
+
+
+def dispatch_auth_email(job_id):
+    """Attempt new jobs without blocking the response or requiring a running worker.
+
+    This is a bounded, best-effort fast path. PostgreSQL remains the source of
+    truth and a supervised worker is still required to guarantee retries after
+    process restarts, provider failures or a saturated dispatcher.
+    """
+    global _dispatch_executor
+    if not _dispatch_slots.acquire(blocking=False):
+        logger.warning("Account email job %s remains queued: background dispatcher is full.", job_id)
+        return
+    try:
+        with _dispatch_lock:
+            if _dispatch_executor is None:
+                _dispatch_executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="account-email")
+            _dispatch_executor.submit(_send_background_job, job_id)
+    except Exception as exc:
+        _dispatch_slots.release()
+        logger.error("Account email job %s remains queued (%s); worker retry required.", job_id, type(exc).__name__)
 
 
 def email_link(path):
@@ -79,10 +122,13 @@ def allow_auth_email(request, email, purpose):
 
 
 def queue_auth_email(user, purpose):
-    return AuthEmailJob.objects.create(
+    job = AuthEmailJob.objects.create(
         user=user, purpose=purpose, recipient=user.email,
         credential_fingerprint=user.get_session_auth_hash(), available_at=timezone.now(),
     )
+    if settings.AUTH_EMAIL_DELIVERY_MODE == "background":
+        transaction.on_commit(partial(dispatch_auth_email, job.pk), robust=True)
+    return job
 
 
 def _deliver(job):
@@ -123,7 +169,7 @@ def _deliver(job):
     return True
 
 
-def deliver_auth_emails(limit=50):
+def deliver_auth_emails(limit=50, *, job_id=None):
     """Lease jobs in PostgreSQL, send outside locks, retry without logging secrets.
 
     Delivery is at least once: a crash after SMTP acceptance can cause a duplicate.
@@ -133,7 +179,10 @@ def deliver_auth_emails(limit=50):
     for _ in range(limit):
         now = timezone.now()
         with transaction.atomic():
-            job = (AuthEmailJob.objects.select_for_update(skip_locked=True)
+            jobs = AuthEmailJob.objects.select_for_update(skip_locked=True)
+            if job_id is not None:
+                jobs = jobs.filter(pk=job_id)
+            job = (jobs
                    .filter(Q(status=AuthEmailJob.Status.PENDING, available_at__lte=now)
                            | Q(status=AuthEmailJob.Status.SENDING, attempted_at__lt=now - timedelta(minutes=5)))
                    .order_by("available_at", "pk").first())
@@ -151,10 +200,14 @@ def deliver_auth_emails(limit=50):
                 available_at=now + timedelta(seconds=min(3600, 30 * 2 ** min(job.attempts, 7))),
                 error_code=type(exc).__name__[:80],
             )
+            logger.warning("Account email job %s attempt %s failed (%s); %s.",
+                           job.pk, job.attempts, type(exc).__name__,
+                           "manual retry required" if job.attempts >= 6 else "retry queued")
         else:
             AuthEmailJob.objects.filter(pk=job.pk, attempted_at=now).update(
                 status=AuthEmailJob.Status.SENT if sent else AuthEmailJob.Status.CANCELLED,
                 sent_at=timezone.now() if sent else None, error_code="",
             )
+            logger.info("Account email job %s %s after attempt %s.", job.pk, "sent" if sent else "cancelled", job.attempts)
             completed += 1
     return completed
