@@ -1,7 +1,10 @@
 from django import forms
 from django.utils import timezone
 
-from capstone.models import CapstoneMessage, CapstoneRequest
+from capstone.models import CapstoneMessage, CapstoneProject, CapstoneRequest
+
+# New project briefs no longer offer these platforms. Existing service listings can still use them.
+RETIRED_PROJECT_TYPES = {CapstoneProject.Field.IOT, CapstoneProject.Field.GAME}
 
 
 class CapstoneRequestForm(forms.ModelForm):
@@ -12,6 +15,12 @@ class CapstoneRequestForm(forms.ModelForm):
         self.fields["project_type"].required = project is None
         self.fields["client_type"].required = False
         self.fields["client_type"].initial = CapstoneRequest.ClientType.STUDENT
+        retired = set(RETIRED_PROJECT_TYPES)
+        if project is not None:
+            retired.discard(project.field)
+        self.fields["project_type"].choices = [
+            choice for choice in self.fields["project_type"].choices if choice[0] not in retired
+        ]
 
     def clean(self):
         data = super().clean()

@@ -64,6 +64,7 @@
 {% if tech_stack %}
 <section class="lp-tech" aria-label="Project technologies"><div class="container"><p class="lp-tech-label">Technologies used in our project services</p><div class="lp-tech-row">{% for tech in tech_stack %}<span class="lp-tech-chip"><i class="bi bi-cpu" aria-hidden="true"></i>{{ tech }}</span>{% endfor %}</div></div></section>
 {% endif %}
+{% include "partials/_landing_experience.html" %}
 <section class="section lp-section" id="start" aria-labelledby="services-title">
   <div class="container">
     <div class="lp-section-head" data-reveal><span class="lp-section-index">01 — Our services</span><span class="lp-eyebrow">Built around your needs</span><h2 id="services-title" class="lp-h2">What would you like to create?</h2><p class="lead-muted mb-0">Choose a platform or describe your idea. We will help define a project scope that fits your requirements.</p></div>
