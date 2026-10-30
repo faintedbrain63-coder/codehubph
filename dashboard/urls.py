@@ -30,6 +30,10 @@ urlpatterns = [
     path("capstone/requests/<str:reference>/", views.capstone_request_detail, name="capstone_request_detail"),
     path("capstone/requests/<str:reference>/concept-file/", views.capstone_request_concept_file,
          name="capstone_request_concept_file"),
+    path("capstone/requests/<str:reference>/concept-file/view/", views.capstone_request_concept_view,
+         name="capstone_request_concept_view"),
+    path("capstone/requests/<str:reference>/concept-file/analyze/", assistant.analyze_concept,
+         name="capstone_request_concept_analyze"),
     path("capstone/requests/<str:reference>/quote/", views.capstone_request_quote, name="capstone_request_quote"),
     path("capstone/requests/<str:reference>/status/", views.capstone_request_status, name="capstone_request_status"),
     path(

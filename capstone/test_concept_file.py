@@ -72,7 +72,7 @@ class ConceptFileTests(BaseTestCase):
         self.client.force_login(self.staff)
 
         page = self.client.get(reverse("dashboard:capstone_request_detail", args=[pdf_request.reference]))
-        self.assertContains(page, "View PDF")
+        self.assertContains(page, "Open &amp; analyze with AI")
         pdf = self.client.get(reverse("dashboard:capstone_request_concept_file", args=[pdf_request.reference]))
         self.assertEqual(pdf["Content-Type"], "application/pdf")
         self.assertTrue(pdf["Content-Disposition"].startswith("inline"))
@@ -81,7 +81,7 @@ class ConceptFileTests(BaseTestCase):
 
         page = self.client.get(reverse("dashboard:capstone_request_detail", args=[word_request.reference]))
         self.assertContains(page, "Word document")
-        self.assertContains(page, "Download to open")
+        self.assertContains(page, "Open &amp; analyze with AI")
         word = self.client.get(reverse("dashboard:capstone_request_concept_file", args=[word_request.reference]))
         self.assertTrue(word["Content-Disposition"].startswith("attachment"))
         self.assertIn(f"{word_request.reference.lower()}-concept.docx", word["Content-Disposition"])

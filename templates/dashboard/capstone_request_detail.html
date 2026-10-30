@@ -23,12 +23,18 @@
         {% url 'dashboard:capstone_request_concept_file' req.reference as concept_url %}
         <div class="d-flex flex-wrap align-items-center gap-2 small">
           {% if req.concept_file_is_pdf %}
-            <i class="bi bi-file-earmark-pdf text-danger fs-5" aria-hidden="true"></i><span>PDF document</span>
-            <a href="{{ concept_url }}" target="_blank" rel="noopener" class="btn btn-sm btn-primary"><i class="bi bi-eye me-1" aria-hidden="true"></i>View PDF</a>
-            <a href="{{ concept_url }}" download class="btn btn-sm btn-soft"><i class="bi bi-download me-1" aria-hidden="true"></i>Download</a>
+            <i class="bi bi-file-earmark-pdf text-danger fs-5" aria-hidden="true"></i>
           {% else %}
-            <i class="bi bi-file-earmark-{% if req.concept_file_extension == 'ppt' or req.concept_file_extension == 'pptx' %}ppt{% else %}word{% endif %} fs-5" aria-hidden="true"></i><span>{{ req.concept_file_label }}</span>
+            <i class="bi bi-file-earmark-{% if req.concept_file_extension == 'ppt' or req.concept_file_extension == 'pptx' %}ppt{% else %}word{% endif %} fs-5" aria-hidden="true"></i>
+          {% endif %}
+          <span>{{ req.concept_file_label }}</span>
+          {% if req.concept_file_extension == 'doc' or req.concept_file_extension == 'ppt' %}
             <a href="{{ concept_url }}" class="btn btn-sm btn-primary"><i class="bi bi-download me-1" aria-hidden="true"></i>Download to open</a>
+            <span class="text-body-secondary w-100">Older .doc and .ppt files cannot be opened or analyzed in the app.</span>
+          {% else %}
+            <a href="{% url 'dashboard:capstone_request_concept_view' req.reference %}" class="btn btn-sm btn-primary"><i class="bi bi-eye me-1" aria-hidden="true"></i>Open &amp; analyze with AI</a>
+            <a href="{{ concept_url }}" download class="btn btn-sm btn-soft"><i class="bi bi-download me-1" aria-hidden="true"></i>Download</a>
+            {% if req.concept_analysis %}<span class="badge text-bg-success">AI analysis ready</span>{% endif %}
           {% endif %}
         </div>
       {% else %}

@@ -1,0 +1,85 @@
+{% extends "dashboard/base_manage.html" %}
+{% block manage_title %}{{ req.reference }} concept file · {% endblock %}
+{% block heading %}Concept file{% endblock %}
+{% block subheading %}<p class="text-body-secondary mb-0">{{ req.reference }} · {{ req.title }}</p>{% endblock %}
+{% block actions %}
+  {% url 'dashboard:capstone_request_concept_file' req.reference as concept_url %}
+  <a href="{% url 'dashboard:capstone_request_detail' req.reference %}" class="btn btn-sm btn-soft"><i class="bi bi-arrow-left me-1" aria-hidden="true"></i>Back to request</a>
+  <a href="{{ concept_url }}" download class="btn btn-sm btn-soft"><i class="bi bi-download me-1" aria-hidden="true"></i>Download</a>
+{% endblock %}
+{% block manage_content %}
+{% url 'dashboard:capstone_request_concept_file' req.reference as concept_url %}
+<div class="row g-4">
+  <div class="col-xl-7">
+    <section class="card p-4" aria-labelledby="doc-title">
+      <h2 id="doc-title" class="h6 mb-3">{{ req.concept_file_label }}</h2>
+      {% if req.concept_file_is_pdf %}
+        <iframe src="{{ concept_url }}" title="Concept file for {{ req.reference }}" class="concept-pdf"></iframe>
+      {% elif read_error %}
+        <p class="small text-body-secondary mb-0">{{ read_error }}</p>
+      {% else %}
+        {% if content.truncated %}<p class="small text-body-secondary">This file is very long; only the beginning is shown. Download it to see everything.</p>{% endif %}
+        <div class="concept-reader">
+          {% if content.kind == "word" %}
+            {% for block in content.blocks %}
+              {% if block.type == "heading" %}
+                <p class="concept-heading concept-heading-{{ block.level }}" role="heading" aria-level="{{ block.level|add:2 }}">{{ block.text }}</p>
+              {% elif block.type == "table" %}
+                <div class="table-responsive"><table class="table table-sm table-bordered small">
+                  {% for row in block.rows %}<tr>{% for cell in row %}<td>{{ cell }}</td>{% endfor %}</tr>{% endfor %}
+                </table></div>
+              {% else %}
+                <p class="{% if block.list %}concept-list-item{% endif %}">{{ block.text }}</p>
+              {% endif %}
+            {% empty %}
+              <p class="small text-body-secondary mb-0">No text was found in this document.</p>
+            {% endfor %}
+          {% else %}
+            {% for slide in content.blocks %}
+              <article class="concept-slide" aria-label="Slide {{ slide.number }}">
+                <p class="concept-slide-number">Slide {{ slide.number }}</p>
+                <h3 class="h6">{{ slide.title|default:"Untitled slide" }}</h3>
+                {% for line in slide.lines %}<p class="mb-1">{{ line }}</p>{% endfor %}
+                {% if slide.notes %}<p class="small text-body-secondary mt-2 mb-0"><strong>Speaker notes:</strong> {{ slide.notes }}</p>{% endif %}
+              </article>
+            {% empty %}
+              <p class="small text-body-secondary mb-0">No text was found in these slides.</p>
+            {% endfor %}
+          {% endif %}
+        </div>
+        <p class="small text-body-secondary mt-3 mb-0">Text and tables only. Download the file to see its original layout and images.</p>
+      {% endif %}
+    </section>
+  </div>
+
+  <div class="col-xl-5">
+    <section class="card p-4" id="analysis" aria-labelledby="analysis-title">
+      <h2 id="analysis-title" class="h6">AI analysis</h2>
+      {% if not ai_ready %}
+        <p class="small text-body-secondary mb-0">Connect and enable an AI provider in <a href="{% url 'dashboard:ai_settings' %}">Settings → AI connection</a> to summarize this file and generate a Claude CLI prompt.</p>
+      {% else %}
+        <p class="small text-body-secondary">{{ provider_label }} reads the request details and this file's text, then writes a summary, suggested algorithms and a prompt to paste into Claude CLI. The customer's name and email are not sent. Images in the file are not read. This uses your provider's paid credits and can take up to two minutes.</p>
+        <form method="post" action="{% url 'dashboard:capstone_request_concept_analyze' req.reference %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-primary btn-sm" data-loading-text="Analyzing… this can take up to two minutes"><i class="bi bi-stars me-1" aria-hidden="true"></i>{% if analysis %}Analyze again{% else %}Analyze with AI{% endif %}</button>
+        </form>
+      {% endif %}
+
+      {% if analysis %}
+        <p class="small text-body-secondary mt-3 mb-0">Generated {{ analysis.analyzed_at|date:"M j, Y, g:i A" }} with {{ analysis.model_name }}{% if analysis.created_by %} by {{ analysis.created_by.display_name }}{% endif %}.</p>
+        {% if analysis.input_truncated %}<p class="small text-warning-emphasis mb-0">The file was too long, so only its beginning was analyzed.</p>{% endif %}
+        <h3 class="h6 mt-4">Summary</h3>
+        <div class="concept-ai-text small bg-body-tertiary rounded-3 p-3">{{ analysis.summary }}</div>
+        <h3 class="h6 mt-4">Suggested algorithms</h3>
+        <div class="concept-ai-text small bg-body-tertiary rounded-3 p-3">{{ analysis.algorithms }}</div>
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-4 mb-2">
+          <h3 class="h6 mb-0">Claude CLI prompt</h3>
+          <button type="button" class="btn btn-sm btn-soft" data-copy="{{ analysis.cli_prompt }}" data-no-loading><i class="bi bi-clipboard me-1" aria-hidden="true"></i>Copy prompt</button>
+        </div>
+        <pre class="concept-ai-text concept-prompt small bg-body-tertiary rounded-3 p-3 mb-2">{{ analysis.cli_prompt }}</pre>
+        <p class="small text-body-secondary mb-0">AI output can be wrong. Review the prompt before pasting it into Claude CLI.</p>
+      {% endif %}
+    </section>
+  </div>
+</div>
+{% endblock %}

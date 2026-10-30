@@ -10,21 +10,24 @@ from django.db import transaction
 from django.db.models import Count, OuterRef, Q, Subquery, Sum
 from django.db.models.deletion import ProtectedError
 from django.db.models.functions import TruncDate
-from django.http import HttpResponseBadRequest
+from django.http import Http404, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.views.decorators.http import require_http_methods, require_POST
 from django.views.decorators.debug import sensitive_post_parameters
 
 from accounts.settings import account_settings_forms
+from capstone.concept_reader import ConceptFileError, read_concept_file
 from capstone.models import CapstoneProject, CapstoneRequest
 from catalog.models import Product
 from core.downloads import serve_private_document, serve_private_file, serve_private_image_inline
 from core.models import ContactMessage, PortfolioProject, SiteSettings, Testimonial
 from core.notifications import notify_capstone_status, notify_download_access_reset
 from core.sales import product_sales_only
+from dashboard.ai.providers import PROVIDERS
 from dashboard.decorators import staff_required
 from dashboard.forms import (
     AdminMessageForm,
@@ -38,6 +41,7 @@ from dashboard.forms import (
     CustomerAdminForm,
     TestimonialAdminForm,
 )
+from dashboard.models import AdminAISettings, ConceptAnalysis
 from orders.models import Order
 from payments.models import Payment
 from payments.services import PaymentError, approve_payment, refund_payable, reject_payment
@@ -372,9 +376,30 @@ def capstone_request_detail(request, reference):
 
 
 @staff_required
+@xframe_options_sameorigin  # The in-app viewer embeds PDFs from this URL.
 def capstone_request_concept_file(request, reference):
     req = get_object_or_404(CapstoneRequest, reference=reference)
     return serve_private_document(req.concept_file, f"{req.reference}-concept")
+
+
+@staff_required
+def capstone_request_concept_view(request, reference):
+    req = get_object_or_404(CapstoneRequest.objects.select_related("customer"), reference=reference)
+    if not req.concept_file:
+        raise Http404("The customer did not attach a file.")
+    content, read_error = None, ""
+    if not req.concept_file_is_pdf:
+        try:
+            content = read_concept_file(req.concept_file)
+        except ConceptFileError as exc:
+            read_error = str(exc)
+    config = AdminAISettings.load()
+    return render(request, "dashboard/capstone_concept_file.html", {
+        "req": req, "content": content, "read_error": read_error,
+        "analysis": ConceptAnalysis.objects.filter(request=req).first(),
+        "ai_ready": config.is_ready,
+        "provider_label": PROVIDERS.get(config.active_connection.provider, {}).get("label") if config.active_connection else "",
+    })
 
 
 @staff_required

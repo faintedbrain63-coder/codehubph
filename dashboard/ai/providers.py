@@ -60,7 +60,7 @@ def model_choices(provider, connection=None):
 
 
 @sensitive_variables()
-def request_json(provider, key, path, payload=None):
+def request_json(provider, key, path, payload=None, read_timeout=50):
     spec = provider_spec(provider)
     headers = {"Accept": "application/json", "Content-Type": "application/json"}
     if spec["protocol"] == "anthropic":
@@ -71,7 +71,7 @@ def request_json(provider, key, path, payload=None):
         # Never follow a redirect with credentials. The URL is entirely server-owned.
         endpoint = endpoint_for_model(provider, payload.get("model", "") if payload else "")
         with requests.request("POST" if payload is not None else "GET", endpoint + path,
-                              headers=headers, json=payload, timeout=(5, 50), allow_redirects=False, stream=True) as response:
+                              headers=headers, json=payload, timeout=(5, read_timeout), allow_redirects=False, stream=True) as response:
             if response.status_code in (401, 403):
                 raise AIError("The provider rejected this API key or model access. Check your key and permissions.")
             if response.status_code == 429:
@@ -130,7 +130,8 @@ def discover_models(provider, key):
 
 
 @sensitive_variables()
-def complete(connection, system, messages):
+def complete(connection, system, messages, max_tokens=None, read_timeout=50, max_chars=16000):
+    """Return the text answer. Defaults suit the chatbot; longer tasks raise the limits."""
     provider = connection.provider
     spec = provider_spec(provider)
     key = connection.get_api_key()
@@ -139,10 +140,10 @@ def complete(connection, system, messages):
     protocol = spec["protocol"]
     if protocol == "responses":
         payload = {"model": connection.model_name, "instructions": system, "input": messages,
-                   "max_output_tokens": 3000, "store": False}
+                   "max_output_tokens": max_tokens or 3000, "store": False}
         if connection.model_name.startswith(("gpt-5", "gpt-6")):
             payload["reasoning"] = {"effort": "low"}
-        data = request_json(provider, key, "/responses", payload)
+        data = request_json(provider, key, "/responses", payload, read_timeout)
         output = data.get("output")
         parts = [part.get("text", "") for item in output if isinstance(item, dict) and item.get("type") == "message"
                  for part in (item.get("content") or []) if isinstance(part, dict) and part.get("type") == "output_text"] if isinstance(output, list) else []
@@ -150,10 +151,10 @@ def complete(connection, system, messages):
             raise AIError("The model did not return a text answer. Try another text model.")
         text = "\n".join(parts)
     elif protocol == "anthropic":
-        payload = {"model": connection.model_name, "system": system, "messages": messages, "max_tokens": 3000}
+        payload = {"model": connection.model_name, "system": system, "messages": messages, "max_tokens": max_tokens or 3000}
         if connection.model_name == "claude-fable-5-1":
             payload["output_config"] = {"effort": "low"}
-        data = request_json(provider, key, "/messages", payload)
+        data = request_json(provider, key, "/messages", payload, read_timeout)
         content = data.get("content")
         parts = [part.get("text", "") for part in content if isinstance(part, dict) and part.get("type") == "text"] if isinstance(content, list) else []
         if any(not isinstance(part, str) for part in parts):
@@ -161,7 +162,7 @@ def complete(connection, system, messages):
         text = "\n".join(parts)
     else:
         payload = {"model": connection.model_name, "messages": [{"role": "system", "content": system}] + messages,
-                   "max_tokens": 4000, "stream": False}
+                   "max_tokens": max_tokens or 4000, "stream": False}
         if provider in {"deepseek", "glm"} or (provider == "minimax" and connection.model_name == "MiniMax-M3"):
             payload["thinking"] = {"type": "disabled"}
         if provider == "glm" and connection.model_name == "glm-5.3":
@@ -176,7 +177,7 @@ def complete(connection, system, messages):
             payload["reasoning_split"] = True
             if connection.model_name == "MiniMax-M3.1-Flash":
                 payload["reasoning_effort"] = "low"
-        data = request_json(provider, key, "/chat/completions", payload)
+        data = request_json(provider, key, "/chat/completions", payload, read_timeout)
         choices = data.get("choices")
         first = choices[0] if isinstance(choices, list) and choices and isinstance(choices[0], dict) else {}
         answer_message = first.get("message")
@@ -189,4 +190,4 @@ def complete(connection, system, messages):
         text = text.split("<think>", 1)[0].strip()
     if not text:
         raise AIError("The model returned no answer. Please try again or choose another model.")
-    return text[:16000]
+    return text[:max_chars]

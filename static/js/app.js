@@ -93,7 +93,7 @@
             notice.className = "small text-body-secondary";
             btn.parentElement.appendChild(notice);
           }
-          notice.textContent = "Please select and copy the reference manually.";
+          notice.textContent = "Please select and copy the text manually.";
         }
         if (!navigator.clipboard || !navigator.clipboard.writeText) {
           copyFailed();

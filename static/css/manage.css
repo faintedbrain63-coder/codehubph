@@ -281,3 +281,16 @@
 @media (prefers-reduced-motion: reduce) {
   .upload-modal[open], .um-fill, .um-fill::after { animation: none !important; transition: none !important; }
 }
+
+/* Concept file viewer and AI analysis */
+.concept-pdf { display: block; width: 100%; height: min(80vh, 1100px); border: 1px solid var(--bs-border-color); border-radius: .75rem; background: var(--bs-tertiary-bg); }
+.concept-reader { max-height: 80vh; overflow-y: auto; padding-right: .5rem; line-height: 1.65; }
+.concept-heading { font-weight: 700; margin: 1.25rem 0 .5rem; }
+.concept-heading-1 { font-size: 1.2rem; }
+.concept-heading-2 { font-size: 1.05rem; }
+.concept-list-item { padding-left: 1.1rem; position: relative; margin-bottom: .35rem; }
+.concept-list-item::before { content: "•"; position: absolute; left: .2rem; }
+.concept-slide { border: 1px solid var(--bs-border-color); border-radius: .75rem; padding: 1rem 1.25rem; margin-bottom: .75rem; }
+.concept-slide-number { font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--bs-secondary-color); margin-bottom: .25rem; }
+.concept-ai-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+.concept-prompt { max-height: 28rem; overflow-y: auto; font-family: var(--bs-font-monospace); }

@@ -4,20 +4,23 @@ import time
 from django.contrib import messages
 from django.core.cache import cache
 from django.db import transaction
-from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
-from django.shortcuts import redirect, render
+from django.http import Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.cache import never_cache
 from django.views.decorators.debug import sensitive_post_parameters, sensitive_variables
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
+from capstone.models import CapstoneRequest
+from dashboard.ai.concept import READ_TIMEOUT, analyze_concept_file
 from dashboard.ai.credentials import AIError
 from dashboard.ai.forms import AIConnectionForm
 from dashboard.ai.knowledge import app_manual, assistant_instructions, manual_version
 from dashboard.ai.providers import PROVIDERS, FRONTIER_DEFAULTS_VERIFIED, complete, discover_models, model_choices
 from dashboard.ai.revenue import revenue_snapshot
 from dashboard.decorators import staff_required
-from dashboard.models import AdminAISettings, AIConnection
+from dashboard.models import AdminAISettings, AIConnection, ConceptAnalysis
 
 
 def _provider(request, config):
@@ -74,9 +77,9 @@ def connection_settings(request):
         "active_label": PROVIDERS.get(config.active_connection.provider, {}).get("label") if config.active_connection else ""})
 
 
-def _acquire(user_id):
+def _acquire(user_id, busy_seconds=75):
     key = f"admin-ai-busy:{user_id}"
-    if not cache.add(key, True, timeout=75):
+    if not cache.add(key, True, timeout=busy_seconds):
         return None
     bucket = f"admin-ai-rate:{user_id}:{int(time.time() // 60)}"
     cache.add(bucket, 0, timeout=70)
@@ -175,6 +178,33 @@ def ask(request):
         return JsonResponse({"error": str(exc)}, status=502)
     finally:
         cache.delete(lock)
+
+
+@staff_required
+@never_cache
+@require_POST
+def analyze_concept(request, reference):
+    req = get_object_or_404(CapstoneRequest, reference=reference)
+    if not req.concept_file:
+        raise Http404("The customer did not attach a file.")
+    page = reverse("dashboard:capstone_request_concept_view", args=[req.reference]) + "#analysis"
+    config = AdminAISettings.load()
+    if not config.is_ready:
+        messages.error(request, "Connect and enable an AI provider in Settings → AI connection first.")
+        return redirect(page)
+    lock = _acquire(request.user.pk, busy_seconds=READ_TIMEOUT + 20)
+    if not lock:
+        messages.error(request, "Another AI request is already running, or the request limit was reached. Please wait.")
+        return redirect(page)
+    try:
+        fields = analyze_concept_file(config.active_connection, req)
+        ConceptAnalysis.objects.update_or_create(request=req, defaults={**fields, "created_by": request.user})
+        messages.success(request, "AI analysis finished. Review it before sharing or pasting the prompt.")
+    except AIError as exc:
+        messages.error(request, str(exc))
+    finally:
+        cache.delete(lock)
+    return redirect(page)
 
 
 @staff_required

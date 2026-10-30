@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 
@@ -32,3 +33,25 @@ class AdminAISettings(models.Model):
     @classmethod
     def load(cls):
         return cls.objects.select_related("active_connection").get_or_create(pk=1)[0]
+
+    @property
+    def is_ready(self):
+        return bool(self.is_enabled and self.active_connection and self.active_connection.encrypted_api_key)
+
+
+class ConceptAnalysis(models.Model):
+    """The latest AI reading of a project request's concept file, kept for the admin."""
+
+    request = models.OneToOneField("capstone.CapstoneRequest", on_delete=models.CASCADE, related_name="concept_analysis")
+    provider = models.CharField(max_length=24)
+    model_name = models.CharField(max_length=200)
+    summary = models.TextField()
+    algorithms = models.TextField()
+    cli_prompt = models.TextField("Claude CLI prompt")
+    input_truncated = models.BooleanField(default=False)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
+                                   related_name="+")
+    analyzed_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Analysis of {self.request_id}"
