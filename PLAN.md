@@ -21,7 +21,6 @@ codehubph/                      <- workspace (contains the prompt + this plan)
 └── codehub_ph/                 <- project folder (manage.py root)
     ├── venv/                   <- virtual environment (created FIRST)
     ├── .env / .env.example / .gitignore / requirements.txt / README.md
-    ├── Dockerfile / docker-compose.yml
     ├── manage.py
     ├── codehub_ph/             <- Django project package
     │   ├── settings.py         <- single settings file, 100% driven by .env
@@ -38,7 +37,7 @@ codehubph/                      <- workspace (contains the prompt + this plan)
 1. `mkdir codehub_ph`, then `py -V:Astral/CPython3.12.14 -m venv venv` and activate it.
 2. Upgrade pip; install `Django 5.x`, `psycopg[binary]`, `python-decouple`, `Pillow`, `whitenoise`, `gunicorn`, `django-axes` (login rate limiting), `requests` (PayPal REST API); `pip freeze > requirements.txt`.
 3. `django-admin startproject codehub_ph .` inside the folder, then `python manage.py startapp` for the 7 apps.
-4. Create `.env` (values from the prompt + generated `SECRET_KEY`), `.env.example` (placeholders), `.gitignore` (`.env`, `venv/`, `__pycache__/`, `media/`, `*.pyc`, plus `private_media/`, `staticfiles/`).
+4. Create `.env` (values from the prompt + generated `SECRET_KEY`), `.env.example` (placeholders), `.gitignore` (`venv/`, `__pycache__/`, `media/`, `*.pyc`, plus `private_media/`, `staticfiles/`).
 5. `DATABASES` -> `django.db.backends.postgresql` from `DB_*` env vars.
 6. `python manage.py check` and `migrate` after each major step.
 
@@ -174,4 +173,4 @@ payments.WebhookEvent
 - [x] `seed_demo` management command (sample products with generated thumbnails + zip files, capstone project, demo customer, admin)
 - [x] Tests passing; `manage.py check` clean
 - [x] README (setup, PostgreSQL, migrations, superuser, seeding, payments config, tests, production checklist, PCI notes, defaults chosen)
-- [x] Dockerfile + docker-compose.yml
+- [x] VPS deployment notes: Gunicorn behind Nginx, reached through a Cloudflare Tunnel

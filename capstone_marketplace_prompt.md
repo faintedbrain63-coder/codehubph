@@ -18,7 +18,7 @@ Follow these steps in order, in the current empty project folder:
 3. Create the Django project **only after** the venv is active and dependencies are installed. The project name is **`codehub_ph`**:
    - Name the project folder `codehub_ph` and create the Django project with `django-admin startproject codehub_ph .` (or inside the `codehub_ph` folder, so that `manage.py` sits at that folder's root).
    - The Django project package (where `settings.py`, `urls.py`, `wsgi.py` and `asgi.py` live) must also be named **`codehub_ph`**, so the settings file is at `codehub_ph/settings.py`.
-   - Use `codehub_ph.settings` for `DJANGO_SETTINGS_MODULE` (in `manage.py`, `wsgi.py`, `asgi.py`), `codehub_ph.wsgi:application` for Gunicorn, and `codehub_ph` as the name in the README, Dockerfile and docker-compose.
+   - Use `codehub_ph.settings` for `DJANGO_SETTINGS_MODULE` (in `manage.py`, `wsgi.py`, `asgi.py`) and `codehub_ph.wsgi:application` for Gunicorn.
    - Then create the apps listed in section 5 with `python manage.py startapp <name>`.
 4. **Create a `.env` file** in the project root (next to `manage.py`) with these values, and make `settings.py` read **all** configuration from it:
 
@@ -138,8 +138,7 @@ Supported methods: **PayPal, GCash, Debit/Credit Card**. Build a `payments` app 
 ## 9. Deliverables
 
 1. Complete working project with the folder structure, `requirements.txt`, `.env.example`, `manage.py`, migrations, templates, static files (custom CSS/JS), and `README.md`.
-2. README must include: local setup, PostgreSQL setup, running migrations, creating a superuser, seeding demo data, configuring PayPal/GCash/card settings, running tests, and a production deployment checklist (Gunicorn + Nginx or a PaaS).
-3. Optional `Dockerfile` and `docker-compose.yml` (web + postgres).
+2. README must include: local setup, PostgreSQL setup, running migrations, creating a superuser, seeding demo data, configuring PayPal/GCash/card settings, running tests, and a production deployment checklist for a VPS (Gunicorn behind Nginx, published with a Cloudflare Tunnel).
 
 ## 10. How to Work
 

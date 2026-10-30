@@ -489,18 +489,7 @@ and cancellation are frozen while a payment is under review. Full refunds revoke
 are recorded for staff review and keep access active. Before deploying these changes, run `migrate` and `collectstatic`
 with the production environment loaded.
 
-## 7. Docker (optional)
-
-```bash
-docker compose up --build
-docker compose exec web python manage.py createsuperuser
-docker compose exec web python manage.py seed_demo
-```
-
-`docker-compose.yml` runs PostgreSQL 16 and the app under Gunicorn on port 8000, using the same `.env` (with
-`DB_HOST` overridden to `db`). Media and private media are kept in named volumes.
-
-## 8. Production checklist
+## 7. Production checklist
 
 - [ ] `DEBUG=False`.
 - [ ] A new, long, random `SECRET_KEY`:
@@ -587,7 +576,7 @@ size" (HTTP 413), raise `client_max_body_size` or lower `UPLOAD_CHUNK_MB`. Set
 visitor's real IP instead of `127.0.0.1` (only safe because Gunicorn listens on `127.0.0.1`). Keep `SECURE_SSL_REDIRECT=True`; Cloudflare supplies HTTPS. Keep
 `private_media/` on the same disk as `private_media/chunked/` so finished uploads are moved, not copied.
 
-## 9. Defaults chosen
+## 8. Defaults chosen
 
 These points were not specified in the brief, so these defaults were used:
 
