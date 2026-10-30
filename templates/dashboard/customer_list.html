@@ -2,14 +2,15 @@
 {% load core_tags %}
 {% block manage_title %}Customers · {% endblock %}
 {% block heading %}Customers{% endblock %}
-{% block subheading %}<p class="text-body-secondary mb-0">Find customer accounts and open their order or project history.</p>{% endblock %}
+{% block subheading %}<p class="text-body-secondary mb-0">Search customer accounts, then add, update or remove them.</p>{% endblock %}
+{% block actions %}<a href="{% url 'dashboard:customer_create' %}" class="btn btn-primary">New customer</a>{% endblock %}
 {% block manage_content %}
-{% include "dashboard/_filters.html" %}
+{% include "dashboard/_filters.html" with placeholder="Search by name, email, phone or school" %}
 <div class="card">
   {% if customers %}
   <div class="table-responsive">
     <table class="table table-hover align-middle mb-0">
-      <thead><tr><th scope="col">Customer</th><th scope="col">School</th><th scope="col">Orders</th><th scope="col">Capstone</th><th scope="col">Total paid</th><th scope="col">Joined</th></tr></thead>
+      <thead><tr><th scope="col">Customer</th><th scope="col">School</th><th scope="col">Orders</th><th scope="col">Capstone</th><th scope="col">Total paid</th><th scope="col">Status</th><th scope="col">Joined</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr></thead>
       <tbody>
         {% for c in customers %}
         <tr>
@@ -18,14 +19,27 @@
           <td><a href="{% url 'dashboard:order_list' %}?q={{ c.email|urlencode }}">{{ c.order_count }}</a></td>
           <td><a href="{% url 'dashboard:capstone_request_list' %}?q={{ c.email|urlencode }}">{{ c.request_count }}</a></td>
           <td>{{ c.paid_total|default:0|money }}</td>
+          <td>{% if c.is_active %}{% status_badge "active" "Can sign in" %}{% else %}{% status_badge "inactive" "Sign-in blocked" %}{% endif %}</td>
           <td class="small text-body-secondary">{{ c.date_joined|date:"M j, Y" }}</td>
+          <td class="text-end text-nowrap">
+            <a href="{% url 'dashboard:customer_edit' c.pk %}" class="btn btn-sm btn-soft">Edit</a>
+            <form method="post" action="{% url 'dashboard:customer_delete' c.pk %}" class="d-inline" data-confirm="Delete {{ c.display_name }}? Accounts with orders, payments or project requests will be deactivated instead.">
+              {% csrf_token %}<button type="submit" class="btn btn-sm btn-link text-danger" aria-label="Delete {{ c.display_name }}"><i class="bi bi-trash" aria-hidden="true"></i></button>
+            </form>
+          </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
   {% else %}
-    {% include "partials/_empty_state.html" with icon="people" title="No customers found" %}
+    {% if q or status %}
+    {% url 'dashboard:customer_list' as list_url %}
+    {% include "partials/_empty_state.html" with icon="search" title="No matching customers" text="Try another name, email, phone, school or status." action_url=list_url action_label="Reset filters" %}
+    {% else %}
+    {% url 'dashboard:customer_create' as create_url %}
+    {% include "partials/_empty_state.html" with icon="people" title="No customers found" text="Add a customer account so they can sign in and request a project." action_url=create_url action_label="New customer" %}
+    {% endif %}
   {% endif %}
 </div>
 {% include "partials/_pagination.html" %}

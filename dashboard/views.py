@@ -35,6 +35,7 @@ from dashboard.forms import (
     QuoteForm,
     RejectPaymentForm,
     SiteSettingsForm,
+    CustomerAdminForm,
     TestimonialAdminForm,
 )
 from orders.models import Order
@@ -594,8 +595,10 @@ def payment_proof(request, pk):
 # --------------------------------------------------------------------------
 # Customers and settings
 # --------------------------------------------------------------------------
-@staff_required
-def customer_list(request):
+CUSTOMER_STATUSES = (("active", "Can sign in"), ("inactive", "Sign-in blocked"))
+
+
+def _customer_queryset():
     paid_total = (
         Payment.objects.filter(customer=OuterRef("pk"), status=Payment.Status.COMPLETED)
         .order_by()
@@ -603,19 +606,67 @@ def customer_list(request):
         .annotate(total=Sum("amount"))
         .values("total")
     )
-    customers = User.objects.filter(is_staff=False).annotate(
+    return User.objects.filter(is_staff=False).annotate(
         order_count=Count("orders", distinct=True),
         request_count=Count("capstone_requests", distinct=True),
         paid_total=Subquery(paid_total),
     )
+
+
+@staff_required
+def customer_list(request):
+    customers = _customer_queryset()
     q = request.GET.get("q", "").strip()[:100]
+    status = request.GET.get("status", "")
     if q:
         customers = customers.filter(
-            Q(email__icontains=q) | Q(first_name__icontains=q)
-            | Q(last_name__icontains=q) | Q(school__icontains=q)
+            Q(email__icontains=q) | Q(first_name__icontains=q) | Q(last_name__icontains=q)
+            | Q(school__icontains=q) | Q(phone_number__icontains=q)
         )
+    if status == "active":
+        customers = customers.filter(is_active=True)
+    elif status == "inactive":
+        customers = customers.filter(is_active=False)
+    else:
+        status = ""
     page = _paginate(request, customers.order_by("-date_joined"))
-    return render(request, "dashboard/customer_list.html", {"page_obj": page, "customers": page.object_list, "q": q})
+    return render(request, "dashboard/customer_list.html", {
+        "page_obj": page, "customers": page.object_list, "q": q, "status": status,
+        "statuses": CUSTOMER_STATUSES,
+    })
+
+
+@staff_required
+@sensitive_post_parameters("password1", "password2")
+@require_http_methods(["GET", "POST"])
+def customer_form(request, pk=None):
+    customer = get_object_or_404(User, pk=pk, is_staff=False) if pk else None
+    form = CustomerAdminForm(request.POST if request.method == "POST" else None, instance=customer)
+    if request.method == "POST" and form.is_valid():
+        customer = form.save()
+        verb = "updated" if pk else "created"
+        messages.success(request, f"{customer.display_name} was {verb}.")
+        return redirect("dashboard:customer_list")
+    return render(request, "dashboard/customer_form.html", {"form": form, "customer": customer})
+
+
+@staff_required
+@require_POST
+def customer_delete(request, pk):
+    customer = get_object_or_404(User, pk=pk, is_staff=False)
+    label = customer.display_name
+    try:
+        customer.delete()
+        messages.success(request, f"{label} was deleted.")
+    except ProtectedError:
+        if customer.is_active:
+            customer.is_active = False
+            customer.save(update_fields=["is_active"])
+        messages.warning(
+            request,
+            f"{label} has orders, payments or project requests, so the account was deactivated instead of deleted.",
+        )
+    return redirect("dashboard:customer_list")
 
 
 @staff_required

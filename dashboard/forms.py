@@ -1,8 +1,10 @@
 from django import forms
 from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 from django.forms import inlineformset_factory
 from django.forms.models import BaseInlineFormSet
-from django.contrib.auth import get_user_model
 from urllib.parse import urlsplit
 
 from capstone.models import CapstoneMessage, CapstoneProject, CapstoneRequest
@@ -215,6 +217,93 @@ PortfolioScreenshotFormSet = inlineformset_factory(
     PortfolioProject, PortfolioScreenshot, form=PortfolioScreenshotForm, formset=BasePortfolioScreenshotFormSet,
     extra=1, can_delete=True, max_num=12, validate_max=True,
 )
+
+
+class CustomerAdminForm(forms.ModelForm):
+    """Staff-managed customer account. Never grants staff or superuser access."""
+
+    password1 = forms.CharField(
+        label="Password",
+        required=False,
+        strip=False,
+        widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}),
+    )
+    password2 = forms.CharField(
+        label="Confirm password",
+        required=False,
+        strip=False,
+        widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}),
+    )
+
+    class Meta:
+        model = get_user_model()
+        fields = ("first_name", "last_name", "email", "phone_number", "school", "is_active")
+        labels = {
+            "phone_number": "Phone number",
+            "school": "School / university",
+            "is_active": "Account can sign in",
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.creating = self.instance.pk is None
+        self.fields["first_name"].required = True
+        self.fields["last_name"].required = True
+        self.fields["phone_number"].required = False
+        self.fields["school"].required = False
+        self.fields["phone_number"].widget.attrs.update({
+            "autocomplete": "tel",
+            "placeholder": "+63 917 000 0000",
+            "inputmode": "tel",
+        })
+        self.fields["school"].widget.attrs.update({
+            "autocomplete": "organization",
+            "placeholder": "University or school name",
+        })
+        self.fields["is_active"].help_text = "Turn this off to block sign-in without deleting orders or project requests."
+        if self.creating:
+            self.fields["password1"].required = True
+            self.fields["password2"].required = True
+            self.fields["password1"].help_text = "At least 8 characters. Share it with the customer through a private channel."
+        else:
+            self.fields["password1"].help_text = "Leave blank to keep the current password."
+
+    def clean_email(self):
+        email = self.cleaned_data["email"].strip().lower()
+        taken = get_user_model().objects.filter(email__iexact=email)
+        if self.instance.pk:
+            taken = taken.exclude(pk=self.instance.pk)
+        if taken.exists():
+            raise forms.ValidationError("An account with this email already exists.")
+        return email
+
+    def clean(self):
+        data = super().clean()
+        password = data.get("password1") or ""
+        confirm = data.get("password2") or ""
+        if self.creating or password or confirm:
+            if password != confirm:
+                self.add_error("password2", "The two passwords do not match.")
+            elif password:
+                self.instance.email = (data.get("email") or "").strip().lower()
+                self.instance.first_name = data.get("first_name") or ""
+                self.instance.last_name = data.get("last_name") or ""
+                try:
+                    validate_password(password, self.instance)
+                except ValidationError as exc:
+                    self.add_error("password1", exc)
+        return data
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.is_staff = False
+        user.is_superuser = False
+        password = self.cleaned_data.get("password1")
+        if password:
+            user.set_password(password)
+        if commit:
+            user.save()
+        return user
 
 
 class SiteSettingsForm(forms.ModelForm):

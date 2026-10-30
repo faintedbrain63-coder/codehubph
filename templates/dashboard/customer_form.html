@@ -1,0 +1,36 @@
+{% extends "dashboard/base_manage.html" %}
+{% block manage_title %}{% if customer %}Edit customer{% else %}New customer{% endif %} · {% endblock %}
+{% block heading %}{% if customer %}Edit {{ customer.display_name }}{% else %}New customer{% endif %}{% endblock %}
+{% block subheading %}<p class="text-body-secondary mb-0">{% if customer %}Update this account. Leave the password blank to keep the current one.{% else %}Create a customer who can sign in with the email and password you set.{% endif %}</p>{% endblock %}
+{% block manage_content %}
+<form method="post" class="needs-validation" novalidate data-dirty-form>
+  {% csrf_token %}
+  {% include "dashboard/_form_summary.html" %}
+  <div class="row g-4">
+    <div class="col-xl-8">
+      <section class="card p-4">
+        <div class="row">
+          <div class="col-md-6">{% include "partials/_field.html" with field=form.first_name %}</div>
+          <div class="col-md-6">{% include "partials/_field.html" with field=form.last_name %}</div>
+        </div>
+        {% include "partials/_field.html" with field=form.email icon="envelope" %}
+        <div class="row">
+          <div class="col-md-6">{% include "partials/_field.html" with field=form.phone_number icon="telephone" show_optional=True %}</div>
+          <div class="col-md-6">{% include "partials/_field.html" with field=form.school icon="building" show_optional=True %}</div>
+        </div>
+      </section>
+    </div>
+    <div class="col-xl-4 d-grid gap-4 align-content-start">
+      <section class="card p-4">
+        {% include "partials/_field.html" with field=form.password1 %}
+        {% include "partials/_field.html" with field=form.password2 %}
+        {% include "partials/_field.html" with field=form.is_active %}
+      </section>
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary" data-loading-text="Saving…">{% if customer %}Save customer{% else %}Create customer{% endif %}</button>
+        <a href="{% url 'dashboard:customer_list' %}" class="btn btn-link">Cancel</a>
+      </div>
+    </div>
+  </div>
+</form>
+{% endblock %}

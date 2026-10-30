@@ -26,6 +26,8 @@ STATUS_STYLES = {
     "published": ("success", "globe"),
     "approved": ("success", "check-circle"),
     "hidden": ("secondary", "eye-slash"),
+    "active": ("success", "check-circle"),
+    "inactive": ("secondary", "slash-circle"),
 }
 
 
