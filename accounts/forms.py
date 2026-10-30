@@ -51,15 +51,14 @@ class RegisterForm(UserCreationForm):
         self.fields["privacy_version"].initial = CURRENT_VERSIONS["privacy"]
         self.fields["license_version"].initial = CURRENT_VERSIONS["license"]
         self.fields["accept_privacy"].label = format_html(
-            'I have read and agree to the <button type="button" class="legal-link" '
-            'data-bs-toggle="modal" data-bs-target="#legal-privacy">Privacy Policy</button>. '
-            'I explicitly consent to the use of any school or academic details I choose to provide '
-            'for my account and requested project services.',
+            'I agree to the <button type="button" class="legal-link" '
+            'data-bs-toggle="modal" data-bs-target="#legal-privacy">Privacy Policy</button> '
+            'and consent to the use of any school details I provide for my projects.',
         )
         self.fields["accept_license"].label = format_html(
-            'I have read and agree to the <button type="button" class="legal-link" data-bs-toggle="modal" '
-            'data-bs-target="#legal-license">{}</button>. I confirm I have legal capacity and authority '
-            'to accept these terms for the named client.', get_document("license")["title"],
+            'I agree to the <button type="button" class="legal-link" data-bs-toggle="modal" '
+            'data-bs-target="#legal-license">{}</button> and have authority to accept these terms for the named client.',
+            get_document("license")["title"],
         )
 
     class Meta(UserCreationForm.Meta):

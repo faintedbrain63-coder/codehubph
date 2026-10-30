@@ -1,0 +1,90 @@
+/* Sign-up page: project pipeline preview, form progress and restrained entrance motion.
+   Every animation is disabled under prefers-reduced-motion. */
+.signup-shell { --signup-ease: cubic-bezier(.22, 1, .36, 1); }
+/* The form column is tall; keep the panel's story near the top instead of floating at the bottom. */
+.signup-shell .auth-aside { justify-content: flex-start; }
+.signup-shell .auth-aside > .my-4 { margin-top: clamp(2rem, 6vh, 4rem) !important; }
+.signup-shell .auth-aside > p:last-child { margin-top: auto; }
+
+/* Ambient light in the dark panel */
+.signup-orb { position: absolute; z-index: -1; border-radius: 50%; filter: blur(48px); pointer-events: none; }
+.signup-orb-one { width: 18rem; height: 18rem; top: -5rem; right: -4rem; background: rgba(var(--brand-rgb), .45); }
+.signup-orb-two { width: 14rem; height: 14rem; bottom: -4rem; left: -3rem; background: rgba(34, 211, 238, .22); }
+
+/* Project pipeline preview */
+.signup-flow { position: relative; padding: 1rem 1.1rem 1.1rem; border: 1px solid rgba(148, 163, 184, .18); border-radius: 1rem;
+  background: linear-gradient(160deg, rgba(15, 23, 42, .78), rgba(15, 23, 42, .52)); box-shadow: 0 24px 50px -30px rgba(0, 0, 0, .8), inset 0 1px rgba(255, 255, 255, .06);
+  backdrop-filter: blur(6px); }
+.signup-flow-head { display: flex; align-items: center; gap: .55rem; margin-bottom: .8rem; font-size: .72rem; font-weight: 600; letter-spacing: .04em; color: #e2e8f0; }
+.signup-flow-live { width: 7px; height: 7px; border-radius: 50%; background: #34d399; box-shadow: 0 0 0 0 rgba(52, 211, 153, .6); }
+.signup-flow-ref { margin-left: auto; font: 500 .62rem/1 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: .12em; color: #64748b; }
+.signup-flow ol { list-style: none; margin: 0; padding: 0; display: grid; gap: .35rem; }
+.signup-flow li { display: flex; align-items: center; gap: .65rem; padding: .45rem .6rem; border-radius: .6rem; font-size: .8rem; color: #64748b;
+  border: 1px solid transparent; transition: color .5s var(--signup-ease), background-color .5s var(--signup-ease), border-color .5s var(--signup-ease); }
+.signup-flow li > i:first-child { font-size: .95rem; transition: color .5s; }
+.signup-flow-check { margin-left: auto; color: #34d399; opacity: 0; transform: scale(.4); transition: opacity .35s, transform .45s var(--signup-ease); }
+.signup-flow li.is-done { color: #cbd5e1; }
+.signup-flow li.is-done .signup-flow-check { opacity: 1; transform: none; }
+.signup-flow li.is-active { color: #f8fafc; background: rgba(var(--brand-rgb), .18); border-color: rgba(129, 140, 248, .35); }
+.signup-flow li.is-active > i:first-child { color: #67e8f9; }
+.signup-flow-bar { height: 3px; margin-top: .85rem; border-radius: 3px; background: rgba(148, 163, 184, .15); overflow: hidden; }
+.signup-flow-bar > span { display: block; height: 100%; width: var(--flow, 100%); border-radius: inherit; background: linear-gradient(90deg, #818cf8, #22d3ee);
+  box-shadow: 0 0 12px rgba(34, 211, 238, .6); transition: width .9s var(--signup-ease); }
+
+/* Form completion progress */
+.signup-progress { margin-bottom: 1.5rem; }
+.signup-steps { display: flex; justify-content: space-between; margin-bottom: .45rem; font-size: .72rem; font-weight: 600; letter-spacing: .02em; color: var(--bs-secondary-color); }
+.signup-steps span { display: inline-flex; align-items: center; gap: .3rem; transition: color .3s; }
+.signup-steps span::before { content: ""; width: .5rem; height: .5rem; border-radius: 50%; border: 1.5px solid currentColor; transition: background-color .3s, border-color .3s, transform .4s var(--signup-ease); }
+.signup-steps span.is-done { color: var(--brand); }
+.signup-steps span.is-done::before { background: var(--brand); border-color: var(--brand); transform: scale(1.15); }
+.signup-track { height: 4px; border-radius: 4px; background: var(--bs-tertiary-bg); overflow: hidden; }
+.signup-track > span { display: block; height: 100%; width: var(--progress, 0%); border-radius: inherit;
+  background: linear-gradient(90deg, var(--brand), #22d3ee); transition: width .6s var(--signup-ease); }
+
+.signup-consent { transition: border-color .4s, box-shadow .4s; }
+.signup-consent.is-complete { border-color: rgba(var(--brand-rgb), .45) !important; box-shadow: 0 0 0 4px rgba(var(--brand-rgb), .07); }
+
+@media (max-width: 991.98px) {
+  .signup-flow { display: none; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .signup-shell { animation: signup-rise .8s var(--signup-ease) both; }
+  .signup-shell .auth-aside .my-4 > *,
+  .signup-shell .auth-form > *,
+  .signup-shell .auth-form form > * { animation: signup-enter .7s var(--signup-ease) both; }
+  .signup-shell .auth-aside .my-4 > :nth-child(2) { animation-delay: .08s; }
+  .signup-shell .auth-aside .my-4 > :nth-child(3) { animation-delay: .16s; }
+  .signup-shell .auth-aside .my-4 > :nth-child(4) { animation-delay: .24s; }
+  .signup-shell .auth-aside .my-4 > :nth-child(5) { animation-delay: .4s; }
+  .signup-shell .auth-form > :nth-child(2) { animation-delay: .1s; }
+  .signup-shell .auth-form > :nth-child(3) { animation-delay: .15s; }
+  .signup-shell .auth-form > :nth-child(4) { animation-delay: .2s; }
+  .signup-shell .auth-form form > :nth-child(n+3) { animation-delay: .25s; }
+  .signup-shell .auth-form form > :nth-child(n+5) { animation-delay: .3s; }
+  .signup-shell .auth-form form > :nth-child(n+7) { animation-delay: .35s; }
+  .signup-shell .auth-form form > :nth-child(n+9) { animation-delay: .4s; }
+  .signup-shell .auth-form form > :nth-child(n+11) { animation-delay: .45s; }
+
+  .signup-orb-one { animation: signup-drift-one 14s ease-in-out infinite alternate; }
+  .signup-orb-two { animation: signup-drift-two 18s ease-in-out infinite alternate; }
+  .signup-flow-live { animation: signup-pulse 2.2s ease-out infinite; }
+  .signup-shell .auth-aside::before { animation: signup-grid 40s linear infinite; }
+
+  .signup-shell .form-control { transition: border-color .25s, box-shadow .25s, background-color .25s; }
+  .signup-shell .form-check-input:checked { animation: signup-check .35s var(--signup-ease); }
+  .signup-shell .btn-primary[type="submit"] { position: relative; overflow: hidden; transition: transform .25s var(--signup-ease), box-shadow .25s; }
+  .signup-shell .btn-primary[type="submit"]::after { content: ""; position: absolute; inset: 0; transform: translateX(-120%);
+    background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, .28) 50%, transparent 65%); transition: transform .8s var(--signup-ease); }
+  .signup-shell .btn-primary[type="submit"]:hover:not(:disabled) { transform: translateY(-1px); box-shadow: var(--shadow-brand); }
+  .signup-shell .btn-primary[type="submit"]:hover::after, .signup-shell form.is-ready .btn-primary[type="submit"]::after { transform: translateX(120%); }
+}
+
+@keyframes signup-rise { from { opacity: 0; transform: translateY(18px) scale(.985); } }
+@keyframes signup-enter { from { opacity: 0; transform: translateY(12px); } }
+@keyframes signup-drift-one { to { transform: translate(-3rem, 2.5rem) scale(1.12); } }
+@keyframes signup-drift-two { to { transform: translate(2.5rem, -2rem) scale(1.18); } }
+@keyframes signup-pulse { 0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, .55); } 70%, 100% { box-shadow: 0 0 0 7px rgba(52, 211, 153, 0); } }
+@keyframes signup-grid { to { background-position: 0 0, 0 0, 0 48px, 48px 0; } }
+@keyframes signup-check { 50% { transform: scale(1.18); } }

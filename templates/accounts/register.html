@@ -1,8 +1,11 @@
 {% extends "accounts/security_base.html" %}
+{% load static %}
 {% block title %}Create account · {% endblock %}
+{% block extra_head %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/signup.css' %}">{% endblock %}
 {% block content %}
-<div class="auth-shell">
+<div class="auth-shell signup-shell">
   <aside class="auth-aside">
+    <span class="signup-orb signup-orb-one" aria-hidden="true"></span><span class="signup-orb signup-orb-two" aria-hidden="true"></span>
     <a class="d-inline-flex align-items-center gap-2 text-decoration-none auth-brand" href="{% url 'core:home' %}">
       <span class="brand-mark" aria-hidden="true"><i class="bi bi-lightning-charge-fill"></i></span>
       <span class="fw-bold font-display">{{ SITE_NAME }}</span>
@@ -16,6 +19,16 @@
         <li><i class="bi bi-shield-lock" aria-hidden="true"></i><span>Card details never touch our servers.</span></li>
         <li><i class="bi bi-kanban" aria-hidden="true"></i><span>Keep project messages and delivered files in your account.</span></li>
       </ul>
+      <div class="signup-flow mt-4" data-signup-flow aria-hidden="true">
+        <div class="signup-flow-head"><span class="signup-flow-live"></span>Your project, tracked<span class="signup-flow-ref">REQ · LIVE</span></div>
+        <ol>
+          <li><i class="bi bi-file-earmark-text"></i><span>Brief submitted</span><i class="bi bi-check2 signup-flow-check"></i></li>
+          <li><i class="bi bi-receipt"></i><span>Quote approved</span><i class="bi bi-check2 signup-flow-check"></i></li>
+          <li><i class="bi bi-code-slash"></i><span>In development</span><i class="bi bi-check2 signup-flow-check"></i></li>
+          <li><i class="bi bi-box-seam"></i><span>Delivered</span><i class="bi bi-check2 signup-flow-check"></i></li>
+        </ol>
+        <div class="signup-flow-bar"><span></span></div>
+      </div>
     </div>
     <p class="small mb-0" style="color:#64748b;">For students, government organizations and businesses.</p>
   </aside>
@@ -29,7 +42,11 @@
         <span>Register to continue where you left off. Already have an account? <a href="{% url 'accounts:login' %}?next={{ next|urlencode }}">Sign in</a> instead and you’ll pick up from the same step.</span>
       </div>
     {% endif %}
-    <form method="post" class="needs-validation" novalidate>
+    <div class="signup-progress" data-signup-progress aria-hidden="true">
+      <div class="signup-steps"><span data-step="profile">Profile</span><span data-step="security">Password</span><span data-step="agree">Agreements</span></div>
+      <div class="signup-track"><span></span></div>
+    </div>
+    <form method="post" class="needs-validation" novalidate data-signup-form>
       {% csrf_token %}
       <input type="hidden" name="next" value="{{ next }}">
       {% if form.non_field_errors %}<div class="alert alert-danger" role="alert">{{ form.non_field_errors|join:" " }}</div>{% endif %}
@@ -42,20 +59,12 @@
       {% include "partials/_field.html" with field=form.school icon="mortarboard" show_optional=1 %}
       {% include "partials/_field.html" with field=form.password1 %}
       {% include "partials/_field.html" with field=form.password2 %}
-      <fieldset class="border rounded-3 p-3 mb-3">
-        <legend class="float-none w-auto h6 px-1 mb-2">Review and agree</legend>
-        <p class="small text-body-secondary">Read both documents before creating your account. Each title opens the full text here.</p>
-        <ul class="small text-body-secondary ps-3">
-          <li>Work follows an accepted quote and confirmed payment. Scope changes and continuing maintenance require an agreement.</li>
-          <li>The developer retains copyright unless expressly assigned in writing. Your paid project receives the agreed use licence.</li>
-          <li>The agreement includes cancellation, liability and client-data responsibilities. Public reviews and private-project publication need separate permission.</li>
-        </ul>
+      <fieldset class="signup-consent border rounded-3 p-3 mb-3">
+        <legend class="float-none w-auto h6 px-1 mb-2">Agreements</legend>
         {{ form.privacy_version }}{{ form.license_version }}
         {% include "partials/_field.html" with field=form.accept_privacy %}
         {% include "partials/_field.html" with field=form.accept_license %}
-        <p class="small text-body-secondary mb-0">Both agreements are required. This does not subscribe you to marketing
-          or personalized ads, authorize public portfolio disclosure, or waive rights protected by law.
-          School/organization is optional at registration; educational information is processed for your requested services as explained in the Policy.</p>
+        <p class="small text-body-secondary mb-0">Select a title to read it. Agreeing doesn't sign you up for marketing or waive your legal rights.</p>
       </fieldset>
       <p class="small text-body-secondary"><i class="bi bi-envelope-check me-1" aria-hidden="true"></i>Verify your email before signing in. We will send you a secure activation link.</p>
       <button type="submit" class="btn btn-primary w-100" data-loading-text="Creating account…">Create account</button>
@@ -66,3 +75,4 @@
 {% include "partials/_legal_modal.html" with document=privacy_document modal_id="legal-privacy" %}
 {% include "partials/_legal_modal.html" with document=license_document modal_id="legal-license" %}
 {% endblock %}
+{% block extra_js %}<script src="{% static 'js/signup.js' %}" defer></script>{% endblock %}
