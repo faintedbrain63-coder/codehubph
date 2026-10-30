@@ -26,7 +26,10 @@
           <span id="hero-title-text" class="visually-hidden">Custom web apps, mobile apps and software, built around your project.</span>
           <span aria-hidden="true">Your idea.<br><span class="lp-gradient-text" data-rotate='["Web apps.", "Mobile apps.", "Software."]'>Web apps.</span><span class="lp-caret"></span><br>Built for you.</span>
         </h1>
-        <p class="lp-lead" data-reveal style="--d: 2">We create web applications, mobile applications and software for student capstone projects, local government units, military organizations and businesses. Tell us what you need to build.</p>
+        <p class="lp-lead">
+          <span class="visually-hidden">We create web applications, mobile applications and software for student capstone projects, local government units, military organizations and businesses. Tell us what you need to build.</span>
+          <span aria-hidden="true" data-type>We create web applications, mobile applications and software for student capstone projects, local government units, military organizations and businesses. Tell us what you need to build.</span><span class="lp-caret lp-lead-caret" aria-hidden="true" hidden></span>
+        </p>
         <div class="d-flex flex-wrap gap-3 mb-4" data-reveal style="--d: 3">
           <a href="{% url 'capstone:request_new' %}" class="btn btn-lg lp-btn-glow"><i class="bi bi-send me-2" aria-hidden="true"></i>Start a project</a>
           <a href="{% url 'capstone:list' %}" class="btn btn-lg lp-btn-ghost"><i class="bi bi-code-slash me-2" aria-hidden="true"></i>Explore services</a>

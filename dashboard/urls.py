@@ -28,6 +28,8 @@ urlpatterns = [
     path("capstone/projects/<int:pk>/delete/", views.capstone_project_delete, name="capstone_project_delete"),
     path("capstone/requests/", views.capstone_request_list, name="capstone_request_list"),
     path("capstone/requests/<str:reference>/", views.capstone_request_detail, name="capstone_request_detail"),
+    path("capstone/requests/<str:reference>/concept-file/", views.capstone_request_concept_file,
+         name="capstone_request_concept_file"),
     path("capstone/requests/<str:reference>/quote/", views.capstone_request_quote, name="capstone_request_quote"),
     path("capstone/requests/<str:reference>/status/", views.capstone_request_status, name="capstone_request_status"),
     path(

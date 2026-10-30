@@ -8,7 +8,9 @@ from django.utils import timezone
 from django.utils.text import slugify
 
 from core.storage import get_private_storage
-from core.validators import DOCUMENT_VALIDATORS, IMAGE_VALIDATORS, PRODUCT_FILE_VALIDATORS, UniqueUploadPath
+from core.validators import (
+    CONCEPT_FILE_VALIDATORS, DOCUMENT_VALIDATORS, IMAGE_VALIDATORS, PRODUCT_FILE_VALIDATORS, UniqueUploadPath,
+)
 from orders.models import generate_reference
 
 
@@ -146,6 +148,14 @@ class CapstoneRequest(models.Model):
         "project requirements",
         help_text="Describe your users, workflow, required features, preferred platform and expected deliverables.",
     )
+    concept_file = models.FileField(
+        "concept or algorithm file",
+        upload_to=UniqueUploadPath("capstone/concepts"),
+        storage=get_private_storage,
+        validators=CONCEPT_FILE_VALIDATORS,
+        blank=True,
+        help_text="Optional. Attach your concept paper, algorithm or flowchart as a PDF, Word or PowerPoint file.",
+    )
     preferred_deadline = models.DateField(null=True, blank=True)
     agreed_price = models.DecimalField(
         max_digits=10, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(Decimal("1.00"))]
@@ -254,6 +264,19 @@ class CapstoneRequest(models.Model):
     @property
     def documentation_file(self):
         return self.delivered_documentation or (self.project.documentation if self.project_id else None)
+
+    @property
+    def concept_file_extension(self):
+        return self.concept_file.name.rsplit(".", 1)[-1].lower() if self.concept_file else ""
+
+    @property
+    def concept_file_is_pdf(self):
+        return self.concept_file_extension == "pdf"
+
+    @property
+    def concept_file_label(self):
+        labels = {"doc": "Word document", "docx": "Word document", "ppt": "PowerPoint", "pptx": "PowerPoint", "pdf": "PDF document"}
+        return labels.get(self.concept_file_extension, "Document")
 
     @property
     def step_index(self):

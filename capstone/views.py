@@ -47,7 +47,9 @@ def request_create(request, slug=None):
     for key, values in (("client_type", CapstoneRequest.ClientType.values), ("project_type", CapstoneProject.Field.values)):
         if request.GET.get(key) in values:
             initial[key] = request.GET[key]
-    form = CapstoneRequestForm(request.POST if request.method == "POST" else None, initial=initial, project=project)
+    form = CapstoneRequestForm(
+        request.POST if request.method == "POST" else None, request.FILES or None, initial=initial, project=project,
+    )
     if request.method == "POST" and form.is_valid():
         req = form.save(commit=False)
         req.customer = request.user

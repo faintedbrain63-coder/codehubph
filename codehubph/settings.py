@@ -182,6 +182,9 @@ ALLOWED_DOCUMENT_EXTENSIONS = config(
     "ALLOWED_DOCUMENT_EXTENSIONS", default="pdf,docx,doc,zip,pptx", cast=Csv()
 )
 ALLOWED_IMAGE_EXTENSIONS = ["jpg", "jpeg", "png", "webp", "gif"]
+# Concept / algorithm file a customer may attach to a project request.
+MAX_CONCEPT_FILE_MB = config("MAX_CONCEPT_FILE_MB", default=20, cast=int)
+ALLOWED_CONCEPT_FILE_EXTENSIONS = ["pdf", "doc", "docx", "ppt", "pptx"]
 FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
 # Large private files (products, capstone source/docs) are sent in chunks so no single request exceeds

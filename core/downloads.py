@@ -25,6 +25,14 @@ def serve_private_file(field_file, download_name_base):
     return response
 
 
+def serve_private_document(field_file, download_name_base):
+    """Open a private PDF in the browser for staff; other document types download."""
+    response = serve_private_file(field_file, download_name_base)
+    if response["Content-Type"] == "application/pdf":
+        response["Content-Disposition"] = response["Content-Disposition"].replace("attachment", "inline", 1)
+    return response
+
+
 def serve_private_image_inline(field_file):
     """Inline display of a private image (e.g. payment proof) for staff."""
     if not field_file:

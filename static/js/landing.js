@@ -1,5 +1,5 @@
 /* Landing page behaviour: reveal on scroll, count-up stats, headline rotation,
-   a subtle 3D panel, review rail and a calm particle field. Vanilla JS. */
+   the hero paragraph type-on, a subtle 3D panel, review rail and a calm particle field. Vanilla JS. */
 (function () {
   "use strict";
 
@@ -86,6 +86,32 @@
       scheduleScroll();
     }, { rootMargin: "80px 0px" });
     motionSections.forEach(function (section) { sectionObserver.observe(section); });
+  }
+
+  // ----- Hero paragraph type-on ---------------------------------------------
+  const typed = document.querySelector("[data-type]");
+  if (typed) {
+    const full = typed.textContent;
+    const caret = typed.parentElement.querySelector(".lp-lead-caret");
+    if (!reduceMotion) {
+      typed.textContent = "";
+      typed.classList.add("is-typing");
+      if (caret) caret.hidden = false;
+      let index = 0;
+      const typeNext = function () {
+        index += 1;
+        typed.textContent = full.slice(0, index);
+        if (index >= full.length) {
+          typed.classList.add("is-done");
+          if (caret) caret.hidden = true;
+          return;
+        }
+        const character = full.charAt(index - 1);
+        const delay = character === "." ? 420 : character === "," ? 180 : 16;
+        window.setTimeout(typeNext, delay);
+      };
+      window.setTimeout(typeNext, 500);
+    }
   }
 
   // ----- Headline word rotation ---------------------------------------------

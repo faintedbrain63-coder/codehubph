@@ -18,6 +18,22 @@
       </dl>
       <h3 class="h6">Project requirements</h3>
       <div class="small bg-body-tertiary rounded-3 p-3">{{ req.customization_notes|linebreaksbr }}</div>
+      <h3 class="h6 mt-3">Concept or algorithm file</h3>
+      {% if req.concept_file %}
+        {% url 'dashboard:capstone_request_concept_file' req.reference as concept_url %}
+        <div class="d-flex flex-wrap align-items-center gap-2 small">
+          {% if req.concept_file_is_pdf %}
+            <i class="bi bi-file-earmark-pdf text-danger fs-5" aria-hidden="true"></i><span>PDF document</span>
+            <a href="{{ concept_url }}" target="_blank" rel="noopener" class="btn btn-sm btn-primary"><i class="bi bi-eye me-1" aria-hidden="true"></i>View PDF</a>
+            <a href="{{ concept_url }}" download class="btn btn-sm btn-soft"><i class="bi bi-download me-1" aria-hidden="true"></i>Download</a>
+          {% else %}
+            <i class="bi bi-file-earmark-{% if req.concept_file_extension == 'ppt' or req.concept_file_extension == 'pptx' %}ppt{% else %}word{% endif %} fs-5" aria-hidden="true"></i><span>{{ req.concept_file_label }}</span>
+            <a href="{{ concept_url }}" class="btn btn-sm btn-primary"><i class="bi bi-download me-1" aria-hidden="true"></i>Download to open</a>
+          {% endif %}
+        </div>
+      {% else %}
+        <p class="small text-body-secondary mb-0">The customer did not attach a file.</p>
+      {% endif %}
     </section>
 
     <section class="card p-4" id="messages" aria-labelledby="msg-title">

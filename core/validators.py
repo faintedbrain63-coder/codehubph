@@ -60,9 +60,38 @@ validate_image_ext = AllowedExtensionValidator("ALLOWED_IMAGE_EXTENSIONS")
 validate_product_file_size = MaxFileSizeValidator("MAX_PRODUCT_FILE_MB")
 validate_image_size = MaxFileSizeValidator("MAX_IMAGE_MB")
 
+validate_concept_file_ext = AllowedExtensionValidator("ALLOWED_CONCEPT_FILE_EXTENSIONS")
+validate_concept_file_size = MaxFileSizeValidator("MAX_CONCEPT_FILE_MB")
+
+# Leading bytes of each allowed concept-file format: PDF, Office Open XML (zip) and legacy Office (OLE2).
+CONCEPT_FILE_SIGNATURES = {
+    "pdf": (b"%PDF-",),
+    "docx": (b"PK\x03\x04",),
+    "pptx": (b"PK\x03\x04",),
+    "doc": (b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1",),
+    "ppt": (b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1",),
+}
+
+
+def validate_concept_file_content(value):
+    """Reject files whose contents do not match their PDF, Word or PowerPoint extension."""
+    signatures = CONCEPT_FILE_SIGNATURES.get(_extension(value.name))
+    if signatures is None:
+        return  # The extension validator reports unsupported types.
+    position = value.tell() if hasattr(value, "tell") else 0
+    value.seek(0)
+    head = value.read(8)
+    value.seek(position)
+    if not head.startswith(signatures):
+        raise ValidationError(
+            "This file does not look like a valid PDF, Word or PowerPoint document.", code="invalid_content",
+        )
+
+
 IMAGE_VALIDATORS = [validate_image_ext, validate_image_size]
 PRODUCT_FILE_VALIDATORS = [validate_product_file_ext, validate_product_file_size]
 DOCUMENT_VALIDATORS = [validate_document_ext, validate_product_file_size]
+CONCEPT_FILE_VALIDATORS = [validate_concept_file_ext, validate_concept_file_size, validate_concept_file_content]
 
 
 @deconstructible

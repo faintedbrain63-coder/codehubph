@@ -1,10 +1,12 @@
 from django import forms
+from django.conf import settings
 from django.utils import timezone
 
 from capstone.models import CapstoneMessage, CapstoneProject, CapstoneRequest
 
 # New project briefs no longer offer these platforms. Existing service listings can still use them.
 RETIRED_PROJECT_TYPES = {CapstoneProject.Field.IOT, CapstoneProject.Field.GAME}
+ACCEPTED_CONCEPT_FILE_TYPES = ".pdf,.doc,.docx,.ppt,.pptx"
 
 
 class CapstoneRequestForm(forms.ModelForm):
@@ -18,6 +20,10 @@ class CapstoneRequestForm(forms.ModelForm):
         retired = set(RETIRED_PROJECT_TYPES)
         if project is not None:
             retired.discard(project.field)
+        self.fields["concept_file"].help_text = (
+            "Optional. Attach your concept paper, algorithm or flowchart as a PDF, Word or PowerPoint file "
+            f"(up to {settings.MAX_CONCEPT_FILE_MB} MB)."
+        )
         self.fields["project_type"].choices = [
             choice for choice in self.fields["project_type"].choices if choice[0] not in retired
         ]
@@ -35,7 +41,7 @@ class CapstoneRequestForm(forms.ModelForm):
     class Meta:
         model = CapstoneRequest
         fields = ("client_type", "request_title", "project_type", "school_name", "program", "group_members",
-                  "customization_notes", "preferred_deadline")
+                  "customization_notes", "concept_file", "preferred_deadline")
         widgets = {
             "group_members": forms.Textarea(attrs={"rows": 3, "placeholder": "Juan Dela Cruz\nMaria Santos"}),
             "customization_notes": forms.Textarea(
@@ -45,6 +51,7 @@ class CapstoneRequestForm(forms.ModelForm):
                     "and any school, department or business requirements.",
                 }
             ),
+            "concept_file": forms.ClearableFileInput(attrs={"accept": ACCEPTED_CONCEPT_FILE_TYPES}),
             "preferred_deadline": forms.DateInput(attrs={"type": "date"}),
         }
 

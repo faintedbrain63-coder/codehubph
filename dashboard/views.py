@@ -21,7 +21,7 @@ from django.views.decorators.debug import sensitive_post_parameters
 from accounts.settings import account_settings_forms
 from capstone.models import CapstoneProject, CapstoneRequest
 from catalog.models import Product
-from core.downloads import serve_private_file, serve_private_image_inline
+from core.downloads import serve_private_document, serve_private_file, serve_private_image_inline
 from core.models import ContactMessage, PortfolioProject, SiteSettings, Testimonial
 from core.notifications import notify_capstone_status, notify_download_access_reset
 from core.sales import product_sales_only
@@ -372,6 +372,12 @@ def capstone_request_detail(request, reference):
 
 
 @staff_required
+def capstone_request_concept_file(request, reference):
+    req = get_object_or_404(CapstoneRequest, reference=reference)
+    return serve_private_document(req.concept_file, f"{req.reference}-concept")
+
+
+@staff_required
 @require_POST
 def capstone_request_quote(request, reference):
     with transaction.atomic():
@@ -667,21 +673,40 @@ def customer_activate(request, pk):
     return redirect(_safe_next(request, "dashboard:customer_list"))
 
 
+def _delete_files(files):
+    for storage, name in files:
+        storage.delete(name)
+
+
 @staff_required
 @require_POST
 def customer_delete(request, pk):
+    """Delete the account with its project requests, their conversations and contact-form messages.
+
+    Orders and payments are financial records, so an account that has any is deactivated instead.
+    """
     customer = get_object_or_404(User, pk=pk, is_staff=False)
     label = customer.display_name
     try:
-        customer.delete()
-        messages.success(request, f"{label} was deleted.")
+        with transaction.atomic():
+            requests = CapstoneRequest.objects.filter(customer=customer)
+            delivered = [
+                (field.storage, field.name)
+                for req in requests
+                for field in (req.concept_file, req.delivered_source, req.delivered_documentation) if field
+            ]
+            requests.delete()  # Cascades to every message in each request's conversation.
+            ContactMessage.objects.filter(email__iexact=customer.email).delete()
+            customer.delete()
+            transaction.on_commit(lambda: _delete_files(delivered))
+        messages.success(request, f"{label} was deleted with their project requests and messages.")
     except ProtectedError:
         if customer.is_active:
             customer.is_active = False
             customer.save(update_fields=["is_active"])
         messages.warning(
             request,
-            f"{label} has orders, payments or project requests, so the account was deactivated instead of deleted.",
+            f"{label} has orders or payments, so the account was deactivated instead of deleted.",
         )
     return redirect("dashboard:customer_list")
 

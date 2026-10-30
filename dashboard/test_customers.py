@@ -1,10 +1,14 @@
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory
 from django.urls import reverse
 
 from accounts.backends import EmailBackend
-from core.testing import PASSWORD, BaseTestCase
+from capstone.models import CapstoneMessage, CapstoneRequest
+from core.models import ContactMessage
+from core.testing import PASSWORD, BaseTestCase, zip_upload
 from orders.models import Order
+from payments.models import Payment
 
 User = get_user_model()
 
@@ -108,3 +112,43 @@ class CustomerAdminTests(BaseTestCase):
         self.assertRedirects(kept, reverse("dashboard:customer_list"))
         self.customer.refresh_from_db()
         self.assertFalse(self.customer.is_active)
+
+    def request_for(self, customer, **extra):
+        return CapstoneRequest.objects.create(
+            customer=customer, project=self.make_capstone_project(), school_name="School", program="BSIT",
+            customization_notes="Details", **extra,
+        )
+
+    def test_delete_removes_the_customers_requests_conversations_messages_and_delivered_files(self):
+        req = self.request_for(self.customer, delivered_source=zip_upload("delivery.zip"),
+                               concept_file=SimpleUploadedFile("concept.pdf", b"%PDF-1.4 concept"))
+        storage, delivered, concept = req.delivered_source.storage, req.delivered_source.name, req.concept_file.name
+        CapstoneMessage.objects.create(request=req, sender=self.customer, body="Question")
+        CapstoneMessage.objects.create(request=req, sender=self.staff, body="Answer")
+        ContactMessage.objects.create(name="Mina", email=self.customer.email.upper(), subject="Hi", message="Hello")
+        other = self.make_user("other")
+        other_request = self.request_for(other)
+        ContactMessage.objects.create(name="Other", email=other.email, subject="Hi", message="Hello")
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.client.post(reverse("dashboard:customer_delete", args=[self.customer.pk]))
+        self.assertRedirects(response, reverse("dashboard:customer_list"))
+        self.assertFalse(User.objects.filter(pk=self.customer.pk).exists())
+        self.assertFalse(CapstoneRequest.objects.filter(pk=req.pk).exists())
+        self.assertFalse(CapstoneMessage.objects.filter(request_id=req.pk).exists())
+        self.assertFalse(ContactMessage.objects.filter(email__iexact=self.customer.email).exists())
+        self.assertFalse(storage.exists(delivered))
+        self.assertFalse(storage.exists(concept))
+        self.assertTrue(CapstoneRequest.objects.filter(pk=other_request.pk).exists())
+        self.assertTrue(ContactMessage.objects.filter(email=other.email).exists())
+
+    def test_delete_keeps_everything_and_deactivates_when_a_request_has_payments(self):
+        req = self.request_for(self.customer)
+        CapstoneMessage.objects.create(request=req, sender=self.customer, body="Question")
+        ContactMessage.objects.create(name="Mina", email=self.customer.email, subject="Hi", message="Hello")
+        Payment.objects.create(capstone_request=req, customer=self.customer, amount="500.00", method="gcash", provider="manual")
+        response = self.client.post(reverse("dashboard:customer_delete", args=[self.customer.pk]))
+        self.assertRedirects(response, reverse("dashboard:customer_list"))
+        self.customer.refresh_from_db()
+        self.assertFalse(self.customer.is_active)
+        self.assertTrue(CapstoneMessage.objects.filter(request=req).exists())
+        self.assertTrue(ContactMessage.objects.filter(email=self.customer.email).exists())

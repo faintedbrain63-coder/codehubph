@@ -30,7 +30,7 @@
             </form>
             {% endif %}
             <a href="{% url 'dashboard:customer_edit' c.pk %}" class="btn btn-sm btn-soft">Edit</a>
-            <form method="post" action="{% url 'dashboard:customer_delete' c.pk %}" class="d-inline" data-confirm="Delete {{ c.display_name }}? Accounts with orders, payments or project requests will be deactivated instead.">
+            <form method="post" action="{% url 'dashboard:customer_delete' c.pk %}" class="d-inline" data-confirm="Delete {{ c.display_name }} with their project requests and messages? Accounts with orders or payments will be deactivated instead.">
               {% csrf_token %}<button type="submit" class="btn btn-sm btn-link text-danger" aria-label="Delete {{ c.display_name }}"><i class="bi bi-trash" aria-hidden="true"></i></button>
             </form>
           </td>

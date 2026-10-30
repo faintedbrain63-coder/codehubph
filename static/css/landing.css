@@ -221,11 +221,23 @@ html:has(.landing) { scroll-padding-top: calc(var(--nav-h) + 0.5rem); }
 
 .lp-lead {
   max-width: 35rem;
+  min-height: 7.6em;
   margin-bottom: 1.9rem;
   color: var(--lp-copy);
   font-size: clamp(1rem, 1.5vw, 1.13rem);
   line-height: 1.75;
 }
+@media (prefers-reduced-motion: no-preference) {
+  html.lp-js .lp-lead [data-type]:not(.is-typing) { color: transparent; }
+}
+.lp-lead-caret {
+  height: 0.95em;
+  margin-left: 0.14em;
+  vertical-align: -0.08em;
+  animation: lp-caret-blink 0.9s steps(1) infinite;
+}
+.lp-lead-caret[hidden] { display: none; }
+@keyframes lp-caret-blink { 50% { opacity: 0; } }
 .lp-checks {
   display: flex;
   flex-wrap: wrap;

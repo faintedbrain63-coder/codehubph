@@ -20,7 +20,7 @@
   <div class="row g-4">
     <div class="col-lg-7">
       <div class="card p-4">
-        <form method="post" class="needs-validation" novalidate>
+        <form method="post" class="needs-validation" enctype="multipart/form-data" novalidate>
           {% csrf_token %}
           {% include "partials/_form.html" %}
           <button type="submit" class="btn btn-primary" data-loading-text="Sending request…"><i class="bi bi-send me-2" aria-hidden="true"></i>Send request</button>
