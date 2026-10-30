@@ -59,6 +59,20 @@ class PortfolioTests(BaseTestCase):
         csrf_client.force_login(self.staff)
         self.assertEqual(csrf_client.post(reverse("dashboard:portfolio_create"), self.payload()).status_code, 403)
 
+    def test_screenshots_open_in_a_lightbox(self):
+        project = self.project(slug="battlespace1")
+        PortfolioScreenshot.objects.create(project=project, image=png_upload("one.png"), caption="Command view", sort_order=0)
+        PortfolioScreenshot.objects.create(project=project, image=png_upload("two.png"), caption="Map view", sort_order=1)
+        self.client.logout()
+        response = self.client.get(project.get_absolute_url())
+        self.assertContains(response, 'id="portfolio-lightbox"')
+        self.assertContains(response, 'data-lightbox-open="0"')
+        self.assertContains(response, 'data-lightbox-open="1"')
+        self.assertContains(response, "Command view")
+        self.assertContains(response, "Map view")
+        self.assertContains(response, "js/portfolio-lightbox.js")
+        self.assertNotContains(response, "target=\"_blank\" rel=\"noopener\"><img")
+
     def test_web_project_create_read_update_and_publication(self):
         response = self.client.post(reverse("dashboard:portfolio_create"), self.payload())
         self.assertRedirects(response, reverse("dashboard:portfolio_list"))

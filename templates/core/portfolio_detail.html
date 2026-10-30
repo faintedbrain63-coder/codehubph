@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load core_tags %}
+{% load static core_tags %}
 {% block title %}{{ project.title }} · Our work · {% endblock %}
 {% block body_class %}portfolio-page{% endblock %}
 {% block extra_head %}{% if not project.is_published %}<meta name="robots" content="noindex,nofollow">{% endif %}{% endblock %}
@@ -10,7 +10,8 @@
   <h1>{{ project.title }}</h1><p class="portfolio-intro mb-0">{{ project.summary }}</p>
 </div></div></header>
 <div class="container py-4 py-lg-5"><div class="portfolio-shell">
-  {% with screenshot=project.thumbnail %}{% if screenshot %}<a class="portfolio-hero-image" href="{{ screenshot.get_absolute_url }}" target="_blank" rel="noopener" aria-label="Open screenshot of {{ project.title }}"><img src="{{ screenshot.get_absolute_url }}" alt="{{ screenshot.caption|default:project.title }}" width="1280" height="800"></a>{% endif %}{% endwith %}
+  {% with screenshots=project.screenshots.all %}
+  {% for screenshot in screenshots %}{% if forloop.first %}<button type="button" class="portfolio-hero-image" data-lightbox-open="0" aria-haspopup="dialog" aria-controls="portfolio-lightbox"><img src="{{ screenshot.get_absolute_url }}" alt="{{ screenshot.caption|default:project.title }}" width="1280" height="800"><span class="portfolio-view-cue"><i class="bi bi-arrows-fullscreen" aria-hidden="true"></i> View screenshots</span></button>{% endif %}{% endfor %}
   <div class="portfolio-story"><div class="portfolio-story-main">
     {% if project.description %}<section class="portfolio-story-panel"><h2>Project overview</h2>{{ project.description|linebreaks }}</section>{% endif %}
     {% if project.challenge %}<section class="portfolio-story-panel"><h2>The challenge</h2>{{ project.challenge|linebreaks }}</section>{% endif %}
@@ -22,7 +23,40 @@
     {% if project.project_type == 'web' and project.project_url %}<a class="btn btn-primary" href="{{ project.project_url }}" target="_blank" rel="noopener noreferrer">Open web application <i class="bi bi-box-arrow-up-right ms-1" aria-hidden="true"></i></a>{% endif %}
     {% if can_review %}<a href="{% url 'accounts:project_testimonial' project.pk %}" class="btn btn-soft">Review your project</a>{% else %}<a href="{% url 'capstone:request_new' %}" class="btn btn-soft">Discuss a project</a>{% endif %}
   </aside></div>
-  {% if project.screenshots.count > 1 %}<section class="mt-5" aria-labelledby="screenshots-title"><h2 class="h4 mb-4" id="screenshots-title">More project screens</h2><div class="portfolio-gallery">{% for screenshot in project.screenshots.all|slice:'1:' %}<figure><a href="{{ screenshot.get_absolute_url }}" target="_blank" rel="noopener"><img src="{{ screenshot.get_absolute_url }}" alt="{{ screenshot.caption|default:project.title }}" loading="lazy"></a>{% if screenshot.caption %}<figcaption>{{ screenshot.caption }}</figcaption>{% endif %}</figure>{% endfor %}</div></section>{% endif %}
+  {% if screenshots|length > 1 %}<section class="mt-5" aria-labelledby="screenshots-title"><h2 class="h4 mb-4" id="screenshots-title">Project screens</h2><div class="portfolio-gallery">{% for screenshot in screenshots %}{% if not forloop.first %}<figure><button type="button" data-lightbox-open="{{ forloop.counter0 }}" aria-haspopup="dialog" aria-controls="portfolio-lightbox" aria-label="View screenshot {{ forloop.counter }}{% if screenshot.caption %}: {{ screenshot.caption }}{% endif %}"><img src="{{ screenshot.get_absolute_url }}" alt="{{ screenshot.caption|default:project.title }}" loading="lazy"></button>{% if screenshot.caption %}<figcaption>{{ screenshot.caption }}</figcaption>{% endif %}</figure>{% endif %}{% endfor %}</div></section>{% endif %}
   <section class="mt-5" aria-labelledby="reviews-title"><h2 class="h4 mb-4" id="reviews-title">Customer feedback</h2><div class="row g-4">{% for review in reviews %}<div class="col-md-6"><figure class="card p-4 mb-0 h-100">{% include "partials/_stars.html" with rating=review.rating %}<blockquote class="mt-3"><p>{{ review.message }}</p></blockquote><figcaption><strong>{{ review.name }}</strong>{% if review.role %}<span class="small text-body-secondary"> · {{ review.role }}</span>{% endif %}</figcaption></figure></div>{% empty %}<div class="col"><p class="text-body-secondary">No published feedback for this project yet.</p></div>{% endfor %}</div></section>
 </div></div>
+{% if screenshots %}
+<div class="modal fade portfolio-lightbox" id="portfolio-lightbox" tabindex="-1" aria-labelledby="portfolio-lightbox-title" aria-hidden="true">
+  <div class="modal-dialog modal-fullscreen">
+    <div class="modal-content">
+      <div class="portfolio-lightbox-bar">
+        <div>
+          <p class="portfolio-lightbox-kicker">Screenshots</p>
+          <h2 class="portfolio-lightbox-title" id="portfolio-lightbox-title">{{ project.title }}</h2>
+        </div>
+        <p class="portfolio-lightbox-count" data-lightbox-count aria-live="polite"></p>
+        <button type="button" class="portfolio-lightbox-close" data-bs-dismiss="modal" aria-label="Close screenshots"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+      </div>
+      <div class="portfolio-lightbox-stage">
+        <button type="button" class="portfolio-lightbox-nav is-prev" data-lightbox-prev aria-label="Previous screenshot"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+        <figure class="portfolio-lightbox-frame" data-lightbox-frame>
+          <img alt="" data-lightbox-image>
+          <figcaption data-lightbox-caption hidden></figcaption>
+        </figure>
+        <button type="button" class="portfolio-lightbox-nav is-next" data-lightbox-next aria-label="Next screenshot"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+      </div>
+      <div class="portfolio-lightbox-rail" data-lightbox-rail role="group" aria-label="Choose a screenshot">
+        {% for screenshot in screenshots %}
+        <button type="button" class="portfolio-lightbox-thumb" data-lightbox-slide data-src="{{ screenshot.get_absolute_url }}" data-alt="{{ screenshot.caption|default:project.title }}" data-caption="{{ screenshot.caption }}" aria-label="Screenshot {{ forloop.counter }}{% if screenshot.caption %}: {{ screenshot.caption }}{% endif %}">
+          <img src="{{ screenshot.get_absolute_url }}" alt="" loading="lazy">
+        </button>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endwith %}
 {% endblock %}
+{% block extra_js %}{% if project.screenshots.all %}<script src="{% static 'js/portfolio-lightbox.js' %}" defer></script>{% endif %}{% endblock %}
