@@ -27,7 +27,7 @@ DEBUG=True
 SECRET_KEY=<generate a long random key>
 ALLOWED_HOSTS=localhost,127.0.0.1
 
-DB_NAME=codehub_db
+DB_NAME=codehubph_db
 DB_USER=postgres
 DB_PASSWORD=root
 DB_HOST=localhost
@@ -37,8 +37,8 @@ PAYPAL_ME_URL=https://paypal.me/faintedbrain63
 ```
 
 5. Also create a `.env.example` with the same keys but placeholder values (no real secrets), and a `.gitignore` that excludes `.env`, `venv/`, `__pycache__/`, `media/`, and `*.pyc`.
-6. Configure Django's `DATABASES` to use `django.db.backends.postgresql` with `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT` from `.env`. The PostgreSQL database is **`codehub_db`**, the username is **`postgres`**, and the password is **`root`**.
-7. Before running migrations, make sure the database exists. If it does not, create it (e.g. `createdb -U postgres codehub_db` or `CREATE DATABASE codehub_db;` via `psql`), then run `python manage.py migrate`. If PostgreSQL is not reachable, tell me clearly what to fix instead of switching databases.
+6. Configure Django's `DATABASES` to use `django.db.backends.postgresql` with `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT` from `.env`. The PostgreSQL database is **`codehubph_db`**, the username is **`postgres`**, and the password is **`root`**.
+7. Before running migrations, make sure the database exists. If it does not, create it (e.g. `createdb -U postgres codehubph_db` or `CREATE DATABASE codehubph_db;` via `psql`), then run `python manage.py migrate`. If PostgreSQL is not reachable, tell me clearly what to fix instead of switching databases.
 8. Note: the `root` password and `.env` values are for **local development only**. The README must tell me to use a strong, unique password and a new `SECRET_KEY` in production.
 
 ## 3. Tech Stack (strict)

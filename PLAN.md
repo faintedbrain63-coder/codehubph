@@ -11,7 +11,7 @@ project setup -> accounts -> catalog -> landing page -> orders -> payments -> ca
 |---|---|---|
 | Python | `python` is not on PATH; `py -V:Astral/CPython3.12.14` is available | Create the venv with Python 3.12.14 (prompt requires 3.12+) |
 | PostgreSQL | Service `postgresql-x64-14` running; `psql` at `C:\Program Files\PostgreSQL\14\bin` | Use it directly; credentials `postgres` / `root` verified |
-| Database | `codehub_db` exists and is empty (re-created by owner) | Run migrations into it |
+| Database | `codehubph_db` exists | Run migrations into it |
 | Workspace folder | `e:\Projects_2026\codehubph` (cannot be renamed to `codehub_ph`) | Use the prompt's alternative: create a `codehub_ph` folder inside the workspace with `manage.py` at its root |
 
 ## 1. Folder layout

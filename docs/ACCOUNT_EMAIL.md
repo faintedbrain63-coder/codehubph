@@ -18,7 +18,7 @@ EMAIL_USE_TLS=True
 EMAIL_USE_SSL=False
 EMAIL_TIMEOUT=15
 DEFAULT_FROM_EMAIL=CodehubPh <your-full-address@yahoo.com>
-SITE_URL=https://www.codehubph.com
+SITE_URL=https://codehubph.tech
 PASSWORD_RESET_TIMEOUT=3600
 EMAIL_VERIFICATION_TIMEOUT=86400
 ```

@@ -24,7 +24,7 @@ from core.testing import BaseTestCase, PASSWORD
 User = get_user_model()
 
 
-@override_settings(SITE_URL="https://www.codehubph.com", EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
+@override_settings(SITE_URL="https://codehubph.tech", EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
 class AccountEmailSecurityTests(BaseTestCase):
     def pending(self, **overrides):
         return self.make_user("pending", is_active=False, email_verification_required=True, **overrides)
@@ -60,7 +60,7 @@ class AccountEmailSecurityTests(BaseTestCase):
         self.assertEqual(AuthEmailJob.objects.get().status, "sent")
         message = mail.outbox[0]
         self.assertEqual(message.to, [user.email])
-        self.assertIn("https://www.codehubph.com/account/verify-email/", message.body)
+        self.assertIn("https://codehubph.tech/account/verify-email/", message.body)
         self.assertIn("1440 minutes", message.body)
         self.assertEqual(message.alternatives[0].mimetype, "text/html")
 
@@ -156,7 +156,7 @@ class AccountEmailSecurityTests(BaseTestCase):
         self.assertEqual(len(mail.outbox), 0)
         deliver_auth_emails()
         self.assertIn("60 minutes", mail.outbox[0].body)
-        self.assertIn("https://www.codehubph.com/account/password-reset/", mail.outbox[0].body)
+        self.assertIn("https://codehubph.tech/account/password-reset/", mail.outbox[0].body)
 
     def test_reset_changes_password_invalidates_sessions_and_rejects_replay(self):
         user = self.make_user()

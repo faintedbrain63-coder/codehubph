@@ -104,14 +104,14 @@ The app only runs on PostgreSQL. Create the database once:
 
 ```powershell
 # using the PostgreSQL bin folder, e.g. C:\Program Files\PostgreSQL\14\bin
-createdb -U postgres codehub_db
-# or: psql -U postgres -c "CREATE DATABASE codehub_db;"
+createdb -U postgres codehubph_db
+# or: psql -U postgres -c "CREATE DATABASE codehubph_db;"
 ```
 
 Connection settings are read from `.env`:
 
 ```
-DB_NAME=codehub_db
+DB_NAME=codehubph_db
 DB_USER=postgres
 DB_PASSWORD=root
 DB_HOST=localhost
@@ -330,7 +330,7 @@ The PayPal.me link can also be changed at runtime in **/manage/settings/**, whic
    PAYPAL_SECRET=...
    PAYPAL_WEBHOOK_ID=...
    ```
-3. Add a webhook in the PayPal dashboard pointing to `https://<your-domain>/payments/webhooks/paypal/` with events
+3. Add a webhook in the PayPal dashboard pointing to `https://codehubph.tech/payments/webhooks/paypal/` with events
    `PAYMENT.CAPTURE.COMPLETED`, `PAYMENT.CAPTURE.DENIED`, `PAYMENT.CAPTURE.DECLINED` and `PAYMENT.CAPTURE.REFUNDED`,
    then copy its ID into `PAYPAL_WEBHOOK_ID`.
 
@@ -413,7 +413,7 @@ APIs. In automated mode, a `PAYMENT.CAPTURE.REFUNDED` webhook also marks the pay
 python manage.py test
 ```
 
-Django creates a temporary `test_codehub_db` on the same PostgreSQL server, so the `.env` user needs the `CREATEDB`
+Django creates a temporary `test_codehubph_db` on the same PostgreSQL server, so the `.env` user needs the `CREATEDB`
 privilege (the `postgres` superuser has it). Test uploads go to a temporary folder.
 
 The Django test suite covers:
@@ -504,7 +504,7 @@ with the production environment loaded.
 - [ ] A new, long, random `SECRET_KEY`:
       `python -c "from django.core.management.utils import get_random_secret_key as k; print(k())"`.
 - [ ] A dedicated PostgreSQL user with a **strong, unique password**. Never `postgres`/`root`.
-- [ ] `ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS=https://your-domain`, plus `SITE_URL=https://your-domain`.
+- [ ] `ALLOWED_HOSTS=codehubph.tech`, `CSRF_TRUSTED_ORIGINS=https://codehubph.tech`, and `SITE_URL=https://codehubph.tech`.
 - [ ] Serve over HTTPS. With `DEBUG=False` the app enables SSL redirect, secure cookies and HSTS; set
       `X-Forwarded-Proto` at the proxy.
 - [ ] `python manage.py migrate` and `python manage.py collectstatic` (WhiteNoise serves `/static/`).
@@ -543,7 +543,7 @@ real_ip_header CF-Connecting-IP;
 
 server {
     listen 127.0.0.1:80;
-    server_name store.example.com;
+    server_name codehubph.tech;
 
     # Chunks are UPLOAD_CHUNK_MB (8 MB); product forms with 12 screenshots stay well below this.
     # Cloudflare's own 100 MB limit applies regardless.
@@ -572,7 +572,7 @@ server {
 tunnel: <your-tunnel-id>
 credentials-file: /etc/cloudflared/<your-tunnel-id>.json
 ingress:
-  - hostname: store.example.com
+  - hostname: codehubph.tech
     service: http://127.0.0.1:80
   - service: http_status:404
 ```
@@ -580,8 +580,8 @@ ingress:
 Gunicorn: `gunicorn codehub_ph.wsgi:application --bind 127.0.0.1:8000 --workers 3 --timeout 120`. An 8 MB
 chunk finishes well within the timeout even on slow connections. If uploads report "The server rejected the chunk
 size" (HTTP 413), raise `client_max_body_size` or lower `UPLOAD_CHUNK_MB`. Set
-`ALLOWED_HOSTS=store.example.com`, `CSRF_TRUSTED_ORIGINS=https://store.example.com` and
-`SITE_URL=https://store.example.com`, and `BEHIND_PROXY=True` so login lockouts and the contact-form limit see each
+`ALLOWED_HOSTS=codehubph.tech`, `CSRF_TRUSTED_ORIGINS=https://codehubph.tech` and
+`SITE_URL=https://codehubph.tech`, and `BEHIND_PROXY=True` so login lockouts and the contact-form limit see each
 visitor's real IP instead of `127.0.0.1` (only safe because Gunicorn listens on `127.0.0.1`). Keep `SECURE_SSL_REDIRECT=True`; Cloudflare supplies HTTPS. Keep
 `private_media/` on the same disk as `private_media/chunked/` so finished uploads are moved, not copied.
 

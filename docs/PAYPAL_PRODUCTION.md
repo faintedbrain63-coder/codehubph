@@ -13,9 +13,9 @@ PAYPAL_CLIENT_ID=<live-app-client-id>
 PAYPAL_SECRET=<live-app-secret>
 PAYPAL_WEBHOOK_ID=<live-app-webhook-id>
 DEBUG=False
-SITE_URL=https://your-public-domain.example
-ALLOWED_HOSTS=your-public-domain.example
-CSRF_TRUSTED_ORIGINS=https://your-public-domain.example
+SITE_URL=https://codehubph.tech
+ALLOWED_HOSTS=codehubph.tech
+CSRF_TRUSTED_ORIGINS=https://codehubph.tech
 SECURE_SSL_REDIRECT=True
 ```
 
@@ -28,7 +28,7 @@ Preserve the existing secret key and database credentials when updating a deploy
 In the PayPal developer dashboard, open the **Live** app corresponding to the credentials and register:
 
 ```text
-https://your-public-domain.example/payments/webhooks/paypal/
+https://codehubph.tech/payments/webhooks/paypal/
 ```
 
 Subscribe to `PAYMENT.CAPTURE.COMPLETED`, `PAYMENT.CAPTURE.DENIED`,

@@ -93,7 +93,7 @@ WSGI_APPLICATION = "codehub_ph.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": config("DB_NAME", default="codehub_db"),
+        "NAME": config("DB_NAME", default="codehubph_db"),
         "USER": config("DB_USER", default="postgres"),
         "PASSWORD": config("DB_PASSWORD", default=""),
         "HOST": config("DB_HOST", default="localhost"),
