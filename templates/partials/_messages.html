@@ -1,0 +1,7 @@
+{% if messages %}
+<div class="container mt-3" aria-live="polite" aria-atomic="true">
+  {% for message in messages %}
+    <div class="alert alert-{% if message.level >= 40 %}danger{% elif message.level >= 30 %}warning{% elif message.level >= 25 %}success{% else %}info{% endif %}" role="{% if message.level >= 40 %}alert{% else %}status{% endif %}" data-site-message data-level="{{ message.level }}">{{ message }}</div>
+  {% endfor %}
+</div>
+{% endif %}

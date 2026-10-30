@@ -1,0 +1,21 @@
+{% extends "dashboard/base_manage.html" %}
+{% block manage_title %}My portfolio · {% endblock %}
+{% block heading %}My portfolio{% endblock %}
+{% block subheading %}<p class="text-body-secondary mb-0">Manage the introduction and optional developer profile shown with your work on the landing page.</p>{% endblock %}
+{% block actions %}<a class="btn btn-soft" href="{% url 'dashboard:portfolio_list' %}">Manage projects</a><a class="btn btn-soft" href="{% url 'core:home' %}#projects" target="_blank" rel="noopener">View saved portfolio</a>{% endblock %}
+{% block manage_content %}
+<form method="post" class="needs-validation" novalidate data-dirty-form>
+  {% csrf_token %}{% include "dashboard/_form_summary.html" %}
+  <div class="row g-4">
+    <div class="col-xl-8 d-grid gap-4 align-content-start">
+      <section class="card p-4"><h2 class="h5 mb-2">Portfolio introduction</h2><p class="text-body-secondary small">Set the heading and introduction visitors see above your projects.</p>{% include "partials/_field.html" with field=form.eyebrow %}{% include "partials/_field.html" with field=form.heading %}{% include "partials/_field.html" with field=form.introduction %}</section>
+      <section class="card p-4"><h2 class="h5 mb-2">Developer profile <span class="small text-body-secondary">Optional</span></h2><p class="text-body-secondary small">Introduce yourself or your studio. Leave these fields blank to show only your project work.</p><div class="row"><div class="col-md-6">{% include "partials/_field.html" with field=form.display_name %}</div><div class="col-md-6">{% include "partials/_field.html" with field=form.professional_title %}</div></div>{% include "partials/_field.html" with field=form.about %}{% include "partials/_field.html" with field=form.skills %}{% include "partials/_field.html" with field=form.location %}{% include "partials/_field.html" with field=form.github_url %}{% include "partials/_field.html" with field=form.linkedin_url %}</section>
+    </div>
+    <div class="col-xl-4 d-grid gap-4 align-content-start">
+      <section class="card p-4"><h2 class="h6 mb-3">Landing page visibility</h2>{% include "partials/_field.html" with field=form.is_visible %}<p class="text-body-secondary small mb-0">Your introduction and profile appear with your published projects. Turning this off hides the landing-page section; individual project publication is managed in the project editor.</p></section>
+      <section class="card p-4"><h2 class="h6 mb-3">Build your portfolio</h2><ol class="small text-body-secondary ps-3 d-grid gap-3 mb-0"><li>Save your introduction and optional profile.</li><li>Add a project, its web link or screenshots, and any case study details.</li><li>Publish the project. Mark a project as featured to highlight it at the top.</li></ol><a class="btn btn-primary mt-4" href="{% url 'dashboard:portfolio_create' %}">Add a portfolio project</a></section>
+    </div>
+  </div>
+  <div class="workspace-save-bar"><span class="save-hint">These changes update your public portfolio presentation.</span><a class="btn btn-soft" href="{% url 'dashboard:portfolio_list' %}">Cancel</a><button class="btn btn-primary" type="submit">Save portfolio</button></div>
+</form>
+{% endblock %}

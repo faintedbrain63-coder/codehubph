@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% load static core_tags %}
+{% block title %}Checkout · {% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        {% if kind == "order" %}<li class="breadcrumb-item"><a href="{% url 'orders:list' %}">Purchase history</a></li>{% else %}<li class="breadcrumb-item"><a href="{{ payable.get_absolute_url }}">Project request</a></li>{% endif %}
+        <li class="breadcrumb-item active" aria-current="page">Checkout</li>
+      </ol>
+    </nav>
+    <span class="page-kicker">Secure checkout</span>
+    <h1 class="h2 mb-1">Choose how you’d like to pay</h1>
+    <p class="text-body-secondary mb-0">Your reference is <span class="reference-chip">{{ payable.reference }}</span></p>
+    <ol class="checkout-steps mt-4 mb-0">
+      <li><span>1</span>{% if kind == "order" %}Cart{% else %}Accepted quote{% endif %}</li>
+      <li class="is-current" aria-current="step"><span>2</span>Payment</li>
+      <li><span>3</span>Access</li>
+    </ol>
+  </div>
+</div>
+
+<div class="container py-4">
+  {% if last_rejected %}
+    <div class="alert alert-danger d-flex gap-2 align-items-start" role="alert">
+      <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+      <div><strong>Your previous payment could not be verified.</strong>
+      {% if last_rejected.rejection_reason %}Reason: {{ last_rejected.rejection_reason }}{% endif %}
+      Please try again below.</div>
+    </div>
+  {% endif %}
+
+  {% if not has_payment_methods %}
+    <div class="alert alert-warning" role="status">Payment methods are currently unavailable. <a href="{% url 'core:home' %}#contact">Contact us</a> for help with {{ payable.reference }}.</div>
+  {% endif %}
+  <noscript><p class="alert alert-info">Choose a payment method using these links:
+    {% for panel in panels %}{% if panel.configured %}<a class="me-3" href="?method={{ panel.provider.method }}">{{ panel.provider.label }}</a>{% endif %}{% endfor %}
+    Automated PayPal and card payments require JavaScript.</p></noscript>
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <fieldset class="mb-4">
+        <legend class="h5 mb-1">Payment method</legend>
+        <p class="small text-body-secondary mb-3">Select one option. The form will update below.</p>
+        <div class="row g-3">
+          {% for panel in panels %}
+            <div class="col-md-4">
+              <input type="radio" class="btn-check" name="payment_method" id="method-{{ panel.provider.method }}"
+                     value="{{ panel.provider.method }}" autocomplete="off" {% if panel.provider.method == selected %}checked{% endif %} {% if not panel.configured %}disabled{% endif %}>
+              <label class="method-option d-block h-100 {% if not panel.configured %}is-disabled{% endif %}" for="method-{{ panel.provider.method }}">
+                <span class="d-flex align-items-center gap-2 fw-semibold mb-1">
+                  <i class="bi bi-{{ panel.provider.icon }} fs-5 text-primary" aria-hidden="true"></i>{{ panel.provider.label }}
+                </span>
+                <span class="small text-body-secondary d-block">{{ panel.provider.description }}</span>
+                {% if not panel.configured %}<span class="tag mt-2">Not available yet</span>{% endif %}
+              </label>
+            </div>
+          {% endfor %}
+        </div>
+      </fieldset>
+
+      {% for panel in panels %}
+        <section class="card p-4" data-panel="{{ panel.provider.method }}" {% if panel.provider.method != selected %}hidden{% endif %} aria-label="{{ panel.provider.label }} payment">
+          {% if panel.configured %}
+            {% include panel.provider.panel_template with provider=panel.provider form=panel.form %}
+          {% else %}
+            {% include "payments/panels/unavailable.html" with provider=panel.provider %}
+          {% endif %}
+        </section>
+      {% endfor %}
+    </div>
+
+    <div class="col-lg-4">
+      <aside class="card p-4 order-summary" aria-labelledby="summary-title">
+        <h2 id="summary-title" class="h5">{% if kind == "order" %}Order summary{% else %}Quote summary{% endif %}</h2>
+        {% if kind == "order" %}
+          <ul class="list-unstyled small d-grid gap-2 my-3">
+            {% for item in payable.items.all %}
+              <li class="d-flex justify-content-between gap-2"><span>{{ item.product_name }}</span><span class="fw-semibold">{{ item.unit_price|money }}</span></li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="small my-3">{{ payable.payable_label }}<br><span class="text-body-secondary">Quote for request {{ payable.reference }}</span></p>
+        {% endif %}
+        <hr>
+        <div class="d-flex justify-content-between fs-5 fw-bold"><span>Total</span><span>{{ payable.amount_due|money }}</span></div>
+        <div class="small text-body-secondary mt-1">Amount in {{ payable.currency }}</div>
+        <hr>
+        <p class="small text-body-secondary mb-0"><i class="bi bi-shield-lock me-1" aria-hidden="true"></i>{{ site.payment_instructions }}</p>
+        <p class="trust-note mt-3 mb-0"><i class="bi bi-check2-circle" aria-hidden="true"></i>{% if kind == "order" %}Files unlock once payment is confirmed.{% else %}Payment starts your project. The team uploads your files according to the agreed scope and timeline.{% endif %}</p>
+      </aside>
+    </div>
+  </div>
+</div>
+
+{{ checkout_config|json_script:"checkout-config" }}
+{% endblock %}
+
+{% block extra_js %}
+{% if paypal_sdk_url %}<script id="paypal-sdk" src="{{ paypal_sdk_url }}" data-namespace="paypal" async></script>{% endif %}
+<script src="{% static 'js/checkout.js' %}"></script>
+{% endblock %}

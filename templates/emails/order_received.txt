@@ -1,0 +1,15 @@
+{% autoescape off %}Hi {{ order.user.first_name|default:order.user.email }},
+
+Thanks for your order {{ order.number }}.
+
+{% for item in order.items.all %}- {{ item.product_name }} (v{{ item.product_version }}): {{ item.unit_price }} {{ order.currency }}
+{% endfor %}
+Total: {{ order.total }} {{ order.currency }}
+
+If you haven't paid yet, you can complete payment here:
+{{ site_url }}{{ order.get_payment_url }}
+
+Use {{ order.number }} as the reference in your payment notes.
+
+— {{ site_name }}
+{% endautoescape %}

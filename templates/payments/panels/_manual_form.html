@@ -1,0 +1,10 @@
+{# Shared "I've paid" form for manual methods (PayPal.me and GCash). #}
+<form method="post" enctype="multipart/form-data" class="needs-validation mt-4" novalidate
+      action="{% url 'payments:submit_manual' kind payable.reference provider.method %}">
+  {% csrf_token %}
+  <h3 class="h6 mb-3">Step {{ step|default:"3" }}: Tell us you’ve paid</h3>
+  {% include "partials/_field.html" with field=form.provider_reference %}
+  {% include "partials/_field.html" with field=form.proof_image %}
+  {% include "partials/_field.html" with field=form.confirm %}
+  <button type="submit" class="btn btn-primary" data-loading-text="Submitting…"><i class="bi bi-send-check me-2" aria-hidden="true"></i>Submit payment details</button>
+</form>

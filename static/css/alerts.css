@@ -1,0 +1,19 @@
+/* Same readable theme in the storefront, staff console, and Django admin. */
+.swal2-container { z-index: 2000; }
+.swal2-popup {
+  --swal2-background: var(--bs-body-bg, var(--body-bg, #fff));
+  --swal2-color: var(--bs-body-color, var(--body-fg, #172033));
+  --swal2-border-radius: 1rem;
+  --swal2-confirm-button-background-color: #4f46e5;
+  --swal2-cancel-button-background-color: #475569;
+  font-family: inherit;
+  overflow-wrap: anywhere;
+}
+.swal2-title { font-size: 1.35rem; }
+.swal2-html-container { white-space: pre-line; }
+.swal2-popup button:focus-visible { outline: 3px solid #818cf8; outline-offset: 3px; }
+.swal2-toast { max-width: calc(100vw - 2rem); }
+[data-site-message][hidden] { display: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  .swal2-popup, .swal2-icon, .swal2-icon * { animation: none !important; transition: none !important; }
+}

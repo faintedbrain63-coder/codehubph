@@ -1,0 +1,9 @@
+{% autoescape off %}Hi {{ order.user.first_name|default:order.user.email }},
+
+Your download access for order {{ order.number }} has been renewed.
+
+Download your files here:
+{{ site_url }}{{ order.get_absolute_url }}
+
+— {{ site_name }}
+{% endautoescape %}

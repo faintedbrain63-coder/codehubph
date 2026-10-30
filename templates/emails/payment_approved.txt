@@ -1,0 +1,12 @@
+{% autoescape off %}Hi {{ payment.customer.first_name|default:payment.customer.email }},
+
+Good news — your payment of {{ payment.amount }} {{ payment.currency }} for {{ payable.reference }} has been confirmed.
+
+{% if payable.payable_kind == "order" %}Your downloads are ready:
+{{ site_url }}{{ payable.get_absolute_url }}{% else %}Your project request is now marked as Paid. Your files are available on your request page:
+{{ site_url }}{{ payable.get_absolute_url }}{% endif %}
+
+Thank you for your purchase!
+
+— {{ site_name }}
+{% endautoescape %}

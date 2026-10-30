@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load static core_tags %}
+{% block title %}Products · {% endblock %}
+{% block body_class %}page-motion{% endblock %}
+{% block meta_description %}Browse ready-made software and mobile apps with full source code. Secure payment and private downloads.{% endblock %}
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'css/page-motion.css' %}">
+  <script>
+    document.documentElement.classList.add("pm-js");
+    setTimeout(function () { if (!window.__pmReady) document.documentElement.classList.remove("pm-js"); }, 2500);
+  </script>
+{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="container" data-reveal>
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Products</li>
+      </ol>
+    </nav>
+    <span class="page-kicker">The catalog</span>
+    <div class="row align-items-end g-3">
+      <div class="col-lg-8">
+        <h1 class="h2 mb-2">Products built to launch</h1>
+        <p class="text-body-secondary mb-0">Tested systems with complete source code. Pay securely and download from your account.</p>
+      </div>
+      <div class="col-lg-4 text-lg-end">
+        <span class="reference-chip">{{ page_obj.paginator.count }} product{{ page_obj.paginator.count|pluralize }}</span>
+      </div>
+    </div>
+    <nav class="nav category-tabs mt-4" aria-label="Product categories">
+      <a class="nav-link {% if not category %}active{% endif %}" href="{% url 'catalog:list' %}{% if tab_params %}?{{ tab_params }}{% endif %}"{% if not category %} aria-current="page"{% endif %}>All</a>
+      {% for value, label in category_tabs %}
+        <a class="nav-link {% if value == category %}active{% endif %}" href="{% url 'catalog:list' %}?category={{ value }}{% if tab_params %}&amp;{{ tab_params }}{% endif %}"{% if value == category %} aria-current="page"{% endif %}>{{ label }}</a>
+      {% endfor %}
+    </nav>
+  </div>
+</div>
+
+<div class="container py-4">
+  {# Category is chosen with the tabs above; the form keeps it while searching or re-sorting. #}
+  <form method="get" class="filter-panel mb-4" role="search" aria-label="Search products" data-reveal style="--d: 1">
+    {% if category %}<input type="hidden" name="category" value="{{ category }}">{% endif %}
+    <div class="row g-2 align-items-end">
+      <div class="col-lg-7">
+        <label for="q" class="form-label">Search</label>
+        <div class="input-group">
+          <span class="input-group-text bg-transparent"><i class="bi bi-search" aria-hidden="true"></i></span>
+          <input type="search" id="q" name="q" value="{{ query }}" class="form-control" placeholder="Name, feature or technology">
+        </div>
+      </div>
+      <div class="col-sm-8 col-lg-3">
+        <label for="sort" class="form-label">Sort by</label>
+        <select id="sort" name="sort" class="form-select" data-auto-submit>
+          {% for value, label in sort_options %}<option value="{{ value }}" {% if value == sort %}selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-sm-4 col-lg-2 d-grid">
+        <button type="submit" class="btn btn-primary" data-no-loading>Search</button>
+      </div>
+    </div>
+  </form>
+
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <p class="result-count mb-0" role="status">{{ page_obj.paginator.count }} result{{ page_obj.paginator.count|pluralize }}{% if query %} for “{{ query }}”{% endif %}{% if category %} in {% for value, label in category_tabs %}{% if value == category %}{{ label }}{% endif %}{% endfor %}{% endif %}</p>
+    {% if query or category %}<a href="{% url 'catalog:list' %}" class="small">Clear all filters</a>{% endif %}
+  </div>
+
+  {% if products %}
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4 card-grid">
+      {% for product in products %}<div class="col" data-reveal style="--d: {{ forloop.counter0|add:1 }}">{% include "partials/_product_card.html" %}</div>{% endfor %}
+    </div>
+    {% include "partials/_pagination.html" %}
+  {% else %}
+    {% url 'catalog:list' as list_url %}
+    {% include "partials/_empty_state.html" with icon="search" title="No products match your search" text="Try another keyword or category — or ask us for a custom build." action_url=list_url action_label="Show all products" %}
+  {% endif %}
+</div>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'js/page-motion.js' %}" defer></script>{% endblock %}

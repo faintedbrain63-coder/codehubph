@@ -1,0 +1,23 @@
+{% load i18n %}
+<button class="sticky toggle-nav-sidebar" id="toggle-nav-sidebar" aria-label="Toggle navigation"></button>
+<nav class="sticky" id="nav-sidebar" aria-label="Admin navigation">
+  <details class="console-shortcuts" open>
+    <summary>Store management</summary>
+    <a href="{% url 'dashboard:home' %}">Overview</a>
+    <a href="{% url 'dashboard:portfolio_list' %}">Portfolio projects</a>
+    {% if PRODUCT_SALES_ENABLED %}<a href="{% url 'dashboard:product_list' %}">All digital products</a>
+    <a href="{% url 'dashboard:product_list' %}?category=software">Software</a>
+    <a href="{% url 'dashboard:product_list' %}?category=mobile_app">Mobile apps</a>
+    <a href="{% url 'dashboard:product_create' %}" class="console-upload">+ Upload product</a>{% endif %}
+    <a href="{% url 'dashboard:capstone_project_list' %}">Project services</a>
+    <a href="{% url 'dashboard:capstone_project_create' %}" class="console-upload">+ Create project service</a>
+    <a href="{% url 'dashboard:capstone_request_list' %}">Project requests</a>
+    <a href="{% url 'dashboard:order_list' %}">Purchase history</a>
+    <a href="{% url 'dashboard:payment_list' %}">Payments</a>
+    <a href="{% url 'dashboard:customer_list' %}">Customers</a>
+    <a href="{% url 'dashboard:message_list' %}">Messages</a>
+    <a href="{% url 'dashboard:settings' %}">Settings</a>
+  </details>
+  <input type="search" id="nav-filter" placeholder="Filter database models…" aria-label="Filter database model navigation">
+  {% include 'admin/app_list.html' with app_list=available_apps show_changelinks=False %}
+</nav>

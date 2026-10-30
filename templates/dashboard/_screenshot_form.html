@@ -1,0 +1,8 @@
+<div class="border rounded-3 p-3">
+  {{ f.id }}
+  {% if f.id.errors %}<div class="alert alert-danger">{{ f.id.errors|join:" " }}</div>{% endif %}
+  {% if f.non_field_errors %}<div class="alert alert-danger">{{ f.non_field_errors|join:" " }}</div>{% endif %}
+  {% if f.instance.pk and f.instance.image %}<img src="{% if f.instance.get_absolute_url %}{{ f.instance.get_absolute_url }}{% else %}{{ f.instance.image.url }}{% endif %}" alt="{{ f.instance.caption|default:'Current screenshot' }}" class="rounded mb-2" width="160" height="100" style="object-fit:cover">{% endif %}
+  <div class="row"><div class="col-md-6">{% include "partials/_field.html" with field=f.image %}</div><div class="col-md-4">{% include "partials/_field.html" with field=f.caption %}</div><div class="col-md-2">{% include "partials/_field.html" with field=f.sort_order %}</div></div>
+  {% if f.instance.pk %}{% include "partials/_field.html" with field=f.DELETE %}{% endif %}
+</div>

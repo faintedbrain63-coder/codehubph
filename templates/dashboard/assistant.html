@@ -1,0 +1,28 @@
+{% extends "dashboard/base_manage.html" %}
+{% load static %}
+{% block manage_title %}AI chatbot · {% endblock %}
+{% block heading %}Your admin assistant{% endblock %}
+{% block subheading %}<p class="text-body-secondary mb-0">App guidance and current revenue, in one conversation.</p>{% endblock %}
+{% block actions %}<a class="btn btn-soft" href="{% url 'dashboard:manual' %}"><i class="bi bi-book" aria-hidden="true"></i>App manual</a><a class="btn btn-soft" href="{% url 'dashboard:ai_settings' %}"><i class="bi bi-gear" aria-hidden="true"></i>AI connection</a>{% endblock %}
+{% block manage_content %}
+<link rel="stylesheet" href="{% static 'css/assistant.css' %}">
+<div class="assistant-layout">
+  <section class="card assistant-conversation" aria-labelledby="conversation-title">
+    <div class="assistant-toolbar"><div><h2 id="conversation-title" class="h6 mb-1">CodehubPh assistant</h2><p class="small text-body-secondary mb-0">{% if ai_ready %}{{ provider_label }} · {{ ai_config.active_connection.model_name }}{% else %}Connect a provider to start chatting{% endif %}</p></div><form method="post" action="{% url 'dashboard:assistant_clear' %}">{% csrf_token %}<button type="submit" class="btn btn-soft btn-sm">New chat</button></form></div>
+    {% if not ai_ready %}<div class="alert alert-info mx-4 mt-4 mb-0">Set up your API key and model in <a href="{% url 'dashboard:ai_settings' %}">AI connection settings</a>. The app manual and revenue cards are available now.</div>{% endif %}
+    <div id="assistant-messages" class="assistant-messages" role="log" aria-label="Chat conversation" aria-live="polite" aria-relevant="additions" tabindex="0">
+      {% for entry in chat_history %}<article class="assistant-message assistant-message-{{ entry.role }}"><p class="assistant-speaker">{% if entry.role == 'user' %}You{% else %}Assistant{% endif %}</p><div class="assistant-message-text">{{ entry.content }}</div></article>{% empty %}<div class="assistant-welcome" id="assistant-welcome"><span class="assistant-symbol" aria-hidden="true"><i class="bi bi-stars"></i></span><h3 class="h4">How can I help?</h3><p>Ask how to manage a project, publish your portfolio, verify a payment or understand your revenue.</p><div class="assistant-suggestions"><button type="button" data-chat-prompt="How much is my revenue today, this week, this month and this year?">Show my revenue</button><button type="button" data-chat-prompt="How do I publish a project in my portfolio?">Publish a portfolio project</button><button type="button" data-chat-prompt="How do I quote a project request and deliver the finished files?">Manage a project request</button></div></div>{% endfor %}
+    </div>
+    <div id="assistant-error" class="assistant-error" role="alert" hidden></div>
+    <form id="assistant-chat-form" class="assistant-composer" data-url="{% url 'dashboard:assistant_ask' %}">
+      {% csrf_token %}<label for="assistant-question" class="form-label small">Message the assistant</label><div class="assistant-input-row"><textarea id="assistant-question" class="form-control" maxlength="3000" rows="3" placeholder="Ask about your app or revenue…" required{% if not ai_ready %} disabled{% endif %}></textarea><button class="btn btn-primary" type="submit"{% if not ai_ready %} disabled{% endif %}><i class="bi bi-send" aria-hidden="true"></i><span>Send</span></button></div><p id="assistant-state" class="small text-body-secondary mt-2 mb-0" role="status">Read-only assistant · Enter to send, Shift+Enter for a new line.</p>
+    </form>
+  </section>
+  <aside class="assistant-insights">
+    <section class="card p-4"><div class="d-flex align-items-center justify-content-between gap-2"><h2 class="h6 mb-0">Verified revenue</h2><i class="bi bi-database-check text-body-secondary" aria-hidden="true"></i></div><p class="small text-body-secondary mt-2">Calculated by the app from confirmed payments.</p><div id="assistant-revenue" class="assistant-revenue">{% for period in revenue.periods %}<div class="assistant-revenue-period"><h3>{{ period.label }}</h3>{% for total in period.totals %}<strong>{{ total.currency }} {{ total.amount }}</strong><span>{{ total.payments }} confirmed payment{{ total.payments|pluralize }}</span>{% endfor %}<small>From {{ period.start|slice:':10' }}</small></div>{% endfor %}</div><p id="revenue-as-of" class="small text-body-secondary mt-3 mb-0">As of {{ revenue.as_of }} · {{ revenue.timezone }}</p><details class="mt-3 small text-body-secondary"><summary>How revenue is counted</summary><p class="mt-2 mb-0">{{ revenue.basis }}</p></details></section>
+    <section class="card p-4"><h2 class="h6">Connected knowledge</h2><p class="small text-body-secondary">The entire app manual is included with every question, together with fresh revenue totals. Your latest six exchanges are kept in this signed-in session.</p><a class="small" href="{% url 'dashboard:manual' %}">Read app manual <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a><p class="small text-body-secondary mt-3 mb-0">Messages and this context go to your selected AI provider. Avoid pasting private customer details.</p></section>
+  </aside>
+</div>
+<noscript><p class="alert alert-info mt-3">Enable JavaScript to chat. You can still read the app manual and view revenue above.</p></noscript>
+{% endblock %}
+{% block manage_js %}<script src="{% static 'js/assistant.js' %}"></script>{% endblock %}

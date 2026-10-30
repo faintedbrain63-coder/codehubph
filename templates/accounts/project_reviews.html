@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}My project reviews · {% endblock %}
+{% block content %}
+<div class="page-header"><div class="container"><span class="page-kicker">My account</span><h1 class="h2 mb-2">My project reviews</h1><p class="text-body-secondary mb-0">Share feedback on projects created for you. Approved reviews for public projects appear on the landing page.</p></div></div>
+<div class="container py-4">{% include "accounts/_account_nav.html" %}
+  <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">{% for project in projects %}<div class="col"><article class="card p-4 h-100"><div class="d-flex flex-wrap gap-2 mb-3"><span class="tag">{{ project.get_project_type_display }}</span><span class="tag">{{ project.get_stage_display }}</span></div><h2 class="h5">{{ project.title }}</h2><p class="text-body-secondary">{{ project.summary }}</p><div class="d-flex flex-wrap gap-2 mt-auto"><a class="btn btn-primary" href="{% url 'accounts:project_testimonial' project.pk %}">Write or edit review</a><a class="btn btn-soft" href="{{ project.get_absolute_url }}">View project</a></div></article></div>{% empty %}<div class="col-12"><div class="card p-4"><h2 class="h5">Your project reviews will be available here</h2><p class="text-body-secondary mb-0">Once the team links a completed or ongoing portfolio project to your account, you can submit feedback for it. Contact the team if your project is missing.</p></div></div>{% endfor %}</div>
+  {% include "partials/_pagination.html" %}<p class="mt-4"><a href="{% url 'accounts:testimonial' %}">Leave a general service review</a></p>
+</div>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load static core_tags %}
+{% block title %}{% block manage_title %}{% endblock %}Admin · {% endblock %}
+{% block body_class %}manage-page{% endblock %}
+{% block navigation %}{% endblock %}
+{% block footer %}{% endblock %}
+{% block adsense %}{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/manage.css' %}">
+<noscript><style>@media(max-width:991.98px){.manage-page .manage-sidebar{position:static;display:block;width:auto;height:auto;visibility:visible;transform:none}.manage-page .manage-main{margin:0}.manage-page [data-sidebar-open],.manage-page [data-sidebar-close]{display:none}}</style></noscript>
+{% endblock %}
+{% block content %}
+<div class="manage-layout">
+  <button class="manage-backdrop" type="button" data-sidebar-close tabindex="-1" aria-label="Close admin menu" hidden></button>
+  <aside class="manage-sidebar" id="manageSidebar" aria-label="Admin navigation" tabindex="-1">
+    <a class="sidebar-brand" href="{% url 'dashboard:home' %}">
+      <span class="workspace-logo" aria-hidden="true"><i class="bi bi-layers-fill"></i></span>
+      <span>{{ SITE_NAME }}<small>Administration</small></span>
+    </a>
+    <button class="workspace-icon sidebar-close" type="button" data-sidebar-close aria-label="Close admin menu"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+    <div class="workspace-label"><span class="workspace-avatar">W</span><span>Project workspace<small>Staff access</small></span><i class="bi bi-shield-check ms-auto" aria-hidden="true"></i></div>
+    <nav class="workspace-navigation" aria-label="Store management">
+      {% for section in workspace_nav %}
+      <div class="workspace-nav-group">
+        <div class="sidebar-heading">{{ section.label }}</div>
+        {% for item in section.items %}
+          <a class="nav-link{% if item.active %} active{% endif %}" href="{{ item.url }}"{% if item.active %} aria-current="page"{% endif %}>
+            <i class="bi bi-{{ item.icon }}" aria-hidden="true"></i><span>{{ item.label }}</span>{% if item.count %}<span class="workspace-count">{{ item.count }}</span>{% endif %}
+          </a>
+          {% if item.url == '/manage/products/' %}
+          <details class="workspace-categories"{% if item.active %} open{% endif %}>
+            <summary>Product types</summary>
+            <a href="{{ item.url }}?category=software">Software</a>
+            <a href="{{ item.url }}?category=mobile_app">Mobile apps</a>
+          </details>
+          {% endif %}
+        {% endfor %}
+      </div>
+      {% endfor %}
+    </nav>
+    <div class="sidebar-foot">
+      <a class="nav-link" href="{% url 'admin:index' %}"><i class="bi bi-database-gear" aria-hidden="true"></i>Advanced administration</a>
+      <a class="nav-link" href="{% url 'core:home' %}" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>Open storefront</a>
+      <div class="workspace-user"><span class="workspace-avatar">{{ user.first_name|default:user.email|slice:":1"|upper }}</span><span class="workspace-user-name">{{ user.display_name }}<small>{{ user.role_label }}</small></span><form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button type="submit" class="workspace-icon" data-no-loading aria-label="Sign out"><i class="bi bi-box-arrow-right" aria-hidden="true"></i></button></form></div>
+    </div>
+  </aside>
+  <div class="manage-main">
+    <header class="manage-topbar">
+      <div class="workspace-location">
+        <button class="workspace-icon workspace-menu" type="button" data-sidebar-open aria-controls="manageSidebar" aria-expanded="false" aria-label="Open admin menu"><i class="bi bi-list" aria-hidden="true"></i><span>Menu</span></button>
+        <nav aria-label="Breadcrumb"><a href="{% url 'dashboard:home' %}">Workspace</a><i class="bi bi-chevron-right" aria-hidden="true"></i><span>{{ workspace_section }}</span></nav>
+      </div>
+      <form action="{% url 'dashboard:search' %}" method="get" role="search" class="workspace-search">
+        <i class="bi bi-search" aria-hidden="true"></i><label for="workspace-search" class="visually-hidden">Search the workspace</label>
+        <input id="workspace-search" type="search" name="q" placeholder="Search projects, requests, customers…" value="{% if request.resolver_match.url_name == 'search' %}{{ q }}{% endif %}" maxlength="100">
+        <button type="submit" data-no-loading aria-label="Search workspace"><i class="bi bi-arrow-return-left" aria-hidden="true"></i></button>
+      </form>
+      <div class="workspace-header-actions">
+        <button type="button" class="workspace-icon" data-theme-toggle aria-label="Switch to dark theme" aria-pressed="false"><i class="bi bi-moon-stars" aria-hidden="true"></i></button>
+        <a class="workspace-icon workspace-inbox" href="{% url 'dashboard:payment_list' %}" aria-label="{{ workspace_counts.payments }} payments awaiting review"><i class="bi bi-bell" aria-hidden="true"></i>{% if workspace_counts.payments %}<span class="notification-dot"></span>{% endif %}</a>
+        <a href="{% url 'dashboard:settings' %}#profile" class="workspace-avatar" aria-label="Edit your profile">{{ user.first_name|default:user.email|slice:":1"|upper }}</a>
+      </div>
+    </header>
+    <div class="manage-content">
+      {% if workspace_parent %}<a class="workspace-back" href="{{ workspace_parent.url }}"><i class="bi bi-arrow-left" aria-hidden="true"></i>Back to {{ workspace_parent.label|lower }}</a>{% endif %}
+      <div class="manage-heading">
+        <div><p class="workspace-eyebrow">{{ workspace_section }}</p><h1>{% block heading %}{% endblock %}</h1>{% block subheading %}{% endblock %}</div>
+        <div class="workspace-page-actions">{% block actions %}{% endblock %}</div>
+      </div>
+      {% block manage_content %}{% endblock %}
+      <footer class="workspace-footer"><span>{{ SITE_NAME }} · Staff workspace</span><a href="{% url 'dashboard:settings' %}#store">Store settings</a></footer>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'js/manage.js' %}"></script><script src="{% static 'js/chunked-upload.js' %}"></script>{% block manage_js %}{% endblock %}{% endblock %}

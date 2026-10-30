@@ -1,0 +1,9 @@
+{% autoescape off %}A {{ payment.get_method_display }} payment is waiting for verification.
+
+Reference: {{ payable.reference }}
+Customer:  {{ payment.customer.email }}
+Amount:    {{ payment.amount }} {{ payment.currency }}
+Transaction / reference no.: {{ payment.provider_reference }}
+
+Review it here: {{ site_url }}/manage/payments/
+{% endautoescape %}

@@ -1,0 +1,36 @@
+{# Approve / reject controls for one payment. Expects `p` (Payment) and `next` (return URL). #}
+{% if p.status == 'awaiting_verification' and p.is_manual %}
+<div class="d-flex flex-wrap gap-1 justify-content-end">
+  {% if p.proof_image %}
+    <a href="{% url 'dashboard:payment_proof' p.pk %}" target="_blank" rel="noopener" class="btn btn-sm btn-soft"><i class="bi bi-image me-1" aria-hidden="true"></i>Proof</a>
+  {% endif %}
+  <form method="post" action="{% url 'dashboard:payment_approve' p.pk %}" data-confirm="Approve this payment of {{ p.amount }} {{ p.currency }}? The customer will get access immediately.">
+    {% csrf_token %}<input type="hidden" name="next" value="{{ next }}">
+    <button type="submit" class="btn btn-sm btn-success"><i class="bi bi-check-lg me-1" aria-hidden="true"></i>Approve</button>
+  </form>
+  <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#reject-{{ p.pk }}"><i class="bi bi-x-lg me-1" aria-hidden="true"></i>Reject</button>
+</div>
+<div class="modal fade" id="reject-{{ p.pk }}" tabindex="-1" aria-labelledby="reject-title-{{ p.pk }}" aria-hidden="true">
+  <div class="modal-dialog">
+    <form class="modal-content" method="post" action="{% url 'dashboard:payment_reject' p.pk %}" data-confirm="Reject this payment and send the stated reason to the customer?" data-confirm-button="Reject payment">
+      {% csrf_token %}<input type="hidden" name="next" value="{{ next }}">
+      <div class="modal-header">
+        <h2 class="modal-title h5" id="reject-title-{{ p.pk }}">Reject payment for {{ p.payable.reference }}</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-start">
+        <label class="form-label" for="reason-{{ p.pk }}">Reason (shown to the customer) <span class="text-danger" aria-hidden="true">*</span></label>
+        <textarea class="form-control" id="reason-{{ p.pk }}" name="reason" rows="3" required maxlength="500" placeholder="e.g. The reference number does not match any transaction."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-link" data-bs-dismiss="modal" data-no-loading>Cancel</button>
+        <button type="submit" class="btn btn-danger">Reject payment</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% elif p.status == 'awaiting_verification' %}
+  <span class="small text-body-secondary">Awaiting confirmation from the payment provider.</span>
+{% elif p.proof_image %}
+  <a href="{% url 'dashboard:payment_proof' p.pk %}" target="_blank" rel="noopener" class="btn btn-sm btn-soft"><i class="bi bi-image me-1" aria-hidden="true"></i>Proof</a>
+{% endif %}

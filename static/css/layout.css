@@ -1,0 +1,109 @@
+/* Site-wide spacious layout and readable typography. Loaded last on every page. */
+/* Outer containers fill the screen up to a 1920px layout; past that (ultrawide) the content is centred so the
+   navbar, columns and card grids don't drift to opposite edges. Section backgrounds still run full-bleed.
+   Text, forms and documents keep their own reading measure inside the container. */
+:root { font-size: 18px; --page-gutter: clamp(16px, 2vw, 40px); --page-max: 1920px; --measure: 72ch; }
+body { font-size: 1rem; }
+.container, .container-sm, .container-md, .container-lg, .container-xl, .container-xxl, .container-fluid {
+  width: 100%; max-width: var(--page-max); padding-inline: var(--page-gutter);
+}
+.auth-shell { width: min(100% - var(--page-gutter) * 2, 72rem); max-width: none; }
+.auth-card { width: min(100%, 34rem); max-width: none; }
+.page-header p { max-width: var(--measure); }
+.prose { max-width: calc(var(--measure) + 8rem); margin-inline: auto; }
+.form-measure { max-width: 40rem; }
+.document-measure { max-width: 64rem; margin-inline: auto; }
+@media (min-width: 1700px) {
+  .card-grid.row-cols-lg-3 > * { width: 25%; }
+}
+.small, small { font-size: .875em; }
+.form-control, .form-select { font-size: 1rem; min-height: 46px; }
+.form-label, .form-check-label { font-size: 1rem; }
+.form-text, .invalid-feedback { font-size: .875rem; line-height: 1.6; }
+.form-control-sm, .form-select-sm { font-size: .9rem; }
+.btn { --bs-btn-font-size: 1rem; }
+.btn-sm { --bs-btn-font-size: .9rem; }
+.breadcrumb, .pagination .page-link, .site-navbar .nav-link, .dropdown-item { font-size: .95rem; }
+.site-navbar .navbar-brand small { font-size: .85rem; letter-spacing: .04em; }
+.tag, .status-badge, .reference-chip, .eyebrow, .page-kicker, .stat-label { font-size: .8rem; }
+.table { font-size: 1rem; }
+.table-responsive { position: relative; max-width: 100%; }
+.table thead th { font-size: .9rem; }
+.prose { font-size: 1rem; }
+.site-footer .footer-tagline, .site-footer a { font-size: .95rem; }
+.site-footer .footer-label, .site-footer .footer-meta { font-size: .8rem; }
+.lp-console-label, .lp-console-bar, .lp-pipe-step, .lp-meter-head span:last-child,
+.lp-file, .lp-file-meta, .lp-float strong, .lp-stat dt, .lp-tech-chip, .lp-cat-count,
+.lp-path-meta, .lp-timeline p, .lp-review figcaption small, .lp-trust p { font-size: .8rem; }
+.lp-cat-copy strong, .lp-cat-copy small, .lp-step-card p, .lp-trust h3 { font-size: .95rem; }
+.lp-paths > *, .lp-path-cats > *, .lp-capstone-grid > *, .lp-steps > *, .lp-trust-panel > * { min-width: 0; }
+.lp-path-cats { grid-template-columns: minmax(0, 1fr); }
+.lp-cat-row { min-width: 0; max-width: 100%; }
+.lp-cat-copy { flex: 1; min-width: 0; }
+
+/* The workspace uses all space alongside its sidebar, even on ultrawide screens. */
+.manage-page { --workspace-sidebar: 288px; font-size: 17px; }
+.manage-page .manage-content { max-width: none; }
+.manage-page .manage-heading p.text-body-secondary { max-width: var(--measure); font-size: 17px; }
+.manage-page .manage-heading h1 { font-size: clamp(28px, 2.3vw, 36px); }
+.manage-page .sidebar-brand { font-size: 16px; }
+.manage-page .sidebar-brand span small { font-size: 14px; }
+.workspace-label { font-size: 16px; }
+.workspace-label small { font-size: 14px; }
+.workspace-avatar { font-size: 15px; width: 38px; height: 38px; flex-basis: 38px; }
+.manage-page .sidebar-heading { font-size: 13px; }
+.manage-page .manage-sidebar .nav-link { font-size: 16px; min-height: 46px; }
+.manage-page .sidebar-foot .nav-link { font-size: 15px; }
+.workspace-count { font-size: 13px; }
+.workspace-categories { font-size: 15px; }
+.workspace-user-name { font-size: 14px; }
+.workspace-user-name small { font-size: 13px; }
+.workspace-location nav, .workspace-menu, .workspace-search input { font-size: 16px; }
+.workspace-icon { min-width: 40px; min-height: 40px; font-size: 20px; }
+.workspace-eyebrow, .workspace-back, .workspace-footer { font-size: 14px; }
+.manage-page .btn { font-size: 16px; padding: 10px 16px; }
+.manage-page .btn-sm { font-size: 14px; padding: 8px 12px; }
+.manage-page .h5 { font-size: 22px; }
+.manage-page .h6 { font-size: 18px; }
+.manage-page .card-header { flex-wrap: wrap; }
+.manage-page .card-header a { font-size: 15px; }
+.manage-page .table { font-size: 16px; }
+.manage-page .table thead th, .manage-page .table .small { font-size: 14px; }
+.manage-page .status-badge { font-size: 13px; }
+.manage-page .form-control, .manage-page .form-select { font-size: 17px; min-height: 46px; }
+.manage-page .form-label { font-size: 16px; }
+.manage-page .form-text, .manage-page .form-control[type="file"], .workspace-upload-status { font-size: 14px; }
+.workspace-filters label, .workspace-results, .workspace-save-bar .save-hint { font-size: 14px; }
+.workspace-filters > div { min-width: 155px; flex-basis: 180px; }
+.workspace-filters .filter-page-size { min-width: 90px; }
+.metric-top, .workspace-callout p, .attention-item > span:nth-child(2) { font-size: 16px; }
+.metric-foot, .attention-item small { font-size: 14px; }
+.metric-value { font-size: clamp(28px, 2.2vw, 36px); }
+.manage-page .empty-state h2 { font-size: 21px; }
+.manage-page .empty-state p { font-size: 16px; max-width: 34rem; }
+.manage-page #chart-days { min-width: 7rem; }
+
+@media (max-width: 575.98px) {
+  /* Leave room for the 2.75rem menu button so it stays on the brand's row. */
+  .site-navbar .navbar-brand { font-size: 1rem; max-width: calc(100% - 3.5rem); min-width: 0; margin-right: 0; white-space: normal; }
+  .site-navbar .navbar-brand small { display: none; }
+  .manage-page .manage-heading { gap: 16px; }
+  .manage-page .manage-topbar { gap: 8px; }
+  .workspace-location { gap: 8px; }
+  .workspace-header-actions { gap: 2px; }
+  .workspace-location nav { font-size: 14px; }
+  .workspace-menu { font-size: 15px; }
+  .workspace-search input { font-size: 16px; }
+  .workspace-filters > div { flex: 1 1 140px; min-width: 0; }
+  .workspace-filters .filter-search, .workspace-filters .filter-actions { flex-basis: 100%; }
+  .workspace-filters .filter-actions { flex-wrap: wrap; }
+  .workspace-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .metric-top { font-size: 14px; }
+  .metric-foot { font-size: 13px; }
+  .workspace-save-bar .btn-primary { order: 1; }
+  .workspace-save-bar a { order: 2; }
+  .workspace-save-bar button[name="save_action"] { order: 3; width: 100%; }
+  .manage-page .manage-sidebar { width: min(320px, calc(100vw - 32px)); }
+  .manage-page .workspace-filters .btn, .manage-page .workspace-page-actions .btn { font-size: 15px; }
+}
+@media print { :root { font-size: 12pt; } .container { padding-inline: 0; } .document-measure, .prose { max-width: none; } }

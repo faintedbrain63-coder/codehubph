@@ -1,0 +1,37 @@
+{% extends "dashboard/base_manage.html" %}
+{% block manage_title %}{% if item %}Edit comment{% else %}Add comment{% endif %} · {% endblock %}
+{% block heading %}{% if item %}Edit comment from {{ item.name }}{% else %}Add customer comment{% endif %}{% endblock %}
+{% block manage_content %}
+<form method="post" class="needs-validation" novalidate data-dirty-form>
+  {% csrf_token %}
+  {% include "dashboard/_form_summary.html" %}
+  <div class="row g-4">
+    <div class="col-xl-8">
+      <section class="card p-4">
+        <div class="row">
+          <div class="col-md-6">{% include "partials/_field.html" with field=form.name %}</div>
+          <div class="col-md-6">{% include "partials/_field.html" with field=form.role %}</div>
+        </div>
+        {% include "partials/_field.html" with field=form.message %}
+        {% include "partials/_field.html" with field=form.portfolio_project %}
+        {% if not item %}
+          <p class="small text-body-secondary mb-0"><i class="bi bi-info-circle me-1" aria-hidden="true"></i>Only add comments real customers sent you (for example by email, Messenger or GCash notes), and ask their permission to publish them.</p>
+        {% elif item.user %}
+          <p class="small text-body-secondary mb-0"><i class="bi bi-patch-check-fill text-success me-1" aria-hidden="true"></i>Written by the customer account {{ item.user.email }}.{% if item.portfolio_project %} The customer's wording and rating are preserved; you can approve, hide or feature the review.{% endif %}</p>
+        {% endif %}
+      </section>
+    </div>
+    <div class="col-xl-4 d-grid gap-4 align-content-start">
+      <section class="card p-4">
+        {% include "partials/_field.html" with field=form.rating %}
+        {% include "partials/_field.html" with field=form.status %}
+        {% include "partials/_field.html" with field=form.is_featured %}
+      </section>
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary" data-loading-text="Saving…">Save comment</button>
+        <a href="{% url 'dashboard:testimonial_list' %}" class="btn btn-link">Cancel</a>
+      </div>
+    </div>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,21 @@
+# Secrets
+.env
+
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Uploads and generated files
+media/
+private_media/
+staticfiles/
+.qa/
+
+# Tooling
+.coverage
+htmlcov/
+.vscode/
+.idea/
+*.log

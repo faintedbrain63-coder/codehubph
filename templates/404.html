@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Page not found · {% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="text-center mb-3"><span class="reference-chip">Error 404</span></div>
+  {% url 'core:home' as home_url %}
+  {% include "partials/_empty_state.html" with icon="signpost-split" title="We couldn’t find that page" text="The link may be outdated, or the item is no longer available." action_url=home_url action_label="Go to the home page" %}
+</div>
+{% endblock %}

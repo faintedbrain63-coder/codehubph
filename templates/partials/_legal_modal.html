@@ -1,0 +1,23 @@
+<div class="modal fade legal-modal" id="{{ modal_id }}" tabindex="-1" aria-labelledby="{{ modal_id }}-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <p class="legal-modal-kicker">Version {{ document.version }} · Effective {{ document.effective_date|date:"F j, Y" }}</p>
+          <h2 class="modal-title h5 mb-0" id="{{ modal_id }}-title">{{ document.title }}</h2>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body prose">
+        <p><strong>Operator:</strong> {{ legal_owner_name }}, operating {{ SITE_NAME }}.
+          {% if legal_contact_address %}<br><strong>Contact address:</strong> {{ legal_contact_address }}.{% endif %}
+        </p>
+        {% include document.template %}
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-soft" href="{{ document.url }}">Open full page</a>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

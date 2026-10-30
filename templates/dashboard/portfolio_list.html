@@ -1,0 +1,26 @@
+{% extends "dashboard/base_manage.html" %}
+{% block manage_title %}Portfolio projects · {% endblock %}
+{% block heading %}Portfolio projects{% endblock %}
+{% block subheading %}<p class="text-body-secondary mb-0">Show past and ongoing work on your landing page. Link each customer's account so they can review their project.</p>{% endblock %}
+{% block actions %}<a class="btn btn-primary" href="{% url 'dashboard:portfolio_create' %}"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>New portfolio project</a><a class="btn btn-soft" href="{% url 'dashboard:portfolio_presentation' %}">Edit introduction &amp; profile</a><a class="btn btn-soft" href="{% url 'core:portfolio_list' %}">View public portfolio</a>{% endblock %}
+{% block manage_content %}
+<form method="get" class="workspace-filters mb-4" role="search">
+  <div><label for="q">Search projects</label><input id="q" name="q" value="{{ q }}" class="form-control" maxlength="100" placeholder="Title, technology or customer email"></div>
+  <div><label for="project_type">Project type</label><select class="form-select" name="project_type" id="project_type"><option value="">All types</option>{% for value, label in project_types %}<option value="{{ value }}"{% if value == project_type %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+  <div><label for="stage">Project stage</label><select class="form-select" name="stage" id="stage"><option value="">All stages</option>{% for value, label in stages %}<option value="{{ value }}"{% if value == stage %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+  <button class="btn btn-primary" type="submit" data-no-loading>Apply</button><a class="btn btn-soft" href="{% url 'dashboard:portfolio_list' %}">Reset</a>
+</form>
+<p class="small text-body-secondary" role="status">{{ page_obj.paginator.count }} project{{ page_obj.paginator.count|pluralize }}</p>
+<div class="card">
+{% if projects %}<div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th>Project</th><th>Type / stage</th><th>Customer</th><th>Visibility</th><th><span class="visually-hidden">Actions</span></th></tr></thead><tbody>
+{% for project in projects %}<tr>
+  <td><a class="fw-semibold" href="{% url 'dashboard:portfolio_edit' project.pk %}">{{ project.title }}</a><div class="small text-body-secondary">{{ project.screenshots.count }} screenshot{{ project.screenshots.count|pluralize }}</div></td>
+  <td class="small">{{ project.get_project_type_display }}<div class="text-body-secondary">{{ project.get_stage_display }}</div></td>
+  <td class="small">{{ project.customer.email|default:"No account linked" }}</td>
+  <td>{% if project.is_published %}<span class="tag text-success">Published</span>{% else %}<span class="tag">Draft</span>{% endif %}{% if project.is_featured %}<span class="tag">Featured</span>{% endif %}</td>
+  <td><div class="d-flex flex-wrap gap-2 justify-content-end"><a class="btn btn-sm btn-soft" href="{{ project.get_absolute_url }}">Preview</a><a class="btn btn-sm btn-primary" href="{% url 'dashboard:portfolio_edit' project.pk %}">Edit</a><form method="post" action="{% url 'dashboard:portfolio_delete' project.pk %}" data-confirm="Delete this portfolio project, its screenshots and project reviews? The linked service request is retained.">{% csrf_token %}<button type="submit" class="btn btn-sm btn-outline-danger">Delete</button></form></div></td>
+</tr>{% endfor %}</tbody></table></div>
+{% else %}<div class="p-4"><h2 class="h5">No portfolio projects found</h2><p class="text-body-secondary mb-0">Add your past and ongoing projects with web links or screenshots.</p></div>{% endif %}
+</div>
+{% include "partials/_pagination.html" %}
+{% endblock %}

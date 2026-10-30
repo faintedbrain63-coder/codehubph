@@ -1,0 +1,29 @@
+{% extends "dashboard/base_manage.html" %}
+{% block manage_title %}Messages · {% endblock %}
+{% block heading %}Contact messages{% endblock %}
+{% block subheading %}<p class="text-body-secondary mb-0">Resolve customer questions and keep track of conversations that still need a response.</p>{% endblock %}
+{% block manage_content %}
+{% include "dashboard/_filters.html" with placeholder="Sender, email, subject or message" %}
+{% if contact_messages %}
+  <div class="d-grid gap-3">
+    {% for m in contact_messages %}
+      <article class="card p-4 {% if m.is_resolved %}opacity-75{% endif %}">
+        <div class="d-flex flex-wrap justify-content-between gap-2">
+          <div>
+            <h2 class="h6 mb-1">{{ m.subject }}</h2>
+            <div class="small text-body-secondary">{{ m.name }} · <a href="mailto:{{ m.email }}?subject=Re: {{ m.subject|urlencode }}">{{ m.email }}</a> · {{ m.created_at|date:"M j, Y, g:i A" }}</div>
+          </div>
+          {% if m.is_resolved %}<span class="status-badge status-success align-self-start"><i class="bi bi-check2" aria-hidden="true"></i>Resolved</span>{% else %}
+            <form method="post" action="{% url 'dashboard:message_resolve' m.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button type="submit" class="btn btn-sm btn-soft">Mark resolved</button></form>
+          {% endif %}
+        </div>
+        <p class="mt-3 mb-0">{{ m.message|linebreaksbr }}</p>
+        <div class="mt-3"><a class="btn btn-sm btn-soft" href="mailto:{{ m.email }}?subject={{ m.subject|urlencode }}">Reply by email<i class="bi bi-arrow-up-right ms-1" aria-hidden="true"></i></a></div>
+      </article>
+    {% endfor %}
+  </div>
+  {% include "partials/_pagination.html" %}
+{% else %}
+  {% include "partials/_empty_state.html" with icon="envelope" title="No messages yet" text="Messages from the contact form will appear here." %}
+{% endif %}
+{% endblock %}

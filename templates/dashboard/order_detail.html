@@ -1,0 +1,77 @@
+{% extends "dashboard/base_manage.html" %}
+{% load core_tags %}
+{% block manage_title %}{{ order.number }} · {% endblock %}
+{% block heading %}Order {{ order.number }} {% status_badge order.status order.get_status_display %}{% endblock %}
+{% block subheading %}<p class="text-body-secondary mb-0">Placed {{ order.created_at|date:"M j, Y, g:i A" }}{% if order.paid_at %} · paid {{ order.paid_at|date:"M j, Y, g:i A" }}{% endif %}</p>{% endblock %}
+{% block manage_content %}
+<div class="row g-4">
+  <div class="col-xl-7 d-grid gap-4 align-content-start">
+    <section class="card" aria-labelledby="items-title">
+      <div class="card-header bg-transparent py-3"><h2 id="items-title" class="h6 mb-0">Items</h2></div>
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead><tr><th scope="col">Product</th><th scope="col">Price</th><th scope="col">Downloads</th><th scope="col">Access until</th></tr></thead>
+          <tbody>
+            {% for item in order.items.all %}
+            <tr>
+              <td>{{ item.product_name }}<div class="small text-body-secondary">v{{ item.product_version }}</div></td>
+              <td>{{ item.unit_price|money }}</td>
+              <td>{{ item.download_count }}{% if item.download_limit %} / {{ item.download_limit }}{% endif %}</td>
+              <td class="small">{{ item.access_expires_at|date:"M j, Y"|default:"—" }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot><tr><th scope="row">Total</th><td colspan="3" class="fw-bold">{{ order.total|money }}</td></tr></tfoot>
+        </table>
+      </div>
+    </section>
+
+    <section class="card p-4" aria-labelledby="payments-title">
+      <h2 id="payments-title" class="h6 mb-3">Payments</h2>
+      {% for p in payments %}
+        <div class="border rounded-3 p-3 mb-2">
+          <div class="d-flex flex-wrap justify-content-between gap-2">
+            <div class="small">
+              <strong>{{ p.get_method_display }}</strong> · {{ p.amount|money }} · {% status_badge p.status p.get_status_display %}
+              <div class="text-body-secondary">{{ p.created_at|date:"M j, Y, g:i A" }} · provider: {{ p.provider }}</div>
+              {% if p.provider_reference %}<div>Reference: <code>{{ p.provider_reference }}</code></div>{% endif %}
+              {% if p.rejection_reason %}<div class="text-danger">Rejected: {{ p.rejection_reason }}</div>{% endif %}
+              {% if p.admin_notes %}<div class="text-body-secondary">Notes: {{ p.admin_notes }}</div>{% endif %}
+              {% if p.verified_by %}<div class="text-body-secondary">Verified by {{ p.verified_by.display_name }} on {{ p.verified_at|date:"M j, g:i A" }}</div>{% endif %}
+            </div>
+            <div>{% include "dashboard/_payment_actions.html" with next=request.path %}</div>
+          </div>
+        </div>
+      {% empty %}
+        <p class="small text-body-secondary mb-0">No payment has been submitted for this order yet.</p>
+      {% endfor %}
+    </section>
+  </div>
+
+  <div class="col-xl-5 d-grid gap-4 align-content-start">
+    <section class="card p-4" aria-labelledby="cust-title">
+      <h2 id="cust-title" class="h6">Customer</h2>
+      <div class="fw-semibold">{{ order.user.display_name }}</div>
+      <div class="small"><a href="mailto:{{ order.user.email }}">{{ order.user.email }}</a></div>
+      {% if order.user.phone_number %}<div class="small">{{ order.user.phone_number }}</div>{% endif %}
+      {% if order.user.school %}<div class="small text-body-secondary">{{ order.user.school }}</div>{% endif %}
+    </section>
+    {% if order.is_paid %}
+    <section class="card p-4" aria-labelledby="actions-title">
+      <h2 id="actions-title" class="h6 mb-3">Actions</h2>
+      <form method="post" action="{% url 'dashboard:order_resend_access' order.number %}" class="mb-3">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-soft w-100"><i class="bi bi-arrow-repeat me-1" aria-hidden="true"></i>Resend download access</button>
+        <div class="form-text">Resets the download counter and expiry, then emails the customer.</div>
+      </form>
+      <form method="post" action="{% url 'dashboard:order_refund' order.number %}" data-confirm="Mark this order as refunded? The customer will lose download access. Send the money back in PayPal/GCash separately.">
+        {% csrf_token %}
+        <label for="refund-notes" class="form-label small">Refund note (internal)</label>
+        <input id="refund-notes" name="notes" class="form-control form-control-sm mb-2" maxlength="200" placeholder="e.g. Refunded via GCash, ref 1234567890123">
+        <button type="submit" class="btn btn-outline-danger w-100"><i class="bi bi-arrow-counterclockwise me-1" aria-hidden="true"></i>Mark as refunded</button>
+      </form>
+    </section>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "dashboard/base_manage.html" %}
+{% load core_tags %}
+{% block manage_title %}Project services · {% endblock %}
+{% block heading %}Project services{% endblock %}
+{% block subheading %}<p class="text-body-secondary mb-0">Introduce custom web app, mobile app and software services for students and organizations. Customers receive an individual quote for each project.</p>{% endblock %}
+{% block actions %}<a href="{% url 'dashboard:capstone_project_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>New service project</a>{% endblock %}
+{% block manage_content %}
+{% include "dashboard/_filters.html" %}
+<p class="small text-body-secondary" role="status">{{ page_obj.paginator.count }} project{{ page_obj.paginator.count|pluralize }} found</p>
+<div class="card">
+  {% if projects %}
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead><tr><th scope="col">Project</th><th scope="col">Field</th><th scope="col">Starting price</th><th scope="col">Docs</th><th scope="col">Requests</th><th scope="col">Status</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr></thead>
+      <tbody>
+        {% for project in projects %}
+        <tr>
+          <td class="fw-semibold"><a href="{% url 'dashboard:capstone_project_detail' project.pk %}">{{ project.title }}</a></td>
+          <td class="small">{{ project.get_field_display }}</td>
+          <td>{{ project.suggested_price|money }}</td>
+          <td>{% if project.documentation %}<i class="bi bi-check-circle-fill text-success" aria-label="Included"></i>{% else %}<span class="text-body-secondary small">None</span>{% endif %}</td>
+          <td>{{ project.request_count }}</td>
+          <td>{% status_badge project.status project.get_status_display %}</td>
+          <td class="text-end text-nowrap">
+            <a href="{% url 'dashboard:capstone_project_detail' project.pk %}" class="btn btn-sm btn-link">View</a>
+            <a href="{% url 'dashboard:capstone_project_edit' project.pk %}" class="btn btn-sm btn-soft">Edit</a>
+            <form method="post" action="{% url 'dashboard:capstone_project_delete' project.pk %}" class="d-inline" data-confirm="Delete “{{ project.title }}”? Projects with requests will be moved to Draft instead.">
+              {% csrf_token %}<button type="submit" class="btn btn-sm btn-link text-danger" aria-label="Delete {{ project.title }}"><i class="bi bi-trash" aria-hidden="true"></i></button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    {% url 'dashboard:capstone_project_create' as create_url %}
+    {% include "partials/_empty_state.html" with icon="mortarboard" title="No capstone projects yet" text="Add a project with its source code to start accepting requests." action_url=create_url action_label="New service project" %}
+  {% endif %}
+</div>
+{% include "partials/_pagination.html" %}
+{% endblock %}

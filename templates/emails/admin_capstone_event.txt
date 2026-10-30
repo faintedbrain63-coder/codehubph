@@ -1,0 +1,11 @@
+{% autoescape off %}Project request {{ req.reference }}: {{ event }}
+
+Project:  {{ req.title }}
+Customer: {{ req.customer.email }}
+Client:   {{ req.get_client_type_display }}
+Platform: {{ req.project_type_label }}
+Organization: {{ req.school_name }}{% if req.program %} — {{ req.program }}{% endif %}
+Status:   {{ req.get_status_display }}
+
+Open it: {{ site_url }}/manage/capstone/requests/{{ req.reference }}/
+{% endautoescape %}

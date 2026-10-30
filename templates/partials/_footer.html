@@ -1,0 +1,64 @@
+{% now "Y" as year %}
+<footer class="site-footer mt-auto" data-bs-theme="dark">
+  <div class="container footer-main">
+    <div class="row g-4 g-lg-5">
+      <div class="col-lg-4">
+        <a class="d-inline-flex align-items-center gap-2 text-decoration-none" href="{% url 'core:home' %}" aria-label="{{ SITE_NAME }} home">
+          <span class="brand-mark" aria-hidden="true"><i class="bi bi-lightning-charge-fill"></i></span>
+          <span class="fw-bold text-white font-display">{{ SITE_NAME }}</span>
+        </a>
+        <p class="footer-tagline mt-3 mb-4">{{ site.tagline }}</p>
+        <div class="footer-badges" aria-label="Payment methods">
+          {% for provider in available_payment_providers %}<span class="footer-badge"><i class="bi bi-{{ provider.icon }}" aria-hidden="true"></i>{{ provider.label }}</span>{% endfor %}
+        </div>
+      </div>
+      <div class="col-6 col-lg-2">
+        <h2>Development</h2>
+        <ul class="list-unstyled small d-grid gap-2">
+          <li><a href="{% url 'capstone:request_new' %}?project_type=web">Web applications</a></li>
+          <li><a href="{% url 'capstone:request_new' %}?project_type=mobile">Mobile applications</a></li>
+          <li><a href="{% url 'capstone:request_new' %}?project_type=desktop">Custom software</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-lg-2">
+        <h2>Services</h2>
+        <ul class="list-unstyled small d-grid gap-2">
+          <li><a href="{% url 'capstone:list' %}">Project services</a></li>
+          <li><a href="{% url 'core:portfolio_list' %}">Our projects</a></li>
+          <li><a href="{% url 'core:home' %}#clients">Who we build for</a></li>
+          <li><a href="{% url 'core:home' %}#how-it-works">How it works</a></li>
+          <li><a href="{% url 'core:home' %}#testimonials">Customer reviews</a></li>
+          <li><a href="{% url 'core:home' %}#faq">FAQ</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-lg-2">
+        <h2>Account</h2>
+        <ul class="list-unstyled small d-grid gap-2">
+          <li><a href="{% url 'accounts:dashboard' %}">My overview</a></li>
+          <li><a href="{% url 'capstone:my_requests' %}">Project requests</a></li>
+          <li><a href="{% url 'accounts:settings' %}">Account settings</a></li>
+          {% if has_order_history %}<li><a href="{% url 'orders:list' %}">Purchase history</a></li>{% endif %}
+        </ul>
+      </div>
+      <div class="col-6 col-lg-2">
+        <h2>Contact</h2>
+        <ul class="list-unstyled small d-grid gap-2">
+          <li><a href="{% url 'core:home' %}#contact">Send a message</a></li>
+          <li><a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a></li>
+          {% if site.contact_phone %}<li><span class="text-secondary">{{ site.contact_phone }}</span></li>{% endif %}
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="footer-bottom">
+      <span>&copy; {{ year }} {{ SITE_NAME }}. All rights reserved.</span>
+      <div class="footer-legal">
+        <a href="{% url 'core:license' %}">License &amp; terms</a>
+        <a href="{% url 'core:privacy' %}">Privacy</a>
+        <a href="{% url 'core:home' %}#contact">Support</a>
+      </div>
+      <span class="footer-secure"><i class="bi bi-shield-lock" aria-hidden="true"></i>Secure checkout &middot; private files</span>
+    </div>
+  </div>
+</footer>

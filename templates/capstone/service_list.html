@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% load static core_tags %}
+{% block title %}Project development services · {% endblock %}
+{% block body_class %}page-motion{% endblock %}
+{% block meta_description %}Custom web applications, mobile apps and software for student capstones, local government units, military organizations and businesses.{% endblock %}
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'css/page-motion.css' %}">
+  <script>
+    document.documentElement.classList.add("pm-js");
+    setTimeout(function () { if (!window.__pmReady) document.documentElement.classList.remove("pm-js"); }, 2500);
+  </script>
+{% endblock %}
+{% block content %}
+<section class="page-header" aria-labelledby="cap-title">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Project services</li>
+      </ol>
+    </nav>
+    <div class="row g-4 g-lg-5 align-items-center" data-reveal>
+      <div class="col-lg-7">
+        <span class="page-kicker">Custom application development</span>
+        <h1 id="cap-title" class="h2 mb-3">Web apps, mobile apps and software built for your project.</h1>
+        <p class="text-body-secondary fs-5 mb-4">
+          We work with students on capstone projects, local government units, military organizations and businesses.
+          Submit your own project brief or use a service below as a starting point. We agree on the scope,
+          price and timeline before development begins.
+        </p>
+        <div class="d-flex flex-wrap gap-2">
+          <a href="{% url 'capstone:request_new' %}" class="btn btn-lg btn-primary">Request a custom project</a>
+          <a href="{% url 'core:home' %}#contact" class="btn btn-lg btn-soft">Ask a question</a>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="hero-card" data-bs-theme="dark" data-reveal style="--d: 2">
+          <h2 class="h6 text-uppercase mb-3" style="letter-spacing: .08em; color:#93a4bd;">How the service works</h2>
+          <ol class="list-unstyled d-grid gap-3 mb-0">
+            <li class="d-flex gap-3"><span class="step-number">1</span><span><strong class="text-white">Request a project</strong><br><span class="small text-body-secondary">Tell us your organization, intended users, platform and required features.</span></span></li>
+            <li class="d-flex gap-3"><span class="step-number">2</span><span><strong class="text-white">Get your quote</strong><br><span class="small text-body-secondary">We review it and send a price with what’s included.</span></span></li>
+            <li class="d-flex gap-3"><span class="step-number">3</span><span><strong class="text-white">Accept and pay</strong><br><span class="small text-body-secondary">{{ payment_methods_text }} — same secure checkout.</span></span></li>
+            <li class="d-flex gap-3"><span class="step-number">4</span><span><strong class="text-white">Receive your system</strong><br><span class="small text-body-secondary">Download from your private request page and message us anytime.</span></span></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section pt-4" id="projects" aria-labelledby="projects-title">
+  <div class="container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mb-4">
+      <div>
+        <span class="eyebrow">Ideas and starting points</span>
+        <h2 id="projects-title" class="section-title mb-0">Project services &amp; examples</h2>
+      </div>
+    </div>
+      <form method="get" class="card p-3 mb-4" role="search" aria-label="Search project services" data-reveal>
+        <div class="row g-3 align-items-end"><div class="col-md"><label for="project-query" class="form-label">Search projects</label><input id="project-query" type="search" name="q" value="{{ q }}" maxlength="100" class="form-control" placeholder="Title, topic or technology"></div>
+        <div class="col-md-4"><label for="field" class="form-label">Project field</label>
+        <select id="field" name="field" class="form-select">
+          <option value="">All fields</option>
+          {% for value, label in fields %}<option value="{{ value }}" {% if value == field %}selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+        </div><div class="col-md-auto d-flex gap-2"><button class="btn btn-primary" type="submit" data-no-loading>Search</button>{% if q or field %}<a class="btn btn-soft" href="{% url 'capstone:list' %}#projects">Reset</a>{% endif %}</div></div>
+        <p class="small text-body-secondary mt-3 mb-0" role="status">{{ page_obj.paginator.count }} project{{ page_obj.paginator.count|pluralize }} found</p>
+      </form>
+    {% if projects %}
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4 card-grid">
+        {% for project in projects %}<div class="col" data-reveal style="--d: {{ forloop.counter0|add:1 }}">{% include "partials/_capstone_card.html" %}</div>{% endfor %}
+      </div>
+      {% include "partials/_pagination.html" %}
+    {% else %}
+      {% if q or field %}
+      {% url 'capstone:list' as capstone_url %}
+      {% include "partials/_empty_state.html" with icon="search" title="No matching projects" text="Try another topic or technology, or choose a different field." action_url=capstone_url action_label="Show all projects" %}
+      {% else %}
+      {% url 'capstone:request_new' as custom_url %}
+      {% include "partials/_empty_state.html" with icon="code-slash" title="Have a project in mind?" text="Describe your idea and requirements. You can request a custom build without choosing a service listing." action_url=custom_url action_label="Request a custom project" %}
+      {% endif %}
+    {% endif %}
+  </div>
+</section>
+
+<section class="section include-section" id="included" aria-labelledby="included-title">
+  <div class="container">
+    <div class="include-head" data-reveal>
+      <span class="eyebrow">What you receive</span>
+      <h2 id="included-title" class="section-title mb-2">What the service includes</h2>
+      <p class="text-body-secondary mb-0">Every accepted request covers the same three deliverables. Nothing is added after you pay.</p>
+    </div>
+    <ol class="include-panel" data-reveal style="--d: 1">
+      <li>
+        <span class="include-index" aria-hidden="true">01</span>
+        <span class="include-icon" aria-hidden="true"><i class="bi bi-sliders"></i></span>
+        <h3>Customisation</h3>
+        <p>Your project scope follows your school, department or business requirements.</p>
+        <ul>
+          <li>Your system name, logo and colours</li>
+          <li>Features and modules your users need</li>
+          <li>Reports and workflows for your organization</li>
+        </ul>
+      </li>
+      <li>
+        <span class="include-index" aria-hidden="true">02</span>
+        <span class="include-icon include-icon-cyan" aria-hidden="true"><i class="bi bi-person-video3"></i></span>
+        <h3>Guidance</h3>
+        <p>Walkthroughs and setup support can be included in your quote.</p>
+        <ul>
+          <li>Installation help on your machine</li>
+          <li>A walkthrough of the code and database</li>
+          <li>Student capstone guidance when applicable</li>
+        </ul>
+      </li>
+      <li>
+        <span class="include-index" aria-hidden="true">03</span>
+        <span class="include-icon" aria-hidden="true"><i class="bi bi-shield-lock"></i></span>
+        <h3>Secure delivery</h3>
+        <p>Receive the agreed project files privately when they are ready.</p>
+        <ul>
+          <li>Full source code in your request page</li>
+          <li>Documentation when the project includes it</li>
+          <li>A private thread with the developers</li>
+        </ul>
+      </li>
+    </ol>
+  </div>
+</section>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'js/page-motion.js' %}" defer></script>{% endblock %}

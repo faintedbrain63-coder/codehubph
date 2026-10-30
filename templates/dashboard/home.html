@@ -1,0 +1,46 @@
+{% extends "dashboard/base_manage.html" %}
+{% load static core_tags %}
+{% block manage_title %}Overview · {% endblock %}
+{% block heading %}Workspace overview{% endblock %}
+{% block subheading %}<p class="text-body-secondary mb-0">Welcome back, {{ user.first_name|default:user.email }}. Here is what needs your attention today.</p>{% endblock %}
+{% block actions %}<a href="{% url 'dashboard:portfolio_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>New portfolio project</a><a href="{% url 'dashboard:capstone_project_create' %}" class="btn btn-soft">New service</a>{% if PRODUCT_SALES_ENABLED %}<a href="{% url 'dashboard:product_create' %}" class="btn btn-soft">New product</a>{% endif %}{% endblock %}
+{% block manage_content %}
+<div class="workspace-metrics">
+  <a class="workspace-metric" href="{% url 'dashboard:payment_list' %}?status=completed"><span class="metric-top">Confirmed payments<i class="bi bi-wallet2" aria-hidden="true"></i></span><strong class="metric-value">{{ stats.period_revenue|money }}</strong><span class="metric-foot">Last {{ days }} days · View payments <i class="bi bi-arrow-right" aria-hidden="true"></i></span></a>
+  <a class="workspace-metric" href="{% url 'dashboard:capstone_request_list' %}"><span class="metric-top">Project requests<i class="bi bi-kanban" aria-hidden="true"></i></span><strong class="metric-value">{{ stats.project_requests }}</strong><span class="metric-foot">{{ stats.open_capstone }} active · All time</span></a>
+  <a class="workspace-metric" href="{% url 'dashboard:capstone_project_list' %}"><span class="metric-top">Published services<i class="bi bi-code-slash" aria-hidden="true"></i></span><strong class="metric-value">{{ stats.published_services }}</strong><span class="metric-foot">Manage services and example projects</span></a>
+  <a class="workspace-metric" href="{% url 'dashboard:customer_list' %}"><span class="metric-top">New customers<i class="bi bi-people" aria-hidden="true"></i></span><strong class="metric-value">{{ stats.new_customers }}</strong><span class="metric-foot">Joined in the last 30 days</span></a>
+</div>
+{% if not stats.published_services %}
+<div class="workspace-callout"><i class="bi bi-code-slash" aria-hidden="true"></i><div><strong>Introduce your project services</strong><p>Describe the systems you develop. Customers can also submit a custom brief without choosing a service.</p><a class="btn btn-sm btn-primary mt-2" href="{% url 'dashboard:capstone_project_create' %}">Create a service</a></div></div>
+{% endif %}
+<div class="row g-4 mb-4">
+  <section class="col-xl-8">
+    <div class="card h-100">
+      <div class="card-header"><div><h2 class="h6 mb-1" id="chart-title">Payment activity</h2><span class="small text-body-secondary">Confirmed payment volume over the last {{ days }} days</span></div>
+      <form method="get" class="d-flex gap-2 align-items-center"><label for="chart-days" class="visually-hidden">Payment activity period</label><select id="chart-days" name="days" class="form-select form-select-sm"><option value="7"{% if days == 7 %} selected{% endif %}>7 days</option><option value="14"{% if days == 14 %} selected{% endif %}>14 days</option><option value="30"{% if days == 30 %} selected{% endif %}>30 days</option></select><button class="btn btn-sm btn-soft" type="submit" data-no-loading>Apply</button></form></div>
+      <div class="p-4"><div class="chart-wrap"><canvas id="revenue-chart" aria-label="Daily confirmed payment amounts; exact values are available in the table below" role="img" style="width:100%;height:100%"></canvas></div>
+      {% if not stats.period_revenue %}<p class="small text-body-secondary mb-0 mt-3">No confirmed payments in this period.</p>{% endif %}
+      <details class="small mt-3"><summary class="text-body-secondary" style="cursor:pointer">View exact daily amounts</summary><div class="table-responsive mt-2"><table class="table table-sm mb-0"><caption class="visually-hidden">Daily payment activity</caption><thead><tr><th scope="col">Day</th><th scope="col">Amount</th></tr></thead><tbody>{% for point in chart %}<tr><td>{{ point.label }}</td><td>{{ point.value|money }}</td></tr>{% endfor %}</tbody></table></div></details>
+      <p class="small text-body-secondary mt-3 mb-0">Excludes fully refunded payments. Partial refunds are not deducted. This is operational activity, not an accounting statement.</p></div>
+    </div>
+  </section>
+  <section class="col-xl-4"><div class="card h-100"><div class="card-header"><h2 class="h6 mb-0">Needs attention</h2><span class="workspace-count">{{ workspace_attention }}</span></div><div class="px-4 pb-4">
+    <a class="attention-item" href="{% url 'dashboard:payment_list' %}"><span class="attention-icon"><i class="bi bi-credit-card" aria-hidden="true"></i></span><span>Payment reviews<small>Verify proof and transaction details</small></span><b>{{ workspace_counts.payments }}</b></a>
+    <a class="attention-item" href="{% url 'dashboard:capstone_request_list' %}?status=submitted"><span class="attention-icon"><i class="bi bi-kanban" aria-hidden="true"></i></span><span>New project requests<small>Review requirements and prepare quotes</small></span><b>{{ workspace_counts.requests }}</b></a>
+    <a class="attention-item" href="{% url 'dashboard:message_list' %}"><span class="attention-icon"><i class="bi bi-inbox" aria-hidden="true"></i></span><span>Open support messages<small>Respond to customer questions</small></span><b>{{ workspace_counts.messages }}</b></a>
+    <a class="attention-item" href="{% url 'dashboard:testimonial_list' %}?status=pending"><span class="attention-icon"><i class="bi bi-chat-square-heart" aria-hidden="true"></i></span><span>Comments to review<small>Moderate before publishing</small></span><b>{{ workspace_counts.reviews }}</b></a>
+  </div></div></section>
+</div>
+<div class="row g-4">
+  {% if stats.orders %}<section class="col-xl-8"><div class="card"><div class="card-header"><h2 class="h6 mb-0">Previous purchase history</h2><a href="{% url 'dashboard:order_list' %}">View history <i class="bi bi-arrow-right" aria-hidden="true"></i></a></div>
+    {% if recent_orders %}<div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr><th scope="col">Order</th><th scope="col">Customer</th><th scope="col">Amount</th><th scope="col">Status</th></tr></thead><tbody>{% for order in recent_orders %}<tr><td><a href="{% url 'dashboard:order_detail' order.number %}" class="fw-semibold">{{ order.number }}</a><div class="small text-body-secondary">{{ order.created_at|date:"M j, g:i A" }}</div></td><td>{{ order.user.email }}</td><td>{{ order.total|money }}</td><td>{% status_badge order.status order.get_status_display %}</td></tr>{% endfor %}</tbody></table></div>
+    {% else %}{% include "partials/_empty_state.html" with icon="receipt" title="Your first order starts here" text="Customer purchases will appear here with their current payment status." %}{% endif %}
+  </div></section>{% endif %}
+  <section class="{% if stats.orders %}col-xl-4{% else %}col-12{% endif %}"><div class="card"><div class="card-header"><h2 class="h6 mb-0">Project pipeline</h2><a href="{% url 'dashboard:capstone_request_list' %}">View all</a></div><div class="p-4"><div class="metric-top"><span>Open project requests</span><strong class="fs-4 text-body">{{ stats.open_capstone }}</strong></div><hr class="my-3">
+    {% for req in new_requests %}<a class="d-block py-2" href="{% url 'dashboard:capstone_request_detail' req.reference %}"><strong class="small text-body">{{ req.title }}</strong><div class="small text-body-secondary">{{ req.reference }} · {{ req.customer.email }}</div></a>{% empty %}<p class="small text-body-secondary mb-0">No new requests awaiting a quote. Open the request list to follow active projects.</p>{% endfor %}
+  </div></div></section>
+</div>
+{{ chart|json_script:"chart-data" }}
+{% endblock %}
+{% block manage_js %}<script src="{% static 'js/dashboard.js' %}"></script>{% endblock %}

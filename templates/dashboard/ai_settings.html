@@ -1,0 +1,37 @@
+{% extends "dashboard/base_manage.html" %}
+{% load static %}
+{% block manage_title %}AI connection · {% endblock %}
+{% block heading %}AI connection{% endblock %}
+{% block subheading %}<p class="text-body-secondary mb-0">Choose the provider and model that power your admin assistant.</p>{% endblock %}
+{% block actions %}<a class="btn btn-soft" href="{% url 'dashboard:settings' %}">Account settings</a><a class="btn btn-primary" href="{% url 'dashboard:assistant' %}"><i class="bi bi-chat-dots" aria-hidden="true"></i>Open chatbot</a>{% endblock %}
+{% block manage_content %}
+<div class="row g-4">
+  <div class="col-xl-8">
+    <form method="post" id="ai-connection-form" data-dirty-form class="card p-4" data-action-url="{% url 'dashboard:ai_connection_action' %}">
+      {% csrf_token %}{% include "dashboard/_form_summary.html" %}
+      <h2 class="h5 mb-2">Provider settings</h2>
+      <p class="text-body-secondary small">The endpoint and frontier model default follow the provider you select. Each provider keeps its own saved key and model.</p>
+      {% include "partials/_field.html" with field=form.provider %}
+      <noscript><p class="small">To change providers without JavaScript, use <a href="?provider=claude">Claude</a>, <a href="?provider=openai">OpenAI</a>, <a href="?provider=kimi">Kimi</a>, <a href="?provider=deepseek">DeepSeek</a>, <a href="?provider=openrouter">OpenRouter</a>, <a href="?provider=glm">GLM</a> or <a href="?provider=minimax">MiniMax</a>, then save.</p></noscript>
+      {% include "partials/_field.html" with field=form.endpoint %}
+      {% include "partials/_field.html" with field=form.model_name %}
+      <div class="d-flex flex-wrap align-items-center gap-2 mb-3"><button type="button" class="btn btn-soft btn-sm" id="ai-use-frontier-default">Use frontier default</button><span class="small text-body-secondary text-break">Default: <code id="ai-frontier-default">{{ frontier_default }}</code> · Verified {{ frontier_verified }}</span></div>
+      <p class="small text-body-secondary" id="ai-catalog-note">Type the exact model ID supported by your API account. Model access depends on your provider subscription.</p>
+      <details id="ai-model-reference" class="small mb-3" hidden><summary>Fetched model IDs for reference</summary><pre id="ai-reference-models" class="mt-2 p-3 rounded border" style="max-height:240px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere"></pre></details>
+      {% include "partials/_field.html" with field=form.api_key %}
+      <p class="small text-body-secondary" id="ai-key-status">{% if connection.encrypted_api_key %}An encrypted API key is saved for this provider.{% else %}No API key saved for this provider.{% endif %}</p>
+      {% include "partials/_field.html" with field=form.is_enabled %}
+      <div class="d-flex flex-wrap gap-2 mt-3"><button class="btn btn-primary" type="submit">Save AI connection</button><button class="btn btn-soft" type="button" data-ai-action="test">Test saved connection</button><button class="btn btn-soft" type="button" data-ai-action="refresh">Refresh saved provider models</button></div>
+      <p class="small text-body-secondary mt-3 mb-0">Test and refresh use saved settings. Save any changes first. A connection test sends a short message and may use API credits.</p>
+      <div id="ai-action-result" class="small mt-3" role="status" aria-live="polite"></div>
+    </form>
+  </div>
+  <div class="col-xl-4 d-grid gap-4 align-content-start">
+    <section class="card p-4"><h2 class="h6 mb-3">Active assistant</h2><div id="ai-active-summary">{% if ai_config.is_enabled and ai_config.active_connection %}<p class="mb-1"><strong>{{ active_label }}</strong></p><p class="small text-body-secondary text-break mb-0">{{ ai_config.active_connection.model_name }}</p>{% else %}<p class="text-body-secondary mb-0">The chatbot is disabled. Save a key and enable a connection to get started.</p>{% endif %}</div></section>
+    <section class="card p-4"><h2 class="h6 mb-3">What the assistant receives</h2><p class="small text-body-secondary">Your messages, the app manual and current revenue totals are sent to your selected provider when you ask a question. Customer records and payment proofs are not included in the app context.</p><p class="small text-body-secondary mb-0">API keys stay on the server and are used only to authenticate with their provider. The assistant cannot change records or approve payments.</p></section>
+    <section class="card p-4"><h2 class="h6 mb-3">Remove a saved key</h2><p class="small text-body-secondary">Remove the key for the selected provider. If it is active, the chatbot will be disabled.</p><button type="button" class="btn btn-outline-danger" data-ai-action="remove">Remove selected provider key</button></section>
+  </div>
+</div>
+{{ provider_registry|json_script:"ai-provider-registry" }}
+{% endblock %}
+{% block manage_js %}<script src="{% static 'js/ai-settings.js' %}"></script>{% endblock %}

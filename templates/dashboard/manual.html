@@ -1,0 +1,10 @@
+{% extends "dashboard/base_manage.html" %}
+{% load static %}
+{% block manage_title %}App manual · {% endblock %}
+{% block heading %}CodehubPh app manual{% endblock %}
+{% block subheading %}<p class="text-body-secondary mb-0">A guide to the public website, customer account and admin workspace. This is the chatbot's app knowledge.</p>{% endblock %}
+{% block actions %}<a class="btn btn-soft" href="?download=1">Download manual</a><a class="btn btn-primary" href="{% url 'dashboard:assistant' %}">Ask the assistant</a>{% endblock %}
+{% block manage_content %}
+<link rel="stylesheet" href="{% static 'css/assistant.css' %}">
+<div class="assistant-manual"><nav class="card p-4 align-self-start" aria-label="Manual contents"><h2 class="h6">Contents</h2><ol class="ps-3 small mb-0">{% for section in sections %}<li class="mb-2"><a href="#{{ section.id }}">{{ section.title }}</a></li>{% endfor %}</ol></nav><div>{% for section in sections %}<section class="card p-4 mb-4 manual-section" id="{{ section.id }}"><h2 class="h4">{{ section.title }}</h2><div class="manual-body">{{ section.body|linebreaks }}</div></section>{% endfor %}<p class="small text-body-secondary">Manual version {{ manual_version }}. Update docs/ADMIN_MANUAL.md when workflows change.</p></div></div>
+{% endblock %}

@@ -1,0 +1,6 @@
+<div class="empty-state">
+  <div class="icon-tile" aria-hidden="true"><i class="bi bi-{{ icon|default:'inbox' }}"></i></div>
+  <h2 class="h5 text-body">{{ title }}</h2>
+  {% if text %}<p class="mb-3">{{ text }}</p>{% endif %}
+  {% if action_url %}<a class="btn btn-primary" href="{{ action_url }}">{{ action_label }}</a>{% endif %}
+</div>

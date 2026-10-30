@@ -1,0 +1,16 @@
+{% if portfolio_presentation.is_visible %}
+  {% if portfolio_projects or portfolio_presentation.has_profile %}
+  <section class="section portfolio-section" id="projects" aria-labelledby="portfolio-title">
+    <div class="container"><div class="portfolio-shell">
+      <div class="portfolio-heading"><div class="portfolio-heading-copy"><p class="portfolio-eyebrow">{{ portfolio_presentation.eyebrow }}</p><h2 id="portfolio-title">{{ portfolio_presentation.heading }}</h2><p class="portfolio-intro">{{ portfolio_presentation.introduction|linebreaksbr }}</p></div><div class="portfolio-heading-actions">{% if user.is_staff %}<a class="portfolio-archive-link" href="{% url 'dashboard:portfolio_presentation' %}"><i class="bi bi-pencil" aria-hidden="true"></i>Edit portfolio</a>{% endif %}<a class="portfolio-archive-link" href="{% url 'core:portfolio_list' %}">View all projects <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a></div></div>
+      {% include "partials/_portfolio_profile.html" %}
+      {% if featured_portfolio_project %}<article class="portfolio-case portfolio-case-featured" id="portfolio-featured">{% include "partials/_portfolio_media.html" with project=featured_portfolio_project %}{% include "partials/_portfolio_project_body.html" with project=featured_portfolio_project featured=True %}</article>{% endif %}
+      {% if portfolio_grid_projects %}<div class="portfolio-grid{% if portfolio_grid_projects|length == 2 %} has-two{% endif %}">{% for project in portfolio_grid_projects %}{% include "partials/_portfolio_card.html" %}{% endfor %}</div>{% endif %}
+    </div></div>
+  </section>
+  {% elif user.is_staff %}
+  <section class="section portfolio-section" id="projects" aria-labelledby="portfolio-title"><div class="container"><div class="portfolio-shell portfolio-editor-empty"><p class="portfolio-eyebrow">Portfolio setup · visible to staff</p><h2 id="portfolio-title">Introduce yourself and showcase your work</h2><p>Add your profile and introduction, then publish a project with a link or screenshots. Your portfolio will appear here for visitors.</p><div class="d-flex flex-wrap gap-2"><a class="btn btn-primary" href="{% url 'dashboard:portfolio_presentation' %}">Edit portfolio introduction</a><a class="btn btn-soft" href="{% url 'dashboard:portfolio_create' %}">Add your first project</a></div></div></div></section>
+  {% endif %}
+{% elif user.is_staff %}
+<section class="section portfolio-section" id="projects"><div class="container"><div class="portfolio-shell portfolio-editor-empty"><h2>Portfolio visibility is turned off</h2><p>Your projects remain available in the public portfolio directory. Turn on landing-page visibility when you are ready.</p><a class="btn btn-primary" href="{% url 'dashboard:portfolio_presentation' %}">Manage portfolio presentation</a></div></div></section>
+{% endif %}

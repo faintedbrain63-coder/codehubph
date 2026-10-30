@@ -1,0 +1,52 @@
+{% extends "dashboard/base_manage.html" %}
+{% load core_tags %}
+{% block manage_title %}Products · {% endblock %}
+{% block heading %}Digital products{% endblock %}
+{% block subheading %}<p class="text-body-secondary mb-0">Historical product records are retained to support previous purchases and downloads.</p>{% endblock %}
+{% block actions %}{% if PRODUCT_SALES_ENABLED %}<a href="{% url 'dashboard:product_create' %}{% if category %}?category={{ category }}{% endif %}" class="btn btn-primary">New product</a>{% endif %}<a href="{% url 'dashboard:capstone_project_create' %}" class="btn btn-soft">New project service</a>{% endblock %}
+{% block manage_content %}
+{% include "dashboard/_filters.html" %}
+<p class="small text-body-secondary" role="status">{{ page_obj.paginator.count }} product{{ page_obj.paginator.count|pluralize }} found</p>
+<div class="card">
+  {% if products %}
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead><tr><th scope="col">Product</th><th scope="col">Category</th><th scope="col">Price</th><th scope="col">Sales</th><th scope="col">Status</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr></thead>
+      <tbody>
+        {% for product in products %}
+        <tr>
+          <td>
+            <div class="d-flex align-items-center gap-3">
+              {% if product.thumbnail %}<img src="{{ product.thumbnail.url }}" alt="" width="64" height="40" class="rounded object-fit-cover">{% else %}<div class="icon-tile" style="width:64px;height:40px"><i class="bi bi-{{ product.category_icon }}" aria-hidden="true"></i></div>{% endif %}
+              <div><a class="fw-semibold" href="{% url 'dashboard:product_detail' product.pk %}">{{ product.name }}</a>{% if product.is_featured %} <i class="bi bi-star-fill text-warning" title="Featured" aria-label="Featured"></i>{% endif %}<div class="small text-body-secondary">v{{ product.version }} · {{ product.file_size|filesizeformat }}</div></div>
+            </div>
+          </td>
+          <td class="small">{{ product.get_category_display }}</td>
+          <td>{{ product.price|money }}</td>
+          <td>{{ product.sales }}</td>
+          <td>{% status_badge product.status product.get_status_display %}</td>
+          <td class="text-end text-nowrap">
+            <a href="{% url 'dashboard:product_detail' product.pk %}" class="btn btn-sm btn-link">View</a>
+            {% if product.is_published %}<a href="{{ product.get_absolute_url }}" class="btn btn-sm btn-link" target="_blank" rel="noopener" aria-label="View {{ product.name }} on the store"><i class="bi bi-eye" aria-hidden="true"></i></a>{% endif %}
+            {% if PRODUCT_SALES_ENABLED %}<a href="{% url 'dashboard:product_edit' product.pk %}" class="btn btn-sm btn-soft">Edit</a>{% endif %}
+            <form method="post" action="{% url 'dashboard:product_delete' product.pk %}" class="d-inline" data-confirm="Delete “{{ product.name }}”? Products with orders will be moved to Draft instead.">
+              {% csrf_token %}<button type="submit" class="btn btn-sm btn-link text-danger" aria-label="Delete {{ product.name }}"><i class="bi bi-trash" aria-hidden="true"></i></button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    {% if q or category or status %}
+    {% url 'dashboard:product_list' as list_url %}
+    {% include "partials/_empty_state.html" with icon="search" title="No matching products" text="Try another search, product type or status." action_url=list_url action_label="Reset filters" %}
+    {% else %}
+    {% url 'dashboard:product_create' as create_url %}
+    {% if PRODUCT_SALES_ENABLED %}{% include "partials/_empty_state.html" with icon="box-seam" title="No products found" text="Add your first product to start selling." action_url=create_url action_label="New product" %}{% else %}<p class="p-4 mb-0 text-body-secondary">No historical products. New work is managed through project services and custom requests.</p>{% endif %}
+    {% endif %}
+  {% endif %}
+</div>
+{% include "partials/_pagination.html" %}
+{% endblock %}

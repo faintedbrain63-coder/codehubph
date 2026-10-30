@@ -1,0 +1,17 @@
+<aside class="auth-aside">
+  <a class="d-inline-flex align-items-center gap-2 text-decoration-none auth-brand" href="{% url 'core:home' %}">
+    <span class="brand-mark" aria-hidden="true"><i class="bi bi-lightning-charge-fill"></i></span>
+    <span class="fw-bold font-display">{{ SITE_NAME }}</span>
+  </a>
+  <div class="my-4">
+    <span class="eyebrow">{{ aside_eyebrow|default:"Account recovery" }}</span>
+    <h2>{{ aside_title|default:"Get back into your account safely." }}</h2>
+    <p>{{ aside_text|default:"Reset links are single-use, expire in three days, and are sent only to the email on your account." }}</p>
+    <ul class="auth-points mt-4">
+      <li><i class="bi bi-shield-lock" aria-hidden="true"></i><span>We never ask for your password by email or chat.</span></li>
+      <li><i class="bi bi-envelope-check" aria-hidden="true"></i><span>Reset links work once and expire automatically.</span></li>
+      <li><i class="bi bi-chat-dots" aria-hidden="true"></i><span>Still stuck? Contact support and we’ll verify your account.</span></li>
+    </ul>
+  </div>
+  <p class="small mb-0" style="color:#64748b;">{{ aside_footnote|default:"Secure account recovery · private by design" }}</p>
+</aside>

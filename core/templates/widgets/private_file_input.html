@@ -1,0 +1,4 @@
+{% if widget.is_initial %}<div class="small text-body-secondary mb-2"><i class="bi bi-lock" aria-hidden="true"></i> Current file (private): <code>{{ widget.filename }}</code>{% if not widget.required %}
+<span class="form-check form-check-inline ms-2"><input class="form-check-input" type="checkbox" name="{{ widget.checkbox_name }}" id="{{ widget.checkbox_id }}"{% if widget.attrs.disabled %} disabled{% endif %}{% if widget.checked %} checked{% endif %}><label class="form-check-label" for="{{ widget.checkbox_id }}">Remove</label></span>{% endif %}</div>
+<div class="small text-body-secondary mb-1">Upload a new file to replace it:</div>{% endif %}
+<input type="{{ widget.type }}" name="{{ widget.name }}"{% include "django/forms/widgets/attrs.html" %}>

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block title %}My projects · {% endblock %}
+{% block content %}
+<div class="page-header"><div class="container">
+  <span class="page-kicker">Your project workspace</span>
+  <div class="d-flex flex-wrap justify-content-between align-items-end gap-3">
+    <div><h1 class="h2 mb-1">Hi, {{ user.first_name|default:user.email }}</h1><p class="text-body-secondary mb-0">Your project requests, quotes, payments and deliveries in one place.</p></div>
+    <div class="d-flex flex-wrap gap-2"><button class="btn btn-soft" type="button" data-bs-toggle="modal" data-bs-target="#onboarding">How projects work</button><a class="btn btn-primary" href="{% url 'capstone:request_new' %}"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Start a project</a></div>
+  </div>
+</div></div>
+<div class="container py-4">
+  {% include "accounts/_account_nav.html" %}
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6"><div class="card stat-card p-4"><div class="stat-label">Active project requests</div><div class="stat-value">{{ stats.capstone }}</div></div></div>
+    <div class="col-sm-6"><div class="card stat-card p-4"><div class="stat-label">Payments under review</div><div class="stat-value">{{ stats.awaiting }}</div></div></div>
+  </div>
+  <div class="row g-4">
+    <div class="col-lg-8"><section class="card p-4">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3"><h2 class="h5 mb-0">Recent project requests</h2><a href="{% url 'capstone:my_requests' %}">View all requests</a></div>
+      {% for req in capstone_requests %}<div class="border-bottom py-3"><div class="d-flex flex-wrap justify-content-between gap-2"><a class="fw-semibold" href="{{ req.get_absolute_url }}">{{ req.title }}</a>{% status_badge req.status req.get_status_display %}</div><p class="small text-body-secondary mb-0 mt-1">{{ req.reference }} · {{ req.get_client_type_display }} · {{ req.project_type_label }}</p></div>
+      {% empty %}<p class="text-body-secondary">Describe the web app, mobile app or software you need. We will review your requirements and send you a quote.</p><a class="btn btn-primary align-self-start" href="{% url 'capstone:request_new' %}">Request your first project</a>{% endfor %}
+    </section></div>
+    <div class="col-lg-4"><section class="card p-4 mb-4"><h2 class="h5">Pending payments</h2>{% for payment in pending_payments %}<div class="border-bottom py-3"><a href="{{ payment.payable.get_absolute_url }}">{{ payment.payable.reference }}</a><div class="small mt-1">{{ payment.amount|money }} · {{ payment.get_status_display }}</div></div>{% empty %}<p class="text-body-secondary mb-0">No pending payments. Payment is available after you accept a quote.</p>{% endfor %}</section>
+      {% if has_order_history %}<section class="card p-4"><h2 class="h5">Previous purchases</h2><p class="text-body-secondary">Your past receipts and paid downloads remain available.</p><a href="{% url 'accounts:purchases' %}">Open purchase library</a></section>{% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

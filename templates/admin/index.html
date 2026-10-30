@@ -1,0 +1,10 @@
+{% extends "admin/index.html" %}
+{% block nav-sidebar %}{% include "admin/nav_sidebar.html" %}{% endblock %}
+{% block content %}
+  <section class="module console-welcome">
+    <h2>Manage your project services</h2>
+    <p>Review custom project briefs, prepare quotes and deliver web apps, mobile apps and software through the project workspace.</p>
+    <p><a href="{% url 'dashboard:capstone_project_list' %}">Manage project services</a> · <a href="{% url 'dashboard:capstone_request_list' %}">Review project requests</a></p>
+  </section>
+  {{ block.super }}
+{% endblock %}

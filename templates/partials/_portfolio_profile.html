@@ -1,0 +1,8 @@
+{% load core_tags %}
+{% if portfolio_presentation.has_profile %}
+{% firstof portfolio_presentation.display_name SITE_NAME as portfolio_owner %}
+<div class="portfolio-profile">
+  <div class="portfolio-profile-person"><span class="portfolio-monogram" aria-hidden="true">{{ portfolio_owner|slice:':1'|upper }}</span><div><h3>{{ portfolio_owner }}</h3>{% if portfolio_presentation.professional_title %}<p class="portfolio-profile-role">{{ portfolio_presentation.professional_title }}</p>{% endif %}{% if portfolio_presentation.location %}<p class="portfolio-profile-location"><i class="bi bi-geo-alt me-1" aria-hidden="true"></i>{{ portfolio_presentation.location }}</p>{% endif %}<div class="portfolio-socials">{% if portfolio_presentation.github_url %}<a href="{{ portfolio_presentation.github_url }}" target="_blank" rel="noopener noreferrer"><i class="bi bi-code-slash" aria-hidden="true"></i>Code profile</a>{% endif %}{% if portfolio_presentation.linkedin_url %}<a href="{{ portfolio_presentation.linkedin_url }}" target="_blank" rel="noopener noreferrer"><i class="bi bi-person-badge" aria-hidden="true"></i>Professional profile</a>{% endif %}</div></div></div>
+  <div class="portfolio-profile-copy">{% if portfolio_presentation.about %}<p>{{ portfolio_presentation.about|linebreaksbr }}</p>{% endif %}{% if portfolio_presentation.skills %}<div class="portfolio-tech" aria-label="Areas of expertise">{% for skill in portfolio_presentation.skills|split_tags %}<span>{{ skill }}</span>{% endfor %}</div>{% endif %}</div>
+</div>
+{% endif %}

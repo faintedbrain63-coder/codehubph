@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block title %}Order {{ order.number }} · {% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'orders:list' %}">My orders</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ order.number }}</li>
+      </ol>
+    </nav>
+    <span class="page-kicker">Order details</span>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+      <div>
+        <h1 class="h2 mb-1">Order {{ order.number }}</h1>
+        <p class="text-body-secondary mb-0">Placed {{ order.created_at|date:"F j, Y, g:i A" }}</p>
+      </div>
+      <div class="d-flex gap-2 align-items-center">
+        {% status_badge order.status order.get_status_display %}
+        {% if order.is_paid or order.status == 'refunded' %}<a href="{% url 'orders:invoice' order.number %}" class="btn btn-soft btn-sm"><i class="bi bi-printer me-1" aria-hidden="true"></i>Receipt</a>{% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+<div class="container py-4">
+  {% include "accounts/_account_nav.html" %}
+
+  {% if order.can_be_paid and order.payment_block_reason %}
+    <div class="alert alert-warning d-flex flex-wrap justify-content-between align-items-center gap-2" role="status">
+      <span><i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>{{ order.payment_block_reason }}</span>
+      <form method="post" action="{% url 'orders:cancel' order.number %}">{% csrf_token %}
+        <input type="hidden" name="restore_cart" value="1">
+        <button type="submit" class="btn btn-primary btn-sm">Cancel and move other items to cart</button>
+      </form>
+    </div>
+  {% elif order.status == 'awaiting_verification' %}
+    <div class="alert alert-warning d-flex gap-2" role="status"><i class="bi bi-hourglass-split" aria-hidden="true"></i><div><strong>We’re verifying your payment.</strong> This usually takes a few hours. We’ll email you as soon as your downloads are ready.</div></div>
+  {% elif not PRODUCT_SALES_ENABLED and order.can_be_cancelled %}
+    <div class="alert alert-secondary" role="status">Ready-made product sales have ended. This previous unpaid order cannot accept a new payment. Contact us about any payment you already sent.</div>
+  {% elif order.status == 'rejected' %}
+    {% with rejected=payments.0 %}
+    <div class="alert alert-danger" role="alert">
+      <strong>Your payment could not be verified.</strong>
+      {% if rejected.rejection_reason %}<div class="mt-1">Reason: {{ rejected.rejection_reason }}</div>{% endif %}
+      <a href="{{ order.get_payment_url }}" class="btn btn-danger btn-sm mt-2">Submit payment again</a>
+    </div>
+    {% endwith %}
+  {% elif order.status == 'pending' %}
+    <div class="alert alert-info d-flex flex-wrap justify-content-between align-items-center gap-2" role="status">
+      <span><i class="bi bi-info-circle me-1" aria-hidden="true"></i>This order is waiting for payment.</span>
+      <a href="{{ order.get_payment_url }}" class="btn btn-primary btn-sm">Pay {{ order.total|money }}</a>
+    </div>
+  {% elif order.status == 'refunded' %}
+    <div class="alert alert-secondary" role="status">This order was refunded on {{ order.refunded_at|date:"M j, Y" }}. Download access has ended.</div>
+  {% elif order.status == 'cancelled' %}
+    <div class="alert alert-secondary" role="status">You cancelled this order on {{ order.cancelled_at|date:"M j, Y" }}.</div>
+  {% endif %}
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-header bg-transparent py-3"><h2 class="h5 mb-0">Items</h2></div>
+        <ul class="list-group list-group-flush">
+          {% for item in order.items.all %}
+          <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center gap-3 py-3">
+            <div class="d-flex align-items-center gap-3">
+              <span class="icon-tile" aria-hidden="true"><i class="bi bi-file-earmark-zip"></i></span>
+              <div>
+                <div class="fw-semibold">{{ item.product_name }}</div>
+                <div class="small text-body-secondary">
+                  Version {{ item.product_version }} · {{ item.unit_price|money }}
+                  {% if order.is_paid %}
+                    {% if item.downloads_left is not None %} · {{ item.downloads_left }} of {{ item.download_limit }} downloads left{% endif %}
+                    {% if item.access_expires_at %} · available until {{ item.access_expires_at|date:"M j, Y" }}{% endif %}
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            {% if item.can_download %}
+              <a href="{% url 'orders:download' item.pk %}" class="btn btn-primary"><i class="bi bi-download me-2" aria-hidden="true"></i>Download</a>
+            {% else %}
+              <span class="small text-body-secondary"><i class="bi bi-lock me-1" aria-hidden="true"></i>{{ item.download_block_reason }}</span>
+            {% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card p-4 mb-4 order-summary">
+        <h2 class="h5">Summary</h2>
+        <div class="d-flex justify-content-between fs-5 fw-bold mt-3"><span>Total</span><span>{{ order.total|money }}</span></div>
+        {% if order.paid_at %}<div class="small text-body-secondary mt-2">Paid {{ order.paid_at|date:"M j, Y, g:i A" }}</div>{% endif %}
+        <p class="trust-note mt-3 mb-0"><i class="bi bi-shield-lock" aria-hidden="true"></i>Secure payment · receipt available above.</p>
+        {% if order.can_be_cancelled %}
+        <form method="post" action="{% url 'orders:cancel' order.number %}" class="mt-3" data-confirm="Cancel order {{ order.number }}? Nothing has been charged.">{% csrf_token %}
+          <button type="submit" class="btn btn-link btn-sm text-danger p-0"><i class="bi bi-x-circle me-1" aria-hidden="true"></i>Cancel this order</button>
+        </form>
+        {% endif %}
+      </div>
+      {% if payments %}
+      <div class="card p-4">
+        <h2 class="h5">Payment history</h2>
+        <ul class="list-unstyled mb-0 d-grid gap-3">
+          {% for p in payments %}
+            <li class="small">
+              <div class="d-flex justify-content-between gap-2"><strong>{{ p.get_method_display }}</strong>{% status_badge p.status p.get_status_display %}</div>
+              <div class="text-body-secondary">{{ p.created_at|date:"M j, Y, g:i A" }}{% if p.provider_reference and p.is_manual %} · Ref {{ p.provider_reference }}{% endif %}</div>
+              {% if p.rejection_reason %}<div class="text-danger">Reason: {{ p.rejection_reason }}</div>{% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

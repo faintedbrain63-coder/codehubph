@@ -1,0 +1,32 @@
+{% extends "dashboard/base_manage.html" %}
+{% load core_tags %}
+{% block manage_title %}Customers · {% endblock %}
+{% block heading %}Customers{% endblock %}
+{% block subheading %}<p class="text-body-secondary mb-0">Find customer accounts and open their order or project history.</p>{% endblock %}
+{% block manage_content %}
+{% include "dashboard/_filters.html" %}
+<div class="card">
+  {% if customers %}
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead><tr><th scope="col">Customer</th><th scope="col">School</th><th scope="col">Orders</th><th scope="col">Capstone</th><th scope="col">Total paid</th><th scope="col">Joined</th></tr></thead>
+      <tbody>
+        {% for c in customers %}
+        <tr>
+          <td><div class="fw-semibold">{{ c.display_name }}</div><div class="small"><a href="mailto:{{ c.email }}">{{ c.email }}</a>{% if c.phone_number %} · {{ c.phone_number }}{% endif %}</div></td>
+          <td class="small">{{ c.school|default:"—" }}</td>
+          <td><a href="{% url 'dashboard:order_list' %}?q={{ c.email|urlencode }}">{{ c.order_count }}</a></td>
+          <td><a href="{% url 'dashboard:capstone_request_list' %}?q={{ c.email|urlencode }}">{{ c.request_count }}</a></td>
+          <td>{{ c.paid_total|default:0|money }}</td>
+          <td class="small text-body-secondary">{{ c.date_joined|date:"M j, Y" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    {% include "partials/_empty_state.html" with icon="people" title="No customers found" %}
+  {% endif %}
+</div>
+{% include "partials/_pagination.html" %}
+{% endblock %}

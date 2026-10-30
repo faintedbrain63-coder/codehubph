@@ -1,0 +1,68 @@
+{% extends "dashboard/base_manage.html" %}
+{% load core_tags %}
+{% block manage_title %}{% if product %}Edit {{ product.name }}{% else %}New product{% endif %} · {% endblock %}
+{% block heading %}{% if product %}Edit product{% else %}New product{% endif %}{% endblock %}
+{% block subheading %}<p class="text-body-secondary mb-0">Package software and mobile apps as ZIP files, installers or APKs. List web apps as capstone projects instead.</p>{% endblock %}
+{% block actions %}{% if product %}<a href="{% url 'dashboard:product_detail' product.pk %}" class="btn btn-soft">Staff preview</a>{% endif %}{% endblock %}
+{% block manage_content %}
+<form method="post" enctype="multipart/form-data" class="needs-validation" novalidate data-dirty-form>
+  {% csrf_token %}
+  {% include "dashboard/_form_summary.html" %}
+  <div class="row g-4">
+    <div class="col-xl-8 d-grid gap-4 align-content-start">
+      <section class="card p-4">
+        <h2 class="h6 mb-3">Basic information</h2>
+        <div class="row">
+          <div class="col-md-8">{% include "partials/_field.html" with field=form.name %}</div>
+          <div class="col-md-4">{% include "partials/_field.html" with field=form.category %}</div>
+        </div>
+        {% include "partials/_field.html" with field=form.slug %}
+        {% include "partials/_field.html" with field=form.short_description %}
+        {% include "partials/_field.html" with field=form.description %}
+        {% include "partials/_field.html" with field=form.features %}
+      </section>
+      <section class="card p-4">
+        <h2 class="h6 mb-3">Technical details</h2>
+        <div class="row">
+          <div class="col-md-4">{% include "partials/_field.html" with field=form.version %}</div>
+          <div class="col-md-8">{% include "partials/_field.html" with field=form.tech_stack %}</div>
+        </div>
+        {% include "partials/_field.html" with field=form.demo_url %}
+      </section>
+      <section class="card p-4">
+        <h2 class="h6 mb-1">Screenshots</h2>
+        <p class="small text-body-secondary">Shown in the product gallery. JPG, PNG or WEBP.</p>
+        {{ formset.management_form }}
+        {% if formset.non_form_errors %}<div class="alert alert-danger">{{ formset.non_form_errors|join:" " }}</div>{% endif %}
+        <div class="d-grid gap-3" data-gallery-forms>
+          {% for f in formset %}
+            {% include "dashboard/_screenshot_form.html" %}
+          {% endfor %}
+        </div>
+        <template id="screenshot-empty-form">{% include "dashboard/_screenshot_form.html" with f=formset.empty_form %}</template>
+        <button type="button" class="btn btn-soft mt-3 align-self-start" data-add-screenshot><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Add screenshot</button>
+        <p class="form-text mb-0">Up to 12 screenshots. Save your changes to upload new images.</p>
+      </section>
+    </div>
+    <div class="col-xl-4 d-grid gap-4 align-content-start">
+      <section class="card p-4">
+        <h2 class="h6 mb-3">Publishing</h2>
+        {% include "partials/_field.html" with field=form.status %}
+        {% include "partials/_field.html" with field=form.is_featured %}
+        <p class="small text-body-secondary">Published products appear in the catalog immediately.</p>
+      </section>
+      <section class="card p-4">
+        <h2 class="h6 mb-3">Price</h2>
+        {% include "partials/_field.html" with field=form.price %}
+      </section>
+      <section class="card p-4">
+        <h2 class="h6 mb-3">Files</h2>
+        {% include "partials/_field.html" with field=form.thumbnail %}
+        {% include "partials/_field.html" with field=form.file %}
+        <p class="small text-body-secondary mb-0"><i class="bi bi-lock me-1" aria-hidden="true"></i>The digital file is stored privately and only served to customers who paid.</p>
+      </section>
+    </div>
+  </div>
+  <div class="workspace-save-bar"><span class="save-hint"><i class="bi bi-lock me-1" aria-hidden="true"></i>Changes apply only when saved. Large uploads may take longer.</span><a href="{% url 'dashboard:product_list' %}" class="btn btn-soft">Cancel</a><button type="submit" class="btn btn-soft" name="save_action" value="continue" data-loading-text="Saving…">Save &amp; continue editing</button><button type="submit" class="btn btn-primary" data-loading-text="Saving…">Save product</button></div>
+</form>
+{% endblock %}

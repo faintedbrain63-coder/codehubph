@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block title %}Payment status · {% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="card auth-card text-center">
+    {% if awaiting %}
+      <div class="icon-tile mx-auto mb-3" aria-hidden="true"><i class="bi bi-hourglass-split"></i></div>
+      <h1 class="h4">We’re verifying your payment</h1>
+      <p class="text-body-secondary">You submitted a {{ awaiting.get_method_display }} payment of {{ awaiting.amount|money }} on {{ awaiting.created_at|date:"M j, g:i A" }}. We’ll email you as soon as it’s confirmed.</p>
+    {% elif blocked %}
+      <div class="icon-tile mx-auto mb-3" aria-hidden="true"><i class="bi bi-exclamation-triangle"></i></div>
+      <h1 class="h4">This order needs an update</h1>
+      <p class="text-body-secondary">{{ blocked }}</p>
+      <form method="post" action="{% url 'orders:cancel' payable.reference %}" class="d-grid mb-2">{% csrf_token %}
+        <input type="hidden" name="restore_cart" value="1">
+        <button type="submit" class="btn btn-primary">Cancel order and move other items to cart</button>
+      </form>
+    {% else %}
+      <div class="icon-tile mx-auto mb-3" aria-hidden="true"><i class="bi bi-info-circle"></i></div>
+      <h1 class="h4">No payment needed right now</h1>
+      <p class="text-body-secondary">{{ payable.reference }} is currently <strong>{{ payable.get_status_display|lower }}</strong>.</p>
+    {% endif %}
+    <a href="{{ payable.get_absolute_url }}" class="btn {% if blocked %}btn-soft{% else %}btn-primary{% endif %}">View details</a>
+  </div>
+</div>
+{% endblock %}

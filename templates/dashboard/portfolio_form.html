@@ -1,0 +1,36 @@
+{% extends "dashboard/base_manage.html" %}
+{% block manage_title %}{% if project.pk %}Edit {{ project.title }}{% else %}New portfolio project{% endif %} · {% endblock %}
+{% block heading %}{% if project.pk %}Edit portfolio project{% else %}New portfolio project{% endif %}{% endblock %}
+{% block subheading %}<p class="text-body-secondary mb-0">Web apps need a link to publish. Software and mobile apps need at least one screenshot. You can save an incomplete entry as a draft.</p>{% endblock %}
+{% block actions %}{% if project.pk %}<a class="btn btn-soft" href="{{ project.get_absolute_url }}">Preview project</a>{% endif %}{% endblock %}
+{% block manage_content %}
+<form method="post" enctype="multipart/form-data" class="needs-validation" novalidate data-dirty-form>
+  {% csrf_token %}{% include "dashboard/_form_summary.html" %}
+  <div class="row g-4">
+    <div class="col-xl-8 d-grid gap-4 align-content-start">
+      <section class="card p-4"><h2 class="h6 mb-3">Project details</h2>
+        {% include "partials/_field.html" with field=form.title %}
+        <div class="row"><div class="col-md-6">{% include "partials/_field.html" with field=form.project_type %}</div><div class="col-md-6">{% include "partials/_field.html" with field=form.stage %}</div></div>
+        {% include "partials/_field.html" with field=form.summary %}
+        {% include "partials/_field.html" with field=form.description %}
+        {% include "partials/_field.html" with field=form.tech_stack %}
+        {% include "partials/_field.html" with field=form.project_url %}
+        {% include "partials/_field.html" with field=form.slug %}
+      </section>
+      <section class="card p-4"><details{% if form.industry.value or form.contribution.value or form.project_year.value or form.challenge.value or form.solution.value or form.outcome.value or form.project_year.errors %} open{% endif %}><summary class="h6 mb-2">Case study details <span class="small text-body-secondary">Optional</span></summary><p class="small text-body-secondary mt-3">Give visitors context about your work, the problem you solved and the result. Empty fields are omitted from the public page.</p><div class="row"><div class="col-md-8">{% include "partials/_field.html" with field=form.industry %}</div><div class="col-md-4">{% include "partials/_field.html" with field=form.project_year %}</div></div>{% include "partials/_field.html" with field=form.contribution %}{% include "partials/_field.html" with field=form.challenge %}{% include "partials/_field.html" with field=form.solution %}{% include "partials/_field.html" with field=form.outcome %}</details></section>
+      <section class="card p-4"><h2 class="h6 mb-2">Project screenshots</h2><p class="small text-body-secondary">Upload screens for software and mobile apps, or optional previews for web apps. Remove personal records and credentials before publishing.</p>
+        {{ formset.management_form }}
+        {% if formset.non_form_errors %}<div class="alert alert-danger" role="alert">{{ formset.non_form_errors|join:" " }}</div>{% endif %}
+        <div class="d-grid gap-3" data-gallery-forms>{% for f in formset %}{% include "dashboard/_screenshot_form.html" %}{% endfor %}</div>
+        <template id="screenshot-empty-form">{% include "dashboard/_screenshot_form.html" with f=formset.empty_form %}</template>
+        <button class="btn btn-soft mt-3 align-self-start" type="button" data-add-screenshot>Add screenshot</button><p class="form-text mb-0">Up to 12 screenshots. Captions and sort order control how they appear.</p>
+      </section>
+    </div>
+    <div class="col-xl-4 d-grid gap-4 align-content-start">
+      <section class="card p-4"><h2 class="h6 mb-3">Publication</h2>{% include "partials/_field.html" with field=form.is_published %}{% include "partials/_field.html" with field=form.is_featured %}<p class="small text-body-secondary mb-0">Published entries appear in the public portfolio; featured entries show first on the landing page.</p></section>
+      <section class="card p-4"><h2 class="h6 mb-3">Customer and service request</h2>{% include "partials/_field.html" with field=form.request %}{% include "partials/_field.html" with field=form.customer %}<p class="small text-body-secondary mb-0">Only the linked customer can submit a project review. This association and customer email stay private.</p></section>
+    </div>
+  </div>
+  <div class="workspace-save-bar"><span class="save-hint">Screenshots for drafts are visible only to staff and the linked customer.</span><a class="btn btn-soft" href="{% url 'dashboard:portfolio_list' %}">Cancel</a><button class="btn btn-soft" type="submit" name="save_action" value="continue">Save &amp; continue editing</button><button class="btn btn-primary" type="submit">Save project</button></div>
+</form>
+{% endblock %}

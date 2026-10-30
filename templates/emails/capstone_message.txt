@@ -1,0 +1,10 @@
+{% autoescape off %}Hi {{ req.customer.first_name|default:req.customer.email }},
+
+You have a new message about your capstone request {{ req.reference }}:
+
+{{ msg.body }}
+
+Reply here: {{ site_url }}{{ req.get_absolute_url }}#messages
+
+— {{ site_name }}
+{% endautoescape %}

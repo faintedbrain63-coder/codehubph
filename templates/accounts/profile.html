@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Profile · {% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'accounts:dashboard' %}">My account</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Profile</li>
+      </ol>
+    </nav>
+    <span class="page-kicker">Account settings</span>
+    <h1 class="h2 mb-1">Profile</h1>
+    <p class="text-body-secondary mb-0">Keep your contact details up to date so receipts and updates reach you.</p>
+  </div>
+</div>
+<div class="container py-4">
+  {% include "accounts/_account_nav.html" %}
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="card p-4">
+        <h2 class="h5 mb-3">Personal details</h2>
+        <form method="post" class="needs-validation" novalidate>
+          {% csrf_token %}
+          <div class="row">
+            <div class="col-md-6">{% include "partials/_field.html" with field=form.first_name %}</div>
+            <div class="col-md-6">{% include "partials/_field.html" with field=form.last_name %}</div>
+          </div>
+          {% include "partials/_field.html" with field=form.email %}
+          {% include "partials/_field.html" with field=form.phone_number icon="telephone" show_optional=1 %}
+          {% include "partials/_field.html" with field=form.school icon="mortarboard" show_optional=1 %}
+          <button type="submit" class="btn btn-primary">Save changes</button>
+        </form>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="card p-4">
+        <h2 class="h5">Account</h2>
+        <dl class="row small mb-3">
+          <dt class="col-5 fw-normal text-body-secondary">Sign-in email</dt><dd class="col-7">{{ user.email }}</dd>
+          <dt class="col-5 fw-normal text-body-secondary">Account type</dt><dd class="col-7">{{ user.role_label }}</dd>
+          <dt class="col-5 fw-normal text-body-secondary">Member since</dt><dd class="col-7">{{ user.date_joined|date:"M j, Y" }}</dd>
+        </dl>
+        <a href="{% url 'accounts:password_change' %}" class="btn btn-soft"><i class="bi bi-key me-2" aria-hidden="true"></i>Change password</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

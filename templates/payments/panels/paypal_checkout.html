@@ -1,0 +1,5 @@
+{% load core_tags %}
+<h2 class="h5 mb-2"><i class="bi bi-paypal text-primary me-2" aria-hidden="true"></i>Pay with PayPal</h2>
+<p class="small text-body-secondary">You’ll approve {{ payable.amount_due|money:True }} in a secure PayPal window. Payment confirmation is recorded on your project or order page.</p>
+<div id="error-paypal" class="alert alert-danger d-none" role="alert" tabindex="-1"></div>
+<div id="paypal-buttons" style="max-width: 420px;"></div>

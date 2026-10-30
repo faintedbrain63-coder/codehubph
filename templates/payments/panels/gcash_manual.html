@@ -1,0 +1,42 @@
+{% load core_tags %}
+{% with gcash=panel.gcash %}
+<h2 class="h5 mb-3"><i class="bi bi-phone text-primary me-2" aria-hidden="true"></i>Pay with GCash</h2>
+<div class="row g-4 align-items-start">
+  {% if gcash.gcash_qr %}
+  <div class="col-md-5">
+    <div class="gcash-scan text-center">
+      <img src="{{ gcash.gcash_qr.url }}" alt="GCash QR code{% if gcash.gcash_account_name %} for {{ gcash.gcash_account_name }}{% endif %}" class="gcash-qr img-fluid" width="280" height="451">
+      <a href="{{ gcash.gcash_qr.url }}" download="gcash-qr" class="btn btn-sm btn-soft" data-no-loading><i class="bi bi-download me-1" aria-hidden="true"></i>Save QR image</a>
+      <div class="small text-body-secondary">Paying on this phone? Save the image, then choose <strong>Upload QR</strong> in GCash’s scanner.</div>
+    </div>
+  </div>
+  {% endif %}
+  <div class="{% if gcash.gcash_qr %}col-md-7{% else %}col-12{% endif %}">
+    <h3 class="h6 mb-2">Step 1: Send exactly {{ payable.amount_due|money:True }}</h3>
+    {% if gcash.gcash_qr %}
+      <ol class="gcash-steps small mb-3">
+        <li>Open GCash and tap <strong>Scan QR</strong>, then scan the code.</li>
+        <li>Type the amount <strong>{{ payable.amount_due|money }}</strong>. The QR code does not fill it in for you.</li>
+        {% if gcash.gcash_account_name %}<li>Check that the recipient shows <strong>{{ gcash.gcash_account_name }}</strong> before you confirm.</li>{% endif %}
+      </ol>
+    {% endif %}
+    {% if gcash.gcash_number %}
+      {% if gcash.gcash_qr %}<p class="small text-body-secondary mb-1">Or send money to this number:</p>{% endif %}
+      <dl class="row small mb-3">
+        {% if gcash.gcash_account_name %}<dt class="col-5 fw-normal text-body-secondary">Account name</dt><dd class="col-7 fw-semibold">{{ gcash.gcash_account_name }}</dd>{% endif %}
+        <dt class="col-5 fw-normal text-body-secondary">GCash number</dt>
+        <dd class="col-7 fw-semibold d-flex align-items-center gap-2">{{ gcash.gcash_number }}
+          <button type="button" class="btn btn-sm btn-soft py-0" data-copy="{{ gcash.gcash_number }}" data-no-loading><i class="bi bi-clipboard" aria-hidden="true"></i><span class="visually-hidden">Copy number</span></button>
+        </dd>
+        <dt class="col-5 fw-normal text-body-secondary">Amount</dt><dd class="col-7 fw-semibold">{{ payable.amount_due|money }}</dd>
+      </dl>
+    {% endif %}
+    <h3 class="h6 mb-2">Step 2: Put this reference in the message</h3>
+    <div class="d-flex align-items-center gap-2">
+      <span class="reference-chip">{{ payable.reference }}</span>
+      <button type="button" class="btn btn-sm btn-soft" data-copy="{{ payable.reference }}" data-no-loading><i class="bi bi-clipboard me-1" aria-hidden="true"></i>Copy</button>
+    </div>
+  </div>
+</div>
+{% endwith %}
+{% include "payments/panels/_manual_form.html" %}

@@ -1,0 +1,32 @@
+{% extends "dashboard/base_manage.html" %}
+{% load core_tags %}
+{% block manage_title %}Orders · {% endblock %}
+{% block heading %}Orders{% endblock %}
+{% block subheading %}<p class="text-body-secondary mb-0">Track purchases, review payments and manage customer download access.</p>{% endblock %}
+{% block manage_content %}
+{% include "dashboard/_filters.html" %}
+<div class="card">
+  {% if orders %}
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead><tr><th scope="col">Order</th><th scope="col">Customer</th><th scope="col">Items</th><th scope="col">Total</th><th scope="col">Status</th><th scope="col">Date</th></tr></thead>
+      <tbody>
+        {% for order in orders %}
+        <tr>
+          <td><a href="{% url 'dashboard:order_detail' order.number %}" class="fw-semibold">{{ order.number }}</a></td>
+          <td class="small">{{ order.user.display_name }}<div class="text-body-secondary">{{ order.user.email }}</div></td>
+          <td>{{ order.item_count }}</td>
+          <td>{{ order.total|money }}</td>
+          <td>{% status_badge order.status order.get_status_display %}</td>
+          <td class="small text-body-secondary">{{ order.created_at|date:"M j, Y" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    {% include "partials/_empty_state.html" with icon="receipt" title="No orders found" text="Try a different filter." %}
+  {% endif %}
+</div>
+{% include "partials/_pagination.html" %}
+{% endblock %}

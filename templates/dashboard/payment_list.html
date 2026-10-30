@@ -1,0 +1,38 @@
+{% extends "dashboard/base_manage.html" %}
+{% load core_tags %}
+{% block manage_title %}Payments · {% endblock %}
+{% block heading %}Payments{% endblock %}
+{% block subheading %}<p class="text-body-secondary mb-0">Check each GCash / PayPal reference in your app before approving.</p>{% endblock %}
+{% block manage_content %}
+<div class="workspace-callout"><i class="bi bi-shield-check" aria-hidden="true"></i><p><strong>Verify before granting access</strong>Match the amount, recipient and transaction reference in your payment provider. Recording a refund here does not return money automatically.</p></div>
+{% include "dashboard/_filters.html" with placeholder="Email, transaction or order reference" %}
+<div class="card">
+  {% if payments %}
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead><tr><th scope="col">For</th><th scope="col">Customer</th><th scope="col">Method</th><th scope="col">Reference</th><th scope="col">Amount</th><th scope="col">Status</th><th scope="col" class="text-end">Actions</th></tr></thead>
+      <tbody>
+        {% for p in payments %}
+        <tr>
+          <td>
+            {% if p.order_id %}<a href="{% url 'dashboard:order_detail' p.order.number %}" class="fw-semibold">{{ p.order.number }}</a>
+            {% else %}<a href="{% url 'dashboard:capstone_request_detail' p.capstone_request.reference %}" class="fw-semibold">{{ p.capstone_request.reference }}</a>{% endif %}
+            <div class="small text-body-secondary">{{ p.created_at|date:"M j, g:i A" }}</div>
+          </td>
+          <td class="small">{{ p.customer.email }}</td>
+          <td class="small">{{ p.get_method_display }}</td>
+          <td><code class="small">{{ p.provider_reference|default:"—" }}</code></td>
+          <td class="fw-semibold">{{ p.amount|money }}</td>
+          <td>{% status_badge p.status p.get_status_display %}</td>
+          <td class="text-end">{% include "dashboard/_payment_actions.html" with next=request.get_full_path %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    {% include "partials/_empty_state.html" with icon="check2-circle" title="Nothing here" text="No payments with this status." %}
+  {% endif %}
+</div>
+{% include "partials/_pagination.html" %}
+{% endblock %}

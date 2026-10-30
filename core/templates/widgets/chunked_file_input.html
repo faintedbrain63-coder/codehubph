@@ -1,0 +1,3 @@
+{% include "widgets/private_file_input.html" %}
+<input type="hidden" name="{{ widget.token_name }}" value="{% if widget.upload %}{{ widget.upload.pk }}{% endif %}" data-upload-token data-upload-url="{% url 'dashboard:upload_start' %}">
+{% if widget.upload %}<div class="small text-success mt-1" data-upload-ready><i class="bi bi-cloud-check" aria-hidden="true"></i> Uploaded and ready to save: <code>{{ widget.upload.filename }}</code> ({{ widget.upload.size|filesizeformat }}). Select another file only to replace it.</div>{% endif %}

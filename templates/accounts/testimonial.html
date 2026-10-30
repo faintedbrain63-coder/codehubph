@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block title %}My review · {% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'accounts:dashboard' %}">My account</a></li>
+        <li class="breadcrumb-item active" aria-current="page">My review</li>
+      </ol>
+    </nav>
+    <span class="page-kicker">Share your experience</span>
+    <h1 class="h2 mb-1">My review</h1>
+    <p class="text-body-secondary mb-0">Tell other customers about your experience. Approved comments appear on our home page.</p>
+  </div>
+</div>
+<div class="container py-4">
+  {% include "accounts/_account_nav.html" %}
+  {% if not eligible %}
+    <div class="card">
+      {% url 'capstone:request_new' as list_url %}
+      {% include "partials/_empty_state.html" with icon="chat-quote" title="Reviews open after your first confirmed payment" text="Once your project payment is confirmed, you can share your experience here." action_url=list_url action_label="Start a project" %}
+    </div>
+  {% else %}
+    <div class="row g-4">
+      <div class="col-lg-7">
+        <div class="card p-4">
+          <h2 class="h5 mb-3">{% if existing %}Edit your comment{% else %}Write a comment{% endif %}</h2>
+          <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+            {% include "partials/_field.html" with field=form.rating %}
+            {% include "partials/_field.html" with field=form.message %}
+            {% include "partials/_field.html" with field=form.role %}
+            <p class="small text-body-secondary">Your comment will be shown as <strong>{{ user.get_full_name|default:"Customer" }}</strong>. You can change your name in your <a href="{% url 'accounts:profile' %}">profile</a>.</p>
+            <button type="submit" class="btn btn-primary" data-loading-text="Sending…">
+              <i class="bi bi-send me-2" aria-hidden="true"></i>{% if existing %}Update comment{% else %}Submit comment{% endif %}
+            </button>
+          </form>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="card p-4">
+          <h2 class="h5">Status</h2>
+          {% if existing %}
+            <p class="mb-2">{% status_badge existing.status existing.get_status_display %}</p>
+            {% if existing.status == "pending" %}
+              <p class="small text-body-secondary mb-0">We review every comment before it goes live, usually within a day.</p>
+            {% elif existing.status == "approved" %}
+              <p class="small text-body-secondary mb-0">Your comment is live on the <a href="{% url 'core:home' %}#testimonials">home page</a>. Editing it sends it for review again.</p>
+            {% else %}
+              <p class="small text-body-secondary mb-0">Your comment is not shown publicly. You can edit it and send it for review again.</p>
+            {% endif %}
+          {% else %}
+            <p class="small text-body-secondary mb-0">You haven’t written a comment yet. Comments are reviewed before they appear publicly.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

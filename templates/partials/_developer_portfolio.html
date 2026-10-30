@@ -1,0 +1,28 @@
+{% load static %}
+<section class="section developer-portfolio" id="about" aria-labelledby="developer-name">
+  <div class="container">
+    <div class="developer-layout">
+      <figure class="developer-portrait mb-0">
+        <img src="{% static 'img/portfolio/christian-m-ragus.jpg' %}" alt="Christian M Ragus wearing a dark suit and burgundy tie" width="1024" height="1046" loading="lazy" decoding="async">
+        <figcaption><span class="developer-caption-label">Experience that connects the stack</span><strong>10+ years</strong><span>Building across web, mobile &amp; software</span></figcaption>
+      </figure>
+      <div class="developer-intro">
+        <p class="developer-eyebrow"><span aria-hidden="true"></span>Meet the developer</p>
+        <h2 id="developer-name">Christian M Ragus<span>Full-stack web developer<br>&amp; software engineer</span></h2>
+        <p class="developer-statement">Turning complex requirements into purposeful digital experiences.</p>
+        <p class="developer-bio">I bring over a decade of development experience to building web applications, mobile apps and software. My work connects intuitive interfaces with dependable back-end systems, bringing every layer of an application together around the people who use it.</p>
+        <p class="developer-bio">From responsive front ends and REST APIs to relational databases, cross-platform mobile experiences and native software, I approach development with a focus on clear architecture, maintainable code and practical business needs.</p>
+        <div class="developer-actions">
+          <a class="btn btn-primary btn-lg" href="{% url 'capstone:request_new' %}">Let’s build your next project <i class="bi bi-arrow-up-right ms-2" aria-hidden="true"></i></a>
+          <a class="developer-work-link" href="{% url 'core:portfolio_list' %}">Explore projects <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i></a>
+        </div>
+      </div>
+    </div>
+    <div class="developer-expertise" aria-label="Development expertise">
+      <article><span class="developer-domain"><i class="bi bi-window-stack" aria-hidden="true"></i>01 / Web applications</span><h3>Connected. From interface to data.</h3><p>Responsive user experiences, application logic and APIs built to work together.</p><ul aria-label="Web technologies"><li>Bootstrap 5</li><li>React</li><li>Vanilla JavaScript</li><li>Python</li><li>Django</li><li>Django REST Framework</li><li>PostgreSQL</li></ul></article>
+      <article><span class="developer-domain"><i class="bi bi-phone" aria-hidden="true"></i>02 / Mobile applications</span><h3>A consistent mobile experience.</h3><p>Cross-platform applications that bring your workflows and services to mobile.</p><ul aria-label="Mobile technologies"><li>Flutter</li></ul></article>
+      <article><span class="developer-domain"><i class="bi bi-terminal" aria-hidden="true"></i>03 / Software development</span><h3>Built for the work behind the scenes.</h3><p>Purpose-built software with a focus on performance, reliability and maintainability.</p><ul aria-label="Software technologies"><li>C#</li><li>Rust</li></ul></article>
+    </div>
+    <div class="developer-principles"><span>One developer. A complete technical perspective.</span><p>Thoughtful interfaces <span aria-hidden="true">/</span> Structured back ends <span aria-hidden="true">/</span> Maintainable systems</p></div>
+  </div>
+</section>

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block title %}My project requests · {% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'accounts:dashboard' %}">My account</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Project requests</li>
+      </ol>
+    </nav>
+    <span class="page-kicker">Project workspace</span>
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-3">
+      <div>
+        <h1 class="h2 mb-1">My project requests</h1>
+        <p class="text-body-secondary mb-0">Quotes, payments and delivery updates for your projects.</p>
+      </div>
+      <span class="reference-chip">{{ page_obj.paginator.count }} request{{ page_obj.paginator.count|pluralize }}</span>
+    </div>
+  </div>
+</div>
+<div class="container py-4">
+  {% include "accounts/_account_nav.html" %}
+  {% include "partials/_history_filters.html" %}
+  {% if requests %}
+    <div class="card">
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead><tr><th scope="col">Reference</th><th scope="col">Project</th><th scope="col">Submitted</th><th scope="col">Price</th><th scope="col">Status</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr></thead>
+          <tbody>
+            {% for req in requests %}
+            <tr>
+              <td><a href="{{ req.get_absolute_url }}" class="fw-semibold">{{ req.reference }}</a></td>
+              <td>{{ req.title }}</td>
+              <td class="small text-body-secondary">{{ req.created_at|date:"M j, Y" }}</td>
+              <td>{% if req.agreed_price %}{{ req.agreed_price|money }}{% else %}<span class="text-body-secondary small">Awaiting quote</span>{% endif %}</td>
+              <td>{% status_badge req.status req.get_status_display %}</td>
+              <td class="text-end"><a href="{{ req.get_absolute_url }}" class="btn btn-sm {% if req.status == 'quoted' or req.status == 'accepted' %}btn-primary{% else %}btn-soft{% endif %}">{% if req.status == 'quoted' %}Review quote{% elif req.status == 'accepted' %}Pay now{% else %}View{% endif %}</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% include "partials/_pagination.html" %}
+  {% else %}
+    {% if q or status %}
+    {% include "partials/_empty_state.html" with icon="search" title="No matching requests" text="Try another reference, project title or status." action_url=request.path action_label="Show all requests" %}
+    {% else %}
+    {% url 'capstone:request_new' as cap_url %}
+    {% include "partials/_empty_state.html" with icon="kanban" title="No project requests yet" text="Describe the application you need and we will send you a quote." action_url=cap_url action_label="Start a project" %}
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

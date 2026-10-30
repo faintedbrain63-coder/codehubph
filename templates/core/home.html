@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+{% load static core_tags %}
+{% block title %}Custom web apps, mobile apps & software development · {% endblock %}
+{% block body_class %}landing{% endblock %}
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'css/landing.css' %}">
+  <script>
+    document.documentElement.classList.add("lp-js");
+    setTimeout(function () { if (!window.__lpReady) document.documentElement.classList.remove("lp-js"); }, 2500);
+  </script>
+{% endblock %}
+{% block content %}
+<div class="lp-progress" data-scroll-progress aria-hidden="true"><span></span></div>
+<section class="lp-hero" data-bs-theme="dark" aria-labelledby="hero-title-text">
+  <div class="lp-hero-bg" aria-hidden="true">
+    <div class="lp-aurora lp-aurora-1" data-parallax="0.03"></div>
+    <div class="lp-aurora lp-aurora-2" data-parallax="-0.018"></div>
+    <div class="lp-aurora lp-aurora-3" data-parallax="0.015"></div>
+    <div class="lp-grid"></div><canvas class="lp-particles" data-particles></canvas><div class="lp-hero-fade"></div>
+  </div>
+  <div class="container position-relative">
+    <div class="row align-items-center g-4 g-lg-5">
+      <div class="col-lg-6">
+        <a href="#start" class="lp-pill" data-reveal><span class="lp-pill-dot" aria-hidden="true"></span>Custom project development<i class="bi bi-arrow-down-short" aria-hidden="true"></i></a>
+        <h1 id="hero-title" class="lp-title" data-reveal style="--d: 1">
+          <span id="hero-title-text" class="visually-hidden">Custom web apps, mobile apps and software, built around your project.</span>
+          <span aria-hidden="true">Your idea.<br><span class="lp-gradient-text" data-rotate='["Web apps.", "Mobile apps.", "Software."]'>Web apps.</span><span class="lp-caret"></span><br>Built for you.</span>
+        </h1>
+        <p class="lp-lead" data-reveal style="--d: 2">We create web applications, mobile applications and software for student capstone projects, local government units, military organizations and businesses. Tell us what you need to build.</p>
+        <div class="d-flex flex-wrap gap-3 mb-4" data-reveal style="--d: 3">
+          <a href="{% url 'capstone:request_new' %}" class="btn btn-lg lp-btn-glow"><i class="bi bi-send me-2" aria-hidden="true"></i>Start a project</a>
+          <a href="{% url 'capstone:list' %}" class="btn btn-lg lp-btn-ghost"><i class="bi bi-code-slash me-2" aria-hidden="true"></i>Explore services</a>
+        </div>
+        <ul class="lp-checks" data-reveal style="--d: 4">
+          <li><i class="bi bi-chat-square-text" aria-hidden="true"></i>Discuss your requirements first</li>
+          <li><i class="bi bi-file-earmark-check" aria-hidden="true"></i>Agree on scope, price and timeline</li>
+          <li><i class="bi bi-headset" aria-hidden="true"></i>Track progress with your development team</li>
+        </ul>
+      </div>
+      <div class="col-lg-6" data-reveal="zoom" style="--d: 2">
+        <div class="lp-console-wrap" data-tilt aria-hidden="true">
+          <div class="lp-console">
+            <div class="lp-console-bar"><span></span><span></span><span></span><div class="lp-console-url"><i class="bi bi-lock-fill"></i> {{ SITE_NAME }} · project workspace</div></div>
+            <div class="lp-console-body">
+              <div class="d-flex justify-content-between align-items-center"><div><div class="lp-mini-label">Your custom project</div><span class="lp-mono">From brief to delivery</span></div><span class="lp-status"><span class="lp-status-dot"></span>In progress</span></div>
+              <div class="lp-pipeline">
+                <div class="lp-pipe-step is-done"><i class="bi bi-chat-text"></i><span>Brief</span></div>
+                <div class="lp-pipe-step is-done"><i class="bi bi-file-earmark-check"></i><span>Quote</span></div>
+                <div class="lp-pipe-step is-active"><i class="bi bi-code-slash"></i><span>Build</span></div>
+                <div class="lp-pipe-step"><i class="bi bi-cloud-arrow-down"></i><span>Deliver</span></div>
+                <div class="lp-pipe-track"><div class="lp-pipe-fill"></div></div>
+              </div>
+              <div class="lp-meter"><div class="lp-meter-head"><span class="lp-mini-label">Built around your requirements</span><span>Plan · develop · review</span></div><div class="lp-meter-track"><span></span></div></div>
+              <div class="lp-files"><div class="lp-file"><i class="bi bi-window-stack"></i><span>Web applications</span><span class="lp-file-badge">custom</span></div><div class="lp-file"><i class="bi bi-phone"></i><span>Mobile &amp; software systems</span><span class="lp-file-badge">custom</span></div></div>
+            </div>
+          </div>
+          <div class="lp-float lp-float-1"><i class="bi bi-chat-dots"></i><div><strong>Direct communication</strong><span>your own project thread</span></div></div>
+          <div class="lp-float lp-float-2"><i class="bi bi-shield-lock"></i><div><strong>Private delivery</strong><span>files in your account</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% if tech_stack %}
+<section class="lp-tech" aria-label="Project technologies"><div class="container"><p class="lp-tech-label">Technologies used in our project services</p><div class="lp-tech-row">{% for tech in tech_stack %}<span class="lp-tech-chip"><i class="bi bi-cpu" aria-hidden="true"></i>{{ tech }}</span>{% endfor %}</div></div></section>
+{% endif %}
+<section class="section lp-section" id="start" aria-labelledby="services-title">
+  <div class="container">
+    <div class="lp-section-head" data-reveal><span class="lp-section-index">01 — Our services</span><span class="lp-eyebrow">Built around your needs</span><h2 id="services-title" class="lp-h2">What would you like to create?</h2><p class="lead-muted mb-0">Choose a platform or describe your idea. We will help define a project scope that fits your requirements.</p></div>
+    <div class="lp-paths lp-services">
+      {% for service in services %}
+      <article class="lp-path" data-reveal>
+        <div class="lp-path-top"><span class="lp-path-icon" aria-hidden="true"><i class="bi bi-{{ service.icon }}"></i></span><span class="lp-path-tag">Custom development</span></div>
+        <h3>{{ service.label }}</h3><p>{{ service.text }}</p>
+        <a href="{% url 'capstone:request_new' %}?project_type={{ service.value }}" class="lp-path-foot">Discuss your project <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+<section class="section lp-section lp-section-alt" id="clients" aria-labelledby="clients-title">
+  <div class="container">
+    <div class="lp-section-head" data-reveal><span class="lp-section-index">02 — Who we build for</span><h2 id="clients-title" class="lp-h2">Your project. Your context.</h2><p class="lead-muted mb-0">From a student capstone to an organizational system, development starts with understanding the people who will use it.</p></div>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-4">
+      {% for client in client_types %}<div class="col" data-reveal><article class="card p-4 h-100"><span class="icon-tile mb-3" aria-hidden="true"><i class="bi bi-{{ client.icon }}"></i></span><h3 class="h5">{{ client.label }}</h3><p class="text-body-secondary">{{ client.text }}</p><a href="{% url 'capstone:request_new' %}?client_type={{ client.value }}" class="mt-auto">Start a conversation <i class="bi bi-arrow-right" aria-hidden="true"></i></a></article></div>{% endfor %}
+    </div>
+  </div>
+</section>
+<section class="section lp-section" id="how-it-works" aria-labelledby="process-title">
+  <div class="container"><div class="lp-capstone-grid">
+    <div data-reveal><span class="lp-section-index">03 — The process</span><span class="lp-eyebrow">From idea to working system</span><h2 id="process-title" class="lp-h2">A clear plan.<br>A project built for you.</h2><p class="lead-muted">Share your goals, required features and preferred deadline. We agree on the scope before development, then keep your quote, messages, payments and deliverables together in your account.</p><a href="{% url 'capstone:request_new' %}" class="btn btn-lg btn-primary">Request a quote <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i></a></div>
+    <ol class="lp-timeline" data-timeline>
+      <li data-reveal><span class="lp-timeline-dot">1</span><div><h3>Tell us your requirements</h3><p>Describe your platform, intended users, features and school or organizational needs.</p></div></li>
+      <li data-reveal><span class="lp-timeline-dot">2</span><div><h3>Review your quote</h3><p>Agree on scope, price, deliverables and timeline before accepting and paying.</p></div></li>
+      <li data-reveal><span class="lp-timeline-dot">3</span><div><h3>Follow the development</h3><p>Track progress and discuss updates through your private project message thread.</p></div></li>
+      <li data-reveal><span class="lp-timeline-dot">4</span><div><h3>Receive your project</h3><p>Download the agreed files once they are ready, with documentation or walkthroughs when included.</p></div></li>
+    </ol>
+  </div></div>
+</section>
+{% if testimonials %}
+<section class="section lp-section" id="testimonials" aria-labelledby="testimonials-title">
+  <div class="container">
+    <div class="d-md-flex justify-content-between align-items-end gap-3 mb-4" data-reveal>
+      <div class="lp-section-head mb-0">
+        <span class="lp-section-index" aria-hidden="true">03 — Proof</span>
+        <span class="lp-eyebrow">Customer comments</span>
+        <h2 id="testimonials-title" class="lp-h2 mb-2">What our customers say</h2>
+        <div class="lp-review-summary">
+          {% include "partials/_stars.html" with rating=testimonial_summary.average|floatformat:"0" %}
+          <span><strong>{{ testimonial_summary.average|floatformat:1 }}</strong> out of 5 from {{ testimonial_summary.total }} review{{ testimonial_summary.total|pluralize }}</span>
+        </div>
+      </div>
+      {% if can_leave_testimonial %}
+        <a href="{% url 'accounts:project_reviews' %}" class="btn btn-soft mt-3 mt-md-0"><i class="bi bi-chat-quote me-1" aria-hidden="true"></i>Share your experience</a>
+      {% endif %}
+    </div>
+  </div>
+  <div class="container">
+    <div class="lp-review-rail" data-review-rail>
+      <div class="lp-reviews">
+        {% for t in testimonials %}
+          <figure class="lp-review mb-0">
+            <div class="lp-review-top">
+              {% include "partials/_stars.html" with rating=t.rating %}
+              <i class="bi bi-quote lp-review-quote" aria-hidden="true"></i>
+            </div>
+            <blockquote><p class="mb-0">“{{ t.message }}”</p></blockquote>
+            <figcaption>
+              <span class="testimonial-avatar" aria-hidden="true">{{ t.name|slice:":1"|upper }}</span>
+              <span>
+                <strong>{{ t.name }}</strong>
+                {% if t.portfolio_project %}<small><a href="{{ t.portfolio_project.get_absolute_url }}">{{ t.portfolio_project.title }}</a></small>{% endif %}
+                <small>
+                  {% if t.role %}{{ t.role }}{% endif %}{% if t.role and t.is_verified_customer %} · {% endif %}
+                  {% if t.is_verified_customer %}<i class="bi bi-patch-check-fill text-success" aria-hidden="true"></i> Verified customer{% endif %}
+                </small>
+              </span>
+            </figcaption>
+          </figure>
+        {% endfor %}
+      </div>
+      <div class="lp-rail-controls">
+        <button type="button" class="lp-rail-btn" data-rail-prev aria-label="Previous reviews"><i class="bi bi-arrow-left" aria-hidden="true"></i></button>
+        <button type="button" class="lp-rail-btn" data-rail-next aria-label="Next reviews"><i class="bi bi-arrow-right" aria-hidden="true"></i></button>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+{% include "partials/_developer_portfolio.html" %}
+{% include "partials/_landing_portfolio.html" %}
+
+<section class="section lp-section" id="faq" aria-labelledby="faq-title">
+  <div class="container"><div class="lp-section-head" data-reveal><span class="lp-section-index">05 — Questions</span><h2 id="faq-title" class="lp-h2">Before you start</h2></div>
+    <div class="accordion" id="faq-list">
+      {% for question, answer in faqs %}<div class="accordion-item"><h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-{{ forloop.counter }}" aria-expanded="false" aria-controls="faq-{{ forloop.counter }}">{{ question }}</button></h3><div id="faq-{{ forloop.counter }}" class="accordion-collapse collapse" data-bs-parent="#faq-list"><div class="accordion-body">{{ answer }}</div></div></div>{% endfor %}
+    </div>
+  </div>
+</section>
+<section class="section lp-section lp-section-alt" id="contact" aria-labelledby="contact-title">
+  <div class="container">
+    <div class="row g-4 g-lg-5">
+      <div class="col-lg-5" data-reveal>
+        <span class="lp-section-index" aria-hidden="true">06 — Support</span>
+        <span class="lp-eyebrow">Contact</span>
+        <h2 id="contact-title" class="lp-h2">Questions? We are happy to help.</h2>
+        <p class="lead-muted">Tell us about a student project, a departmental system or a business application. We usually reply within one business day.</p>
+        <ul class="lp-contact-list">
+          <li><span class="icon-tile" aria-hidden="true"><i class="bi bi-envelope"></i></span><a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a></li>
+          {% if site.contact_phone %}<li><span class="icon-tile" aria-hidden="true"><i class="bi bi-telephone"></i></span><span>{{ site.contact_phone }}</span></li>{% endif %}
+          <li><span class="icon-tile" aria-hidden="true"><i class="bi bi-clock"></i></span><span>Replies within one business day</span></li>
+        </ul>
+      </div>
+      <div class="col-lg-7" data-reveal style="--d: 1">
+        <div class="lp-card-static">
+          <form method="post" action="{% url 'core:contact' %}" class="needs-validation" novalidate>
+            {% csrf_token %}
+            <div class="row">
+              <div class="col-md-6">{% include "partials/_field.html" with field=contact_form.name %}</div>
+              <div class="col-md-6">{% include "partials/_field.html" with field=contact_form.email %}</div>
+            </div>
+            {% include "partials/_field.html" with field=contact_form.subject %}
+            {% include "partials/_field.html" with field=contact_form.message %}
+            {{ contact_form.website }}
+            <button type="submit" class="btn btn-lg btn-primary" data-loading-text="Sending…"><i class="bi bi-send me-2" aria-hidden="true"></i>Send message</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<button type="button" class="lp-top" data-back-top aria-label="Back to top" aria-hidden="true" tabindex="-1">
+  <i class="bi bi-arrow-up" aria-hidden="true"></i>
+</button>
+{% endblock %}
+
+{% block extra_js %}<script src="{% static 'js/landing.js' %}" defer></script>{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "dashboard/base_manage.html" %}
+{% block manage_title %}Search · {% endblock %}
+{% block heading %}Search workspace{% endblock %}
+{% block subheading %}<p class="text-body-secondary mb-0">Find a product, project, order or customer without switching sections.</p>{% endblock %}
+{% block manage_content %}
+<form method="get" role="search" class="workspace-filters"><div class="filter-search"><label for="q">Search all sections</label><input class="form-control" id="q" type="search" name="q" value="{{ q }}" minlength="2" maxlength="100" placeholder="Name, technology, email or order number" autofocus></div><button class="btn btn-primary" type="submit" data-no-loading>Search</button></form>
+{% if q|length >= 2 %}
+<p class="workspace-results" role="status">{{ result_count }} matching result{{ result_count|pluralize }} · Up to 5 per section</p>
+<div class="row g-4">{% for group in groups %}{% if group.rows %}<section class="col-lg-6"><div class="card h-100"><div class="card-header"><h2 class="h6 mb-0">{{ group.title }}</h2><a href="{{ group.url }}?q={{ q|urlencode }}">See all matches</a></div><div class="list-group list-group-flush">{% for row in group.rows %}<a href="{{ row.url }}" class="list-group-item list-group-item-action py-3"><strong>{{ row.title }}</strong><div class="small text-body-secondary">{{ row.subtitle }}</div></a>{% endfor %}</div></div></section>{% endif %}{% endfor %}</div>
+{% if not result_count %}{% include "partials/_empty_state.html" with icon="search" title="No matches found" text="Check the spelling, try an email address or use fewer words." %}{% endif %}
+{% else %}{% include "partials/_empty_state.html" with icon="search" title="What are you looking for?" text="Enter at least two characters. Results include drafts and are only visible to staff." %}{% endif %}
+{% endblock %}

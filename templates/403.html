@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Access denied · {% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="text-center mb-3"><span class="reference-chip">Error 403</span></div>
+  {% url 'core:home' as home_url %}
+  {% include "partials/_empty_state.html" with icon="shield-lock" title="You don’t have access to this page" text="If you think this is a mistake, sign in with the right account or contact us." action_url=home_url action_label="Go to the home page" %}
+</div>
+{% endblock %}

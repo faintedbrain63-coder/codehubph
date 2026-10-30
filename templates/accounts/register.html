@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Create account · {% endblock %}
+{% block content %}
+<div class="auth-shell">
+  <aside class="auth-aside">
+    <a class="d-inline-flex align-items-center gap-2 text-decoration-none auth-brand" href="{% url 'core:home' %}">
+      <span class="brand-mark" aria-hidden="true"><i class="bi bi-lightning-charge-fill"></i></span>
+      <span class="fw-bold font-display">{{ SITE_NAME }}</span>
+    </a>
+    <div class="my-4">
+      <span class="eyebrow">Start in minutes</span>
+      <h2>Turn your project idea into a working application.</h2>
+      <p>Create a free account to submit your requirements, review a quote and follow development in one place.</p>
+      <ul class="auth-points mt-4">
+        <li><i class="bi bi-check2-circle" aria-hidden="true"></i><span>No subscription. Pay only for what you need.</span></li>
+        <li><i class="bi bi-shield-lock" aria-hidden="true"></i><span>Card details never touch our servers.</span></li>
+        <li><i class="bi bi-kanban" aria-hidden="true"></i><span>Keep project messages and delivered files in your account.</span></li>
+      </ul>
+    </div>
+    <p class="small mb-0" style="color:#64748b;">For students, government organizations and businesses.</p>
+  </aside>
+  <div class="auth-form">
+    <span class="eyebrow">Create account</span>
+    <h1 class="h3 mb-1">Create your free account</h1>
+    <p class="text-body-secondary mb-4">It’s free. Start a project and keep every update in one place.</p>
+    {% if next %}
+      <div class="alert alert-info d-flex gap-2 align-items-start" role="status">
+        <i class="bi bi-arrow-right-circle" aria-hidden="true"></i>
+        <span>Register to continue where you left off. Already have an account? <a href="{% url 'accounts:login' %}?next={{ next|urlencode }}">Sign in</a> instead and you’ll pick up from the same step.</span>
+      </div>
+    {% endif %}
+    <form method="post" class="needs-validation" novalidate>
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}">
+      {% if form.non_field_errors %}<div class="alert alert-danger" role="alert">{{ form.non_field_errors|join:" " }}</div>{% endif %}
+      <div class="row">
+        <div class="col-md-6">{% include "partials/_field.html" with field=form.first_name %}</div>
+        <div class="col-md-6">{% include "partials/_field.html" with field=form.last_name %}</div>
+      </div>
+      {% include "partials/_field.html" with field=form.email %}
+      {% include "partials/_field.html" with field=form.phone_number icon="telephone" show_optional=1 %}
+      {% include "partials/_field.html" with field=form.school icon="mortarboard" show_optional=1 %}
+      {% include "partials/_field.html" with field=form.password1 %}
+      {% include "partials/_field.html" with field=form.password2 %}
+      <fieldset class="border rounded-3 p-3 mb-3">
+        <legend class="float-none w-auto h6 px-1 mb-2">Review and agree</legend>
+        <p class="small text-body-secondary">Read both documents before creating your account. Each title opens the full text here.</p>
+        <ul class="small text-body-secondary ps-3">
+          <li>Work follows an accepted quote and confirmed payment. Scope changes and continuing maintenance require an agreement.</li>
+          <li>The developer retains copyright unless expressly assigned in writing. Your paid project receives the agreed use licence.</li>
+          <li>The agreement includes cancellation, liability and client-data responsibilities. Public reviews and private-project publication need separate permission.</li>
+        </ul>
+        {{ form.privacy_version }}{{ form.license_version }}
+        {% include "partials/_field.html" with field=form.accept_privacy %}
+        {% include "partials/_field.html" with field=form.accept_license %}
+        <p class="small text-body-secondary mb-0">Both agreements are required. This does not subscribe you to marketing
+          or personalized ads, authorize public portfolio disclosure, or waive rights protected by law.
+          School/organization is optional at registration; educational information is processed for your requested services as explained in the Policy.</p>
+      </fieldset>
+      <button type="submit" class="btn btn-primary w-100" data-loading-text="Creating account…">Create account</button>
+    </form>
+    <p class="text-center small text-body-secondary mt-4 mb-0">Already have an account? <a href="{% url 'accounts:login' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Sign in</a></p>
+  </div>
+</div>
+{% include "partials/_legal_modal.html" with document=privacy_document modal_id="legal-privacy" %}
+{% include "partials/_legal_modal.html" with document=license_document modal_id="legal-license" %}
+{% endblock %}

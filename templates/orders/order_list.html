@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block title %}My orders · {% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'accounts:dashboard' %}">My account</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Orders</li>
+      </ol>
+    </nav>
+    <span class="page-kicker">Purchase history</span>
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-3">
+      <div>
+        <h1 class="h2 mb-1">My orders</h1>
+        <p class="text-body-secondary mb-0">Receipts, payment status and downloads for every purchase.</p>
+      </div>
+      <span class="reference-chip">{{ page_obj.paginator.count }} order{{ page_obj.paginator.count|pluralize }}</span>
+    </div>
+  </div>
+</div>
+<div class="container py-4">
+  {% include "accounts/_account_nav.html" %}
+  {% include "partials/_history_filters.html" with search_hint="Order number or product name" %}
+  {% if orders %}
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table align-middle mb-0">
+        <thead><tr><th scope="col">Order</th><th scope="col">Items</th><th scope="col">Date</th><th scope="col">Total</th><th scope="col">Status</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr></thead>
+        <tbody>
+          {% for order in orders %}
+          <tr>
+            <td><a href="{{ order.get_absolute_url }}" class="fw-semibold">{{ order.number }}</a></td>
+            <td class="small">{% for item in order.items.all %}{{ item.product_name }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+            <td class="small text-body-secondary">{{ order.created_at|date:"M j, Y" }}</td>
+            <td class="fw-semibold">{{ order.total|money }}</td>
+            <td>{% status_badge order.status order.get_status_display %}</td>
+            <td class="text-end">
+              {% if order.can_be_paid %}<a href="{{ order.get_payment_url }}" class="btn btn-sm btn-primary">Pay now</a>
+              {% else %}<a href="{{ order.get_absolute_url }}" class="btn btn-sm btn-soft">View</a>{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% include "partials/_pagination.html" %}
+  {% else %}
+    {% if q or status %}
+    {% include "partials/_empty_state.html" with icon="search" title="No matching orders" text="Try a different search or status." action_url=request.path action_label="Show all orders" %}
+    {% else %}
+    {% url 'capstone:request_new' as list_url %}
+    {% include "partials/_empty_state.html" with icon="receipt" title="No previous orders" text="Historical product orders and receipts remain available here. New custom work starts with a project request." action_url=list_url action_label="Start a project" %}
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

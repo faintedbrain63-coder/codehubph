@@ -1,0 +1,27 @@
+{% load core_tags %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+  <h2 class="h5 mb-0"><i class="bi bi-credit-card text-primary me-2" aria-hidden="true"></i>Debit / Credit Card</h2>
+  <div class="card-brands d-flex gap-2" aria-label="Accepted cards: Visa, Mastercard, American Express">
+    <i class="bi bi-credit-card-2-front" title="Visa" aria-hidden="true"></i>
+    <i class="bi bi-credit-card" title="Mastercard" aria-hidden="true"></i>
+    <i class="bi bi-credit-card-2-back" title="American Express" aria-hidden="true"></i>
+  </div>
+</div>
+<div class="alert alert-info border small d-flex gap-2" role="note">
+  <i class="bi bi-shield-lock-fill text-success" aria-hidden="true"></i>
+  <span><strong>Secured payment.</strong> Card details are entered into secure fields provided by PayPal. They never touch our servers and are never stored by us.</span>
+</div>
+<div id="error-card" class="alert alert-danger d-none" role="alert" tabindex="-1"></div>
+<div id="card-not-eligible" class="alert alert-warning d-none" role="status">Card payments are not available for this account right now. Please choose PayPal or GCash.</div>
+<div id="card-button" class="card-button d-none" aria-label="Pay with a debit or credit card"></div>
+<form id="card-form" novalidate>
+  <div class="mb-3"><label class="form-label" for="card-name">Name on card</label><div id="card-name" class="card-field"></div></div>
+  <div class="mb-3"><label class="form-label" for="card-number">Card number</label><div id="card-number" class="card-field"></div></div>
+  <div class="row">
+    <div class="col-6 mb-3"><label class="form-label" for="card-expiry">Expiry date</label><div id="card-expiry" class="card-field"></div></div>
+    <div class="col-6 mb-3"><label class="form-label" for="card-cvv">CVV</label><div id="card-cvv" class="card-field"></div></div>
+  </div>
+  <button id="card-submit" type="submit" class="btn btn-primary btn-lg" data-loading-text="Processing payment…" data-no-loading disabled>
+    <i class="bi bi-lock-fill me-2" aria-hidden="true"></i>Pay {{ payable.amount_due|money }}
+  </button>
+</form>

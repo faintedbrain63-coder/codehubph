@@ -1,0 +1,13 @@
+{% autoescape off %}Hi {{ payment.customer.first_name|default:payment.customer.email }},
+
+We could not verify your {{ payment.get_method_display }} payment for {{ payable.reference }}.
+
+Reason: {{ payment.rejection_reason }}
+
+You can submit your payment details again here:
+{{ site_url }}{{ payable.get_payment_url }}
+
+If you believe this is a mistake, simply reply to this email with your receipt.
+
+— {{ site_name }}
+{% endautoescape %}

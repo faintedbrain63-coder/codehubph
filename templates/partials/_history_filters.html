@@ -1,0 +1,7 @@
+<form method="get" role="search" class="history-filters card p-3 mb-4">
+  <div class="row g-3 align-items-end">
+    <div class="col-md"><label for="history-query" class="form-label">Search</label><input type="search" class="form-control" id="history-query" name="q" value="{{ q }}" maxlength="100" placeholder="{{ search_hint|default:'Reference or project name' }}"></div>
+    <div class="col-md-4"><label for="history-status" class="form-label">Status</label><select class="form-select" id="history-status" name="status"><option value="">All statuses</option>{% for value, label in statuses %}<option value="{{ value }}"{% if status == value %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+    <div class="col-md-auto d-flex gap-2"><button type="submit" class="btn btn-primary" data-no-loading>Apply</button><a class="btn btn-soft" href="{{ request.path }}">Reset</a></div>
+  </div>
+</form>

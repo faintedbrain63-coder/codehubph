@@ -1,0 +1,40 @@
+{% extends "dashboard/base_manage.html" %}
+{% block manage_title %}{% if project %}Edit {{ project.title }}{% else %}New service project{% endif %} · {% endblock %}
+{% block heading %}{% if project %}Edit project service{% else %}New project service{% endif %}{% endblock %}
+{% block subheading %}<p class="text-body-secondary mb-0">Describe a service or example project. Reference files are optional; upload customer builds to each project request when ready.</p>{% endblock %}
+{% block actions %}{% if project %}<a href="{% url 'dashboard:capstone_project_detail' project.pk %}" class="btn btn-soft">Staff preview</a>{% endif %}{% endblock %}
+{% block manage_content %}
+<form method="post" enctype="multipart/form-data" class="needs-validation" novalidate data-dirty-form>
+  {% csrf_token %}
+  {% include "dashboard/_form_summary.html" %}
+  <div class="row g-4">
+    <div class="col-xl-8">
+      <section class="card p-4">
+        <div class="row">
+          <div class="col-md-8">{% include "partials/_field.html" with field=form.title %}</div>
+          <div class="col-md-4">{% include "partials/_field.html" with field=form.field %}</div>
+        </div>
+        {% include "partials/_field.html" with field=form.slug %}
+        {% include "partials/_field.html" with field=form.short_description %}
+        {% include "partials/_field.html" with field=form.description %}
+        {% include "partials/_field.html" with field=form.features %}
+        {% include "partials/_field.html" with field=form.tech_stack %}
+      </section>
+    </div>
+    <div class="col-xl-4 d-grid gap-4 align-content-start">
+      <section class="card p-4">
+        {% include "partials/_field.html" with field=form.status %}
+        {% include "partials/_field.html" with field=form.suggested_price %}
+      </section>
+      <section class="card p-4">
+        <h2 class="h6 mb-3">Files</h2>
+        {% include "partials/_field.html" with field=form.thumbnail %}
+        {% include "partials/_field.html" with field=form.source_code %}
+        {% include "partials/_field.html" with field=form.documentation %}
+        <p class="small text-body-secondary mb-0"><i class="bi bi-lock me-1" aria-hidden="true"></i>Source code and documentation are private. Customers can download them only after their request is paid.</p>
+      </section>
+    </div>
+  </div>
+  <div class="workspace-save-bar"><span class="save-hint">Private source files are released only after payment.</span><a href="{% url 'dashboard:capstone_project_list' %}" class="btn btn-soft">Cancel</a><button type="submit" class="btn btn-soft" name="save_action" value="continue" data-loading-text="Saving…">Save &amp; continue editing</button><button type="submit" class="btn btn-primary" data-loading-text="Saving…">Save project</button></div>
+</form>
+{% endblock %}

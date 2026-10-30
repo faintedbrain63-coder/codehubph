@@ -1,0 +1,20 @@
+{% load core_tags %}
+<article class="card product-card card-hover h-100 position-relative">
+  {% if product.thumbnail %}
+    <img src="{{ product.thumbnail.url }}" class="product-thumb" alt="Screenshot of {{ product.name }}" loading="lazy" width="640" height="400">
+  {% else %}
+    <div class="thumb-placeholder" aria-hidden="true"><i class="bi bi-{{ product.category_icon }}"></i></div>
+  {% endif %}
+  <div class="card-body d-flex flex-column">
+    <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+      <span class="tag tag-brand"><i class="bi bi-{{ product.category_icon }}" aria-hidden="true"></i>{{ product.get_category_display }}</span>
+      {% if product.is_featured %}<span class="tag"><i class="bi bi-star-fill text-warning" aria-hidden="true"></i>Featured</span>{% endif %}
+    </div>
+    <h3 class="card-title mb-2 stretched-title"><a href="{{ product.get_absolute_url }}" class="stretched-link">{{ product.name }}</a></h3>
+    <p class="product-desc text-body-secondary small mb-3">{{ product.short_description }}</p>
+    <div class="card-foot">
+      <span class="price">{{ product.price|money }}</span>
+      <span class="small text-primary fw-semibold">View details <i class="bi bi-arrow-right" aria-hidden="true"></i></span>
+    </div>
+  </div>
+</article>

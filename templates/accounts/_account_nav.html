@@ -1,0 +1,8 @@
+{% load core_tags %}
+<nav class="nav account-nav mb-4 no-print" aria-label="Account sections">
+  <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' or request.resolver_match.url_name == 'purchases' %}active{% endif %}" href="{% if user.is_staff %}{% url 'accounts:purchases' %}{% else %}{% url 'accounts:dashboard' %}{% endif %}"><i class="bi bi-grid" aria-hidden="true"></i>Overview</a>
+  {% if has_order_history %}<a class="nav-link {% active '/orders/' '/account/purchases/' %}" href="{% url 'orders:list' %}"><i class="bi bi-receipt" aria-hidden="true"></i>Purchase history</a>{% endif %}
+  <a class="nav-link {% active '/account/capstone/' %}" href="{% url 'capstone:my_requests' %}"><i class="bi bi-kanban" aria-hidden="true"></i>Project requests</a>
+  <a class="nav-link {% active '/account/review/' '/account/project-reviews/' %}" href="{% url 'accounts:project_reviews' %}"><i class="bi bi-chat-quote" aria-hidden="true"></i>My reviews</a>
+  <a class="nav-link {% active '/account/settings/' '/account/profile/' '/account/password/' %}" href="{% if user.is_staff %}{% url 'dashboard:settings' %}{% else %}{% url 'accounts:settings' %}{% endif %}"><i class="bi bi-gear" aria-hidden="true"></i>Settings</a>
+</nav>

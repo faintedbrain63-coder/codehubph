@@ -1,0 +1,9 @@
+<a class="portfolio-media" data-platform="{{ project.project_type }}" href="{{ project.get_absolute_url }}" aria-label="View {{ project.title }}">
+  <span class="portfolio-stage{% if project.stage == 'completed' %} is-completed{% endif %}">{{ project.get_stage_display }}</span>
+  <div class="portfolio-device">
+    <div class="portfolio-device-bar" aria-hidden="true"><span class="portfolio-device-dot"></span><span class="portfolio-device-dot"></span><span class="portfolio-device-dot"></span><span class="portfolio-device-label">{% if project.project_domain %}{{ project.project_domain }}{% else %}{{ project.title }}{% endif %}</span></div>
+    <div class="portfolio-device-screen">
+      {% with screenshot=project.thumbnail %}{% if screenshot %}<img src="{{ screenshot.get_absolute_url }}" alt="{{ screenshot.caption|default:project.title }}" loading="lazy" width="960" height="600">{% else %}<div class="portfolio-placeholder"><i class="bi bi-{% if project.project_type == 'web' %}window-stack{% elif project.project_type == 'mobile' %}phone{% else %}pc-display{% endif %}" aria-hidden="true"></i><span>{% if project.project_domain %}{{ project.project_domain }}{% else %}{{ project.get_project_type_display }}{% endif %}</span></div>{% endif %}{% endwith %}
+    </div>
+  </div>
+</a>

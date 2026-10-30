@@ -1,0 +1,32 @@
+{% extends "dashboard/base_manage.html" %}
+{% load core_tags %}
+{% block manage_title %}Project requests · {% endblock %}
+{% block heading %}Project requests{% endblock %}
+{% block subheading %}<p class="text-body-secondary mb-0">Review requirements, send quotes and follow each project through delivery.</p>{% endblock %}
+{% block manage_content %}
+{% include "dashboard/_filters.html" %}
+<div class="card">
+  {% if requests %}
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead><tr><th scope="col">Reference</th><th scope="col">Customer</th><th scope="col">Project</th><th scope="col">Deadline</th><th scope="col">Price</th><th scope="col">Status</th></tr></thead>
+      <tbody>
+        {% for req in requests %}
+        <tr>
+          <td><a href="{% url 'dashboard:capstone_request_detail' req.reference %}" class="fw-semibold">{{ req.reference }}</a><div class="small text-body-secondary">{{ req.created_at|date:"M j, Y" }}</div></td>
+          <td class="small">{{ req.customer.display_name }}<div class="text-body-secondary">{{ req.school_name }}</div></td>
+          <td class="small">{{ req.title }}</td>
+          <td class="small">{{ req.preferred_deadline|date:"M j, Y"|default:"—" }}</td>
+          <td>{% if req.agreed_price %}{{ req.agreed_price|money }}{% else %}<span class="small text-body-secondary">Not quoted</span>{% endif %}</td>
+          <td>{% status_badge req.status req.get_status_display %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    {% include "partials/_empty_state.html" with icon="inboxes" title="No requests found" text="Project requests from customers will appear here." %}
+  {% endif %}
+</div>
+{% include "partials/_pagination.html" %}
+{% endblock %}

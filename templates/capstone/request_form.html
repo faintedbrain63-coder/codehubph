@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block title %}Request a project · {% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'capstone:list' %}">Project services</a></li>
+        {% if project %}<li class="breadcrumb-item"><a href="{{ project.get_absolute_url }}">{{ project.title }}</a></li>{% endif %}
+        <li class="breadcrumb-item active" aria-current="page">Request</li>
+      </ol>
+    </nav>
+    <span class="page-kicker">Free request · no payment yet</span>
+    <h1 class="h2 mb-1">{% if project %}Request this project{% else %}Tell us about your project{% endif %}</h1>
+    <p class="text-body-secondary mb-0">{% if project %}{{ project.title }} · starting at {{ project.suggested_price|money }}{% else %}Custom web apps, mobile apps and software for students, local government units, military organizations and businesses.{% endif %}</p>
+  </div>
+</div>
+<div class="container py-4">
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="card p-4">
+        <form method="post" class="needs-validation" novalidate>
+          {% csrf_token %}
+          {% include "partials/_form.html" %}
+          <button type="submit" class="btn btn-primary" data-loading-text="Sending request…"><i class="bi bi-send me-2" aria-hidden="true"></i>Send request</button>
+          <a href="{% url 'capstone:list' %}" class="btn btn-link">Cancel</a>
+        </form>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="card p-4">
+        <h2 class="h5">What happens next?</h2>
+        <ol class="small text-body-secondary ps-3 mb-0 d-grid gap-2">
+          <li>We review your request, usually within one business day.</li>
+          <li>You receive a quote with the final price and what’s included.</li>
+          <li>If you accept, you pay through our secure checkout.</li>
+          <li>We develop your project and deliver the agreed files to your private request page.</li>
+        </ol>
+        <p class="small mt-3 mb-0">Sending a request is free and you can cancel any time before paying.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

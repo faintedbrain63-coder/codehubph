@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block title %}{{ product.name }} · {% endblock %}
+{% block meta_description %}{{ product.short_description }}{% endblock %}
+{% block content %}
+<div class="container py-4 py-lg-5">
+  <nav aria-label="Breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'catalog:list' %}">Products</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'catalog:list' %}?category={{ product.category }}">{{ product.get_category_display }}</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ product.name }}</li>
+    </ol>
+  </nav>
+
+  <div class="row g-4 g-lg-5">
+    <div class="col-lg-7">
+      {% with images=product.images.all %}
+        {% if product.thumbnail %}
+          <img src="{{ product.thumbnail.url }}" alt="{{ product.name }} main screenshot" class="gallery-main mb-3" data-gallery-main width="960" height="600">
+        {% elif images %}
+          <img src="{{ images.0.image.url }}" alt="{{ images.0 }}" class="gallery-main mb-3" data-gallery-main width="960" height="600">
+        {% else %}
+          <div class="thumb-placeholder rounded-4 mb-3" aria-hidden="true"><i class="bi bi-{{ product.category_icon }}"></i></div>
+        {% endif %}
+        {% if images %}
+          <div class="gallery-thumbs d-flex flex-wrap gap-2" aria-label="Screenshots">
+            {% if product.thumbnail %}
+              <button type="button" data-gallery-thumb data-src="{{ product.thumbnail.url }}" data-alt="{{ product.name }} main screenshot" aria-current="true" aria-label="Show main screenshot">
+                <img src="{{ product.thumbnail.url }}" alt="" loading="lazy">
+              </button>
+            {% endif %}
+            {% for img in images %}
+              <button type="button" data-gallery-thumb data-src="{{ img.image.url }}" data-alt="{{ img }}" aria-current="{% if not product.thumbnail and forloop.first %}true{% else %}false{% endif %}" aria-label="Show screenshot: {{ img }}">
+                <img src="{{ img.image.url }}" alt="" loading="lazy">
+              </button>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <section class="mt-4 mt-lg-5" aria-labelledby="about-title">
+        <span class="eyebrow">Overview</span>
+        <h2 id="about-title" class="h4">About this product</h2>
+        <div class="text-body-secondary">{{ product.description|linebreaks }}</div>
+      </section>
+
+      {% if product.features %}
+      <section class="mt-4" aria-labelledby="features-title">
+        <h2 id="features-title" class="h4">What’s included</h2>
+        <ul class="feature-list row row-cols-1 row-cols-md-2 g-2">
+          {% for feature in product.features|split_lines %}
+            <li class="col"><i class="bi bi-check-circle-fill" aria-hidden="true"></i><span>{{ feature }}</span></li>
+          {% endfor %}
+        </ul>
+      </section>
+      {% endif %}
+
+      <div class="d-flex flex-wrap gap-2 mt-4">
+        <span class="tag"><i class="bi bi-file-earmark-zip" aria-hidden="true"></i>Full source code</span>
+        <span class="tag"><i class="bi bi-shield-lock" aria-hidden="true"></i>Private download</span>
+        <span class="tag"><i class="bi bi-headset" aria-hidden="true"></i>Setup help</span>
+        <span class="tag"><i class="bi bi-arrow-repeat" aria-hidden="true"></i>Free updates</span>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <aside class="buy-card" aria-labelledby="product-title">
+        <span class="tag tag-brand mb-3"><i class="bi bi-{{ product.category_icon }}" aria-hidden="true"></i>{{ product.get_category_display }}</span>
+        <h1 id="product-title" class="h3 mb-2">{{ product.name }}</h1>
+        <p class="text-body-secondary">{{ product.short_description }}</p>
+        <div class="buy-price mb-1">{{ product.price|money }}</div>
+        <p class="trust-note mb-4"><i class="bi bi-lightning-charge" aria-hidden="true"></i>{% if has_instant_payments %}Instant access once payment is confirmed{% else %}Download access opens as soon as we verify your payment{% endif %}</p>
+
+        {% if owned_item %}
+          <div class="alert alert-success d-flex gap-2 align-items-start" role="status">
+            <i class="bi bi-check-circle-fill" aria-hidden="true"></i><span>You own this product.</span>
+          </div>
+          {% if owned_item.can_download %}
+            <a href="{% url 'orders:download' owned_item.pk %}" class="btn btn-primary btn-lg w-100 mb-2"><i class="bi bi-download me-2" aria-hidden="true"></i>Download</a>
+          {% else %}
+            <p class="small text-body-secondary" role="status">{{ owned_item.download_block_reason }}</p>
+            <a href="{% url 'core:home' %}#contact" class="btn btn-primary w-100 mb-2">Request download access</a>
+          {% endif %}
+          <a href="{{ owned_item.order.get_absolute_url }}" class="btn btn-soft w-100">View order</a>
+        {% else %}
+          <form method="post" action="{% url 'orders:buy_now' product.slug %}" class="mb-2">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary btn-lg w-100" data-loading-text="{% if user.is_authenticated %}Preparing checkout…{% else %}Opening registration…{% endif %}"><i class="bi bi-lightning-charge me-2" aria-hidden="true"></i>Buy now</button>
+          </form>
+          <form method="post" action="{% url 'orders:cart_add' product.slug %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-primary w-100"><i class="bi bi-bag-plus me-2" aria-hidden="true"></i>Add to cart</button>
+          </form>
+          {% if not user.is_authenticated %}
+            <p class="small text-body-secondary text-center mt-2 mb-0">New here? You’ll create a free account first, then go straight to checkout. Your downloads are saved to your account.</p>
+          {% endif %}
+        {% endif %}
+
+        <hr>
+        <dl class="row small mb-0">
+          <dt class="col-5 text-body-secondary fw-normal">Version</dt><dd class="col-7">{{ product.version }}</dd>
+          {% if product.file_size %}<dt class="col-5 text-body-secondary fw-normal">Download size</dt><dd class="col-7">{{ product.file_size|filesizeformat }}</dd>{% endif %}
+          <dt class="col-5 text-body-secondary fw-normal">Updated</dt><dd class="col-7">{{ product.updated_at|date:"M j, Y" }}</dd>
+          {% if product.tech_stack %}
+            <dt class="col-5 text-body-secondary fw-normal">Tech stack</dt>
+            <dd class="col-7 d-flex flex-wrap gap-1">{% for tag in product.tech_stack|split_tags %}<span class="tag">{{ tag }}</span>{% endfor %}</dd>
+          {% endif %}
+        </dl>
+        {% if product.demo_url %}
+          <a href="{{ product.demo_url }}" class="btn btn-soft w-100 mt-3" target="_blank" rel="noopener noreferrer"><i class="bi bi-box-arrow-up-right me-2" aria-hidden="true"></i>Try the live demo</a>
+        {% endif %}
+        <p class="trust-note mt-3 mb-0"><i class="bi bi-shield-lock" aria-hidden="true"></i>Secure checkout with {{ payment_methods_text }}.</p>
+      </aside>
+    </div>
+  </div>
+
+  {% if related %}
+  <section class="mt-5 pt-4 border-top" aria-labelledby="related-title">
+    <div class="d-flex justify-content-between align-items-end gap-3 mb-4">
+      <div>
+        <span class="eyebrow">Keep exploring</span>
+        <h2 id="related-title" class="h4 mb-0">You might also like</h2>
+      </div>
+      <a href="{% url 'catalog:list' %}" class="small">View all products</a>
+    </div>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4 card-grid">
+      {% for product in related %}<div class="col">{% include "partials/_product_card.html" %}</div>{% endfor %}
+    </div>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block title %}My dashboard · {% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">My account</li>
+      </ol>
+    </nav>
+    <span class="page-kicker">Your account</span>
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-3">
+      <div>
+        <h1 class="h2 mb-1">Hi, {{ user.first_name|default:user.email }}</h1>
+        <p class="text-body-secondary mb-0">Your previous purchases, project requests and payments.</p>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        <button type="button" class="btn btn-soft" data-bs-toggle="modal" data-bs-target="#onboarding"><i class="bi bi-signpost-2 me-1" aria-hidden="true"></i>How projects work</button>
+        <a href="{% url 'capstone:request_new' %}" class="btn btn-soft"><i class="bi bi-send me-1" aria-hidden="true"></i>Start a project</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container py-4">
+  {% include "accounts/_account_nav.html" %}
+
+  {% if open_orders %}
+    <div class="alert alert-warning d-flex flex-wrap justify-content-between align-items-center gap-2" role="status">
+      <span><i class="bi bi-clock-history me-1" aria-hidden="true"></i>You have orders waiting for payment or verification.</span>
+      <a href="{% url 'orders:list' %}" class="btn btn-sm btn-soft">Review orders</a>
+    </div>
+  {% endif %}
+
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+      <div class="card stat-card p-3 h-100">
+        <div class="d-flex justify-content-between align-items-start gap-2">
+          <div><div class="stat-label">Products owned</div><div class="stat-value">{{ stats.purchases }}</div></div>
+          <span class="icon-tile" aria-hidden="true"><i class="bi bi-box-seam"></i></span>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card stat-card p-3 h-100">
+        <div class="d-flex justify-content-between align-items-start gap-2">
+          <div><div class="stat-label">Orders</div><div class="stat-value">{{ stats.orders }}</div></div>
+          <span class="icon-tile" aria-hidden="true"><i class="bi bi-receipt"></i></span>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card stat-card p-3 h-100">
+        <div class="d-flex justify-content-between align-items-start gap-2">
+          <div><div class="stat-label">Active capstone requests</div><div class="stat-value">{{ stats.capstone }}</div></div>
+          <span class="icon-tile" aria-hidden="true"><i class="bi bi-mortarboard"></i></span>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card stat-card p-3 h-100">
+        <div class="d-flex justify-content-between align-items-start gap-2">
+          <div><div class="stat-label">Payments under review</div><div class="stat-value">{{ stats.awaiting }}</div></div>
+          <span class="icon-tile" aria-hidden="true"><i class="bi bi-hourglass-split"></i></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <section class="card h-100" aria-labelledby="purchases-title">
+        <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-3">
+          <h2 id="purchases-title" class="h5 mb-0">My purchases</h2>
+          <a href="{% url 'orders:list' %}" class="small">All orders</a>
+        </div>
+        <form method="get" role="search" class="library-search p-3 border-bottom">
+          <label for="library-query" class="form-label small">Search your purchases</label>
+          <div class="d-flex gap-2"><input type="search" class="form-control" id="library-query" name="q" value="{{ q }}" maxlength="100" placeholder="Product name or order number"><button type="submit" class="btn btn-soft" data-no-loading>Search</button>{% if q %}<a href="{{ request.path }}" class="btn btn-link">Reset</a>{% endif %}</div>
+          <p class="small text-body-secondary mt-2 mb-0" role="status">{{ page_obj.paginator.count }} purchase{{ page_obj.paginator.count|pluralize }}{% if q %} matching “{{ q }}”{% endif %}</p>
+        </form>
+        {% if purchases %}
+          <ul class="list-group list-group-flush">
+            {% for item in purchases %}
+              <li class="list-group-item d-flex justify-content-between align-items-center gap-3 py-3">
+                <div class="d-flex align-items-center gap-3">
+                  <span class="icon-tile" aria-hidden="true"><i class="bi bi-file-earmark-zip"></i></span>
+                  <div>
+                    <div class="fw-semibold">{{ item.product_name }}</div>
+                    <div class="small text-body-secondary">v{{ item.product_version }} · {{ item.order.number }}{% if item.downloads_left is not None %} · {{ item.downloads_left }} download{{ item.downloads_left|pluralize }} left{% endif %}</div>
+                  </div>
+                </div>
+                {% if item.can_download %}
+                  <a href="{% url 'orders:download' item.pk %}" class="btn btn-primary btn-sm"><i class="bi bi-download me-1" aria-hidden="true"></i>Download</a>
+                {% else %}
+                  <span class="small text-body-secondary text-end">{{ item.download_block_reason }}</span>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+          {% include "partials/_pagination.html" %}
+        {% else %}
+          {% if q %}
+          {% include "partials/_empty_state.html" with icon="search" title="No matching purchases" text="Try a different product name or reset your search." action_url=request.path action_label="Show all purchases" %}
+          {% else %}
+          {% url 'capstone:request_new' as list_url %}
+          {% include "partials/_empty_state.html" with icon="kanban" title="No previous purchases" text="Your historical paid downloads remain available here. Submit a brief to start a new custom project." action_url=list_url action_label="Start a project" %}
+          {% endif %}
+        {% endif %}
+        {% if open_orders %}
+          <div class="card-footer bg-transparent">
+            <h3 class="h6 mt-2">Orders waiting for payment or verification</h3>
+            <ul class="list-unstyled mb-1">
+              {% for order in open_orders %}
+                <li class="d-flex justify-content-between align-items-center gap-2 py-1">
+                  <a href="{{ order.get_absolute_url }}">{{ order.number }}</a>
+                  <span>{% status_badge order.status order.get_status_display %}</span>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+      </section>
+    </div>
+
+    <div class="col-lg-5 d-grid gap-4">
+      <section class="card" aria-labelledby="capstone-title">
+        <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-3">
+          <h2 id="capstone-title" class="h5 mb-0">My project requests</h2>
+          <a href="{% url 'capstone:my_requests' %}" class="small">View all</a>
+        </div>
+        {% if capstone_requests %}
+          <ul class="list-group list-group-flush">
+            {% for req in capstone_requests %}
+              <li class="list-group-item py-3">
+                <div class="d-flex justify-content-between gap-2">
+                  <a href="{{ req.get_absolute_url }}" class="fw-semibold">{{ req.title }}</a>
+                  {% status_badge req.status req.get_status_display %}
+                </div>
+                <div class="small text-body-secondary">{{ req.reference }}{% if req.agreed_price %} · {{ req.agreed_price|money }}{% endif %}</div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          {% url 'capstone:list' as cap_url %}
+          {% include "partials/_empty_state.html" with icon="mortarboard" title="No capstone requests yet" text="Request a project and we’ll send you a quote." action_url=cap_url action_label="See capstone projects" %}
+        {% endif %}
+      </section>
+
+      <section class="card" aria-labelledby="payments-title">
+        <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-3">
+          <h2 id="payments-title" class="h5 mb-0">Payments</h2>
+          <span class="reference-chip">Secure</span>
+        </div>
+        <div class="card-body">
+          <h3 class="h6">Pending</h3>
+          {% for p in pending_payments %}
+            <div class="d-flex justify-content-between align-items-center gap-2 small py-1"><span>{{ p.payable.reference }} · {{ p.get_method_display }}</span><span class="text-end">{{ p.amount|money }} {% status_badge p.status p.get_status_display %}</span></div>
+          {% empty %}<p class="small text-body-secondary">No pending payments.</p>{% endfor %}
+          <h3 class="h6 mt-3">Approved</h3>
+          {% for p in approved_payments %}
+            <div class="d-flex justify-content-between align-items-center gap-2 small py-1"><span>{{ p.payable.reference }} · {{ p.get_method_display }}</span><span class="text-end">{{ p.amount|money }} {% status_badge p.status "Approved" %}</span></div>
+          {% empty %}<p class="small text-body-secondary mb-0">No approved payments yet.</p>{% endfor %}
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+{% endblock %}

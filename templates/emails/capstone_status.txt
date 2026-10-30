@@ -1,0 +1,16 @@
+{% autoescape off %}Hi {{ req.customer.first_name|default:req.customer.email }},
+
+Your project request {{ req.reference }} ({{ req.title }}) is now: {{ req.get_status_display }}.
+{% if req.status == "quoted" %}
+Your quote: {{ req.agreed_price }} {{ req.currency }}
+{% if req.quote_notes %}{{ req.quote_notes }}
+{% endif %}
+Review and accept the quote here:{% elif req.status == "accepted" %}
+You can now pay to start the project:{% elif req.status == "paid" %}
+Payment confirmed. We are starting on your project.{% elif req.status == "delivered" %}
+Your files are ready to download on your request page:{% elif req.status == "cancelled" %}
+{{ req.cancel_reason }}{% endif %}
+{{ site_url }}{{ req.get_absolute_url }}
+
+— {{ site_name }}
+{% endautoescape %}

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block title %}Your cart · {% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Cart</li>
+      </ol>
+    </nav>
+    <span class="page-kicker">Step 1 of 3</span>
+    <h1 class="h2 mb-1">Your cart</h1>
+    <p class="text-body-secondary mb-0">Review your items before choosing a payment method.</p>
+    <ol class="checkout-steps mt-4 mb-0">
+      <li class="is-current" aria-current="step"><span>1</span>Cart</li>
+      <li><span>2</span>Payment</li>
+      <li><span>3</span>Access</li>
+    </ol>
+  </div>
+</div>
+
+<div class="container py-4">
+  {% if products %}
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card">
+        <ul class="list-group list-group-flush">
+          {% for product in products %}
+          <li class="list-group-item d-flex flex-wrap flex-sm-nowrap gap-3 align-items-center py-3">
+            {% if product.thumbnail %}<img src="{{ product.thumbnail.url }}" alt="" width="96" height="60" class="rounded object-fit-cover">{% else %}<div class="icon-tile" aria-hidden="true"><i class="bi bi-{{ product.category_icon }}"></i></div>{% endif %}
+            <div class="flex-grow-1">
+              <a href="{{ product.get_absolute_url }}" class="fw-semibold">{{ product.name }}</a>
+              <div class="small text-body-secondary">{{ product.get_category_display }} · v{{ product.version }}</div>
+              {% if product.pk in owned %}<div class="small text-success"><i class="bi bi-check-circle me-1" aria-hidden="true"></i>You already own this — it won’t be charged again.</div>{% endif %}
+            </div>
+            <div class="fw-semibold">{{ product.price|money }}</div>
+            <form method="post" action="{% url 'orders:cart_remove' product.slug %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-link text-danger" aria-label="Remove {{ product.name }} from cart" data-no-loading><i class="bi bi-trash" aria-hidden="true"></i></button>
+            </form>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <a href="{% url 'catalog:list' %}" class="btn btn-link mt-2 ps-0"><i class="bi bi-arrow-left me-1" aria-hidden="true"></i>Continue shopping</a>
+    </div>
+    <div class="col-lg-4">
+      <div class="card p-4 order-summary">
+        <h2 class="h5">Summary</h2>
+        <div class="d-flex justify-content-between small text-body-secondary mt-3"><span>Items</span><span>{{ products|length }}</span></div>
+        <div class="d-flex justify-content-between fs-5 fw-bold my-3"><span>Total</span><span>{{ total|money }}</span></div>
+        <form method="post" action="{% url 'orders:cart_checkout' %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-primary btn-lg w-100" data-loading-text="{% if user.is_authenticated %}Preparing checkout…{% else %}Opening registration…{% endif %}" {% if not total %}disabled{% endif %}>Proceed to payment</button>
+        </form>
+        {% if not user.is_authenticated %}
+          <p class="small text-body-secondary mt-2 mb-0">You’ll create a free account first. Your cart is kept and checkout continues right after.</p>
+        {% endif %}
+        <p class="small text-body-secondary mt-3 mb-0"><i class="bi bi-shield-lock me-1" aria-hidden="true"></i>Pay with {{ payment_methods_text }} on the next step.</p>
+        <p class="trust-note mt-2 mb-0"><i class="bi bi-lightning-charge" aria-hidden="true"></i>{% if has_instant_payments %}Instant access after payment.{% else %}Downloads unlock once we verify your payment.{% endif %}</p>
+      </div>
+    </div>
+  </div>
+  {% else %}
+    {% url 'catalog:list' as list_url %}
+    {% include "partials/_empty_state.html" with icon="bag" title="Your cart is empty" text="Add products to buy several at once." action_url=list_url action_label="Browse products" %}
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block title %}{{ project.title }} · Project service · {% endblock %}
+{% block meta_description %}{{ project.short_description }}{% endblock %}
+{% block content %}
+<div class="container py-4 py-lg-5">
+  <nav aria-label="Breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'capstone:list' %}">Project services</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ project.title }}</li>
+    </ol>
+  </nav>
+  <div class="row g-4 g-lg-5">
+    <div class="col-lg-7">
+      {% if project.thumbnail %}
+        <img src="{{ project.thumbnail.url }}" alt="Preview of {{ project.title }}" class="gallery-main mb-4" width="960" height="600">
+      {% else %}
+        <div class="thumb-placeholder rounded-4 mb-4" aria-hidden="true"><i class="bi bi-mortarboard"></i></div>
+      {% endif %}
+      <section aria-labelledby="about-project-title">
+        <span class="eyebrow">The system</span>
+        <h2 id="about-project-title" class="h4">About this system</h2>
+        <div class="text-body-secondary">{{ project.description|linebreaks }}</div>
+      </section>
+      {% if project.features %}
+        <section class="mt-4" aria-labelledby="modules-title">
+          <h2 id="modules-title" class="h4">Modules and features</h2>
+          <ul class="feature-list row row-cols-1 row-cols-md-2 g-2">
+            {% for feature in project.features|split_lines %}<li class="col"><i class="bi bi-check-circle-fill" aria-hidden="true"></i><span>{{ feature }}</span></li>{% endfor %}
+          </ul>
+        </section>
+      {% endif %}
+      <div class="d-flex flex-wrap gap-2 mt-4">
+        <span class="tag"><i class="bi bi-code-slash" aria-hidden="true"></i>Full source code</span>
+        <span class="tag"><i class="bi bi-sliders" aria-hidden="true"></i>Customisation included</span>
+        <span class="tag"><i class="bi bi-person-video3" aria-hidden="true"></i>Walkthrough</span>
+        <span class="tag"><i class="bi bi-lock" aria-hidden="true"></i>Private delivery</span>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <aside class="buy-card" aria-labelledby="project-title">
+        <span class="tag tag-brand mb-3"><i class="bi bi-mortarboard" aria-hidden="true"></i>{{ project.get_field_display }}</span>
+        <h1 id="project-title" class="h3">{{ project.title }}</h1>
+        <p class="text-body-secondary">{{ project.short_description }}</p>
+        <div class="mb-3">
+          <span class="small text-body-secondary">Starting at</span>
+          <div class="buy-price">{{ project.suggested_price|money }}</div>
+          <div class="small text-body-secondary">Final price depends on your customisations and deadline.</div>
+        </div>
+        <a href="{% url 'capstone:request_create' project.slug %}" class="btn btn-primary btn-lg w-100"><i class="bi bi-send me-2" aria-hidden="true"></i>Request this project</a>
+        {% if not user.is_authenticated %}<p class="small text-body-secondary text-center mt-2 mb-0">You’ll create a free account first, then continue to the request form.</p>{% endif %}
+        <hr>
+        <ul class="feature-list small mb-3">
+          <li><i class="bi bi-check2" aria-hidden="true"></i>Full source code</li>
+          <li><i class="bi bi-{% if project.documentation %}check2{% else %}dash{% endif %}" aria-hidden="true"></i>{% if project.documentation %}Documentation included{% else %}Documentation available on request{% endif %}</li>
+          <li><i class="bi bi-check2" aria-hidden="true"></i>Development tailored to your requirements</li>
+          <li><i class="bi bi-check2" aria-hidden="true"></i>Setup guidance and walkthrough</li>
+        </ul>
+        {% if project.tech_stack %}
+          <div class="d-flex flex-wrap gap-1">{% for tag in project.tech_stack|split_tags %}<span class="tag">{{ tag }}</span>{% endfor %}</div>
+        {% endif %}
+        <p class="trust-note mt-3 mb-0"><i class="bi bi-chat-dots" aria-hidden="true"></i>No payment until you accept the quote.</p>
+      </aside>
+    </div>
+  </div>
+</div>
+{% endblock %}

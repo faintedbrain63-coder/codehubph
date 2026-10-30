@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Settings · {% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'accounts:dashboard' %}">My account</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Settings</li>
+      </ol>
+    </nav>
+    <span class="page-kicker">My account</span>
+    <h1 class="h2 mb-1">Account settings</h1>
+    <p class="text-body-secondary mb-0">Manage your profile and password.</p>
+  </div>
+</div>
+<div class="container py-4">
+  {% include "accounts/_account_nav.html" %}
+  {% include "accounts/_settings_forms.html" %}
+</div>
+{% endblock %}

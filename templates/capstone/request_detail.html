@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block title %}Request {{ req.reference }} · {% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'capstone:my_requests' %}">Project requests</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ req.reference }}</li>
+      </ol>
+    </nav>
+    <span class="page-kicker">Project request</span>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+      <div>
+        <h1 class="h2 mb-1">{{ req.title }}</h1>
+        <p class="text-body-secondary mb-0">Request <span class="reference-chip">{{ req.reference }}</span> · submitted {{ req.created_at|date:"M j, Y" }}</p>
+      </div>
+      {% status_badge req.status req.get_status_display %}
+    </div>
+  </div>
+</div>
+<div class="container py-4">
+  {% include "accounts/_account_nav.html" %}
+
+  {% if req.status != 'cancelled' %}
+  <ol class="stepper mb-4" aria-label="Request progress">
+    {% for value, label in steps %}
+      <li class="{% if forloop.counter0 < req.step_index %}done{% elif forloop.counter0 == req.step_index %}current{% endif %}" {% if forloop.counter0 == req.step_index %}aria-current="step"{% endif %}>{{ label }}</li>
+    {% endfor %}
+  </ol>
+  {% endif %}
+
+  <div class="row g-4">
+    <div class="col-lg-7 d-grid gap-4 align-content-start">
+
+      {# ---------- Next action for the customer ---------- #}
+      {% if req.status == 'submitted' %}
+        <div class="alert alert-info mb-0" role="status"><i class="bi bi-hourglass me-2" aria-hidden="true"></i><strong>We’re reviewing your request.</strong> You’ll receive a quote by email, usually within one business day.</div>
+      {% elif req.status == 'quoted' %}
+        <section class="card p-4 border-primary" aria-labelledby="quote-title">
+          <h2 id="quote-title" class="h5">Your quote is ready</h2>
+          <div class="display-6 fw-bold my-2">{{ req.agreed_price|money }}</div>
+          {% if req.quote_notes %}<div class="text-body-secondary mb-3">{{ req.quote_notes|linebreaks }}</div>{% endif %}
+          <div class="d-flex flex-wrap gap-2">
+            <form method="post" action="{% url 'capstone:request_accept' req.reference %}">{% csrf_token %}
+              <button type="submit" class="btn btn-primary"><i class="bi bi-hand-thumbs-up me-2" aria-hidden="true"></i>Accept quote</button>
+            </form>
+            <a href="#messages" class="btn btn-soft">Ask a question</a>
+          </div>
+        </section>
+      {% elif req.status == 'accepted' %}
+        <section class="card p-4 border-primary" aria-labelledby="pay-title">
+          {% if pending_payment %}
+            <h2 id="pay-title" class="h5"><i class="bi bi-hourglass-split me-2 text-warning" aria-hidden="true"></i>Payment under review</h2>
+            <p class="text-body-secondary mb-0">We received your {{ pending_payment.get_method_display }} payment of {{ pending_payment.amount|money }} and will confirm it shortly.</p>
+          {% else %}
+            <h2 id="pay-title" class="h5">Pay to start your project</h2>
+            <p class="text-body-secondary">Agreed price: <strong>{{ req.agreed_price|money }}</strong>. Work starts as soon as your payment is confirmed.</p>
+            {% with rejected=payments.0 %}{% if rejected.status == 'rejected' %}<div class="alert alert-danger small">Your last payment could not be verified. Reason: {{ rejected.rejection_reason }}</div>{% endif %}{% endwith %}
+            <a href="{{ req.get_payment_url }}" class="btn btn-primary btn-lg align-self-start"><i class="bi bi-credit-card me-2" aria-hidden="true"></i>Pay {{ req.agreed_price|money }}</a>
+          {% endif %}
+        </section>
+      {% elif req.status == 'cancelled' %}
+        <div class="alert alert-secondary mb-0" role="status">This request was cancelled{% if req.cancel_reason %}: {{ req.cancel_reason }}{% endif %}</div>
+      {% endif %}
+
+      {# ---------- Deliverables ---------- #}
+      <section class="card p-4" aria-labelledby="files-title">
+        <h2 id="files-title" class="h5">Your files</h2>
+        {% if req.files_unlocked %}
+          <p class="text-body-secondary small">{% if req.status == 'paid' or req.status == 'in_progress' %}We’re customising your project. The current version is ready to download, and we’ll notify you when the final version is delivered.{% else %}Your project has been delivered. Download your files below.{% endif %}</p>
+          <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'capstone:request_download' req.reference 'source' %}" class="btn btn-primary"><i class="bi bi-file-earmark-zip me-2" aria-hidden="true"></i>Download source code</a>
+            {% if req.documentation_file %}
+              <a href="{% url 'capstone:request_download' req.reference 'documentation' %}" class="btn btn-outline-primary"><i class="bi bi-file-earmark-text me-2" aria-hidden="true"></i>Download documentation</a>
+            {% endif %}
+          </div>
+          {% if req.status == 'delivered' %}
+            <form method="post" action="{% url 'capstone:request_complete' req.reference %}" class="mt-3" data-confirm="Mark this project as completed?">{% csrf_token %}
+              <button type="submit" class="btn btn-soft btn-sm"><i class="bi bi-check2-all me-1" aria-hidden="true"></i>Everything looks good — mark as completed</button>
+            </form>
+          {% endif %}
+        {% else %}
+          <p class="text-body-secondary mb-0"><i class="bi bi-lock me-1" aria-hidden="true"></i>Your project files will appear here after payment is confirmed and the team uploads your deliverables. Payment starts development; delivery follows your agreed timeline.</p>
+        {% endif %}
+      </section>
+
+      {# ---------- Message thread ---------- #}
+      <section class="card p-4" id="messages" aria-labelledby="messages-title">
+        <h2 id="messages-title" class="h5">Messages</h2>
+        <div class="thread my-3">
+          {% for msg in thread %}
+            <div class="bubble {% if msg.sender == user %}mine{% endif %}">
+              <div class="meta mb-1">{% if msg.from_admin %}{{ SITE_NAME }} team{% else %}{{ msg.sender.display_name }}{% endif %} · {{ msg.created_at|date:"M j, g:i A" }}</div>
+              <div>{{ msg.body|linebreaksbr }}</div>
+            </div>
+          {% empty %}
+            <p class="small text-body-secondary mb-0">No messages yet. Ask us anything about your project.</p>
+          {% endfor %}
+        </div>
+        <form method="post" action="{% url 'capstone:request_message' req.reference %}" class="needs-validation" novalidate>
+          {% csrf_token %}
+          {% include "partials/_field.html" with field=message_form.body %}
+          <button type="submit" class="btn btn-primary btn-sm" data-loading-text="Sending…"><i class="bi bi-send me-1" aria-hidden="true"></i>Send message</button>
+        </form>
+      </section>
+    </div>
+
+    <div class="col-lg-5 d-grid gap-4 align-content-start">
+      <section class="card p-4" aria-labelledby="details-title">
+        <h2 id="details-title" class="h5">Request details</h2>
+        <dl class="row small mb-0">
+          <dt class="col-5 fw-normal text-body-secondary">Project</dt><dd class="col-7">{{ req.title }}</dd>
+          <dt class="col-5 fw-normal text-body-secondary">Client type</dt><dd class="col-7">{{ req.get_client_type_display }}</dd>
+          <dt class="col-5 fw-normal text-body-secondary">Platform</dt><dd class="col-7">{{ req.project_type_label }}</dd>
+          <dt class="col-5 fw-normal text-body-secondary">School / organization</dt><dd class="col-7">{{ req.school_name }}</dd>
+          {% if req.program %}<dt class="col-5 fw-normal text-body-secondary">Program</dt><dd class="col-7">{{ req.program }}</dd>{% endif %}
+          {% if req.preferred_deadline %}<dt class="col-5 fw-normal text-body-secondary">Preferred deadline</dt><dd class="col-7">{{ req.preferred_deadline|date:"M j, Y" }}</dd>{% endif %}
+          {% if req.group_members %}<dt class="col-5 fw-normal text-body-secondary">Group members</dt><dd class="col-7">{{ req.group_members|linebreaksbr }}</dd>{% endif %}
+          <dt class="col-5 fw-normal text-body-secondary">Price</dt><dd class="col-7">{% if req.agreed_price %}{{ req.agreed_price|money }}{% else %}Awaiting quote{% endif %}</dd>
+        </dl>
+        <h3 class="h6 mt-3">Project requirements</h3>
+        <p class="small text-body-secondary mb-0">{{ req.customization_notes|linebreaksbr }}</p>
+      </section>
+
+      {% if payments %}
+      <section class="card p-4" aria-labelledby="payhist-title">
+        <h2 id="payhist-title" class="h5">Payments</h2>
+        <ul class="list-unstyled small d-grid gap-2 mb-0">
+          {% for p in payments %}
+            <li class="d-flex justify-content-between gap-2"><span>{{ p.get_method_display }} · {{ p.created_at|date:"M j" }}</span><span>{{ p.amount|money }} {% status_badge p.status p.get_status_display %}</span></li>
+          {% endfor %}
+        </ul>
+      </section>
+      {% endif %}
+
+      {% if req.can_cancel %}
+        <form method="post" action="{% url 'capstone:request_cancel' req.reference %}" data-confirm="Cancel this request? You can submit a new one later.">{% csrf_token %}
+          <button type="submit" class="btn btn-link text-danger p-0"><i class="bi bi-x-circle me-1" aria-hidden="true"></i>Cancel this request</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

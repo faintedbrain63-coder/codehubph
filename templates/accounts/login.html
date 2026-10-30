@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Sign in · {% endblock %}
+{% block content %}
+<div class="auth-shell">
+  <aside class="auth-aside">
+    <a class="d-inline-flex align-items-center gap-2 text-decoration-none auth-brand" href="{% url 'core:home' %}">
+      <span class="brand-mark" aria-hidden="true"><i class="bi bi-lightning-charge-fill"></i></span>
+      <span class="fw-bold font-display">{{ SITE_NAME }}</span>
+    </a>
+    <div class="my-4">
+      <span class="eyebrow">One secure account</span>
+      <h2>Your projects, in one place.</h2>
+      <p>Your project requests, quotes, messages and deliverables stay together in your private account.</p>
+      <ul class="auth-points mt-4">
+        <li><i class="bi bi-shield-check" aria-hidden="true"></i><span>Private files, served only to your account</span></li>
+        <li><i class="bi bi-kanban" aria-hidden="true"></i><span>Track your project from quote to delivery</span></li>
+        <li><i class="bi bi-chat-dots" aria-hidden="true"></i><span>Direct support from the developers</span></li>
+      </ul>
+    </div>
+    <p class="small mb-0" style="color:#94a3b8;">Secure checkout with {{ payment_methods_text }}.</p>
+  </aside>
+  <div class="auth-form">
+    <span class="eyebrow">Welcome back</span>
+    <h1 class="h3 mb-1">Sign in to your account</h1>
+    <p class="text-body-secondary mb-4">Track projects, review quotes and message the development team.</p>
+    <form method="post" class="needs-validation" novalidate>
+      {% csrf_token %}
+      {% include "partials/_form.html" %}
+      <input type="hidden" name="next" value="{{ next }}">
+      <div class="d-flex justify-content-end mb-3">
+        <a href="{% url 'accounts:password_reset' %}" class="small">Forgot your password?</a>
+      </div>
+      <button type="submit" class="btn btn-primary w-100" data-loading-text="Signing in…">Sign in</button>
+    </form>
+    <p class="text-center small text-body-secondary mt-4 mb-0">
+      New here? <a href="{% url 'accounts:register' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Create a free account</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

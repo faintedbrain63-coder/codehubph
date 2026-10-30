@@ -1,0 +1,10 @@
+{% load core_tags %}
+<div class="portfolio-case-body">
+  {% if featured %}<span class="portfolio-feature-label"><i class="bi bi-bookmark" aria-hidden="true"></i>Featured project</span>{% endif %}
+  <div class="portfolio-project-meta"><span class="portfolio-platform"><i class="bi bi-{% if project.project_type == 'web' %}window-stack{% elif project.project_type == 'mobile' %}phone{% else %}pc-display{% endif %}" aria-hidden="true"></i>{{ project.get_project_type_display }}</span>{% if project.industry %}<span class="portfolio-meta-divider" aria-hidden="true"></span><span>{{ project.industry }}</span>{% endif %}{% if project.project_year %}<span class="portfolio-meta-divider" aria-hidden="true"></span><span>{{ project.project_year }}</span>{% endif %}</div>
+  <h3 class="portfolio-project-title"><a href="{{ project.get_absolute_url }}">{{ project.title }}</a></h3>
+  <p class="portfolio-project-summary">{{ project.summary }}</p>
+  {% if featured and project.outcome %}<div class="portfolio-outcome"><strong>Project outcome</strong><p>{{ project.outcome }}</p></div>{% endif %}
+  {% if project.tech_stack %}<div class="portfolio-tech" aria-label="Project technologies">{% for tech in project.tech_stack|split_tags|slice:':5' %}<span>{{ tech }}</span>{% endfor %}</div>{% endif %}
+  <div class="portfolio-project-links"><a href="{{ project.get_absolute_url }}">Project details <i class="bi bi-arrow-right" aria-hidden="true"></i></a>{% if project.project_type == 'web' and project.project_url %}<a href="{{ project.project_url }}" target="_blank" rel="noopener noreferrer">Open web app <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i></a>{% endif %}</div>
+</div>

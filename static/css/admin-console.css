@@ -1,0 +1,25 @@
+.console-shortcuts { padding: 16px; border-bottom: 1px solid var(--hairline-color); }
+.console-shortcuts summary { cursor: pointer; font-weight: 700; margin-bottom: 12px; }
+.console-shortcuts a { display: block; padding: 9px 10px; border-radius: 6px; }
+.console-shortcuts a:hover, .console-shortcuts a:focus-visible { background: var(--selected-bg); }
+.console-shortcuts .console-upload { font-weight: 700; }
+.console-welcome p { padding: 0 16px; }
+/* Keep the advanced database UI readable and full-width too. */
+html { font-size: 18px; }
+body { font-size: 1rem; }
+#container { width: 100%; max-width: none; }
+body.dashboard #content { width: auto; max-width: none; }
+html body.login #container { width: calc(100% - 32px); max-width: none; }
+.colM, .colMS { max-width: none; }
+input, textarea, select, .button, input[type=submit], input[type=button] { font-size: 1rem; }
+td, th, label, #changelist-filter, #changelist .actions { font-size: .9rem; }
+body #changelist table th, body #changelist table td { font-size: .9rem; }
+small, .small, .help, .quiet, .mini { font-size: .8rem; }
+@media (max-width: 767px) {
+  #main { flex-wrap: wrap; }
+  #main > #nav-sidebar { display: block; position: static; flex: 1 0 100%; margin: 0; max-height: none; visibility: visible; border: 0; }
+  #nav-sidebar > .module, #nav-sidebar > #nav-filter { display: none; }
+  .console-shortcuts { padding: 12px 20px; }
+  .console-shortcuts[open] { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .console-shortcuts summary { grid-column: 1 / -1; }
+}

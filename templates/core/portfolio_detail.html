@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block title %}{{ project.title }} · Our work · {% endblock %}
+{% block body_class %}portfolio-page{% endblock %}
+{% block extra_head %}{% if not project.is_published %}<meta name="robots" content="noindex,nofollow">{% endif %}{% endblock %}
+{% block content %}
+<header class="portfolio-page-header"><div class="container"><div class="portfolio-shell">
+  <nav aria-label="Breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'core:portfolio_list' %}">Our projects</a></li><li class="breadcrumb-item active" aria-current="page">{{ project.title }}</li></ol></nav>
+  <div class="portfolio-project-meta"><span class="portfolio-platform">{{ project.get_project_type_display }}</span><span class="portfolio-meta-divider" aria-hidden="true"></span><span>{{ project.get_stage_display }}</span>{% if project.industry %}<span class="portfolio-meta-divider" aria-hidden="true"></span><span>{{ project.industry }}</span>{% endif %}{% if project.project_year %}<span class="portfolio-meta-divider" aria-hidden="true"></span><span>{{ project.project_year }}</span>{% endif %}{% if not project.is_published %}<span class="tag">Private preview</span>{% endif %}</div>
+  <h1>{{ project.title }}</h1><p class="portfolio-intro mb-0">{{ project.summary }}</p>
+</div></div></header>
+<div class="container py-4 py-lg-5"><div class="portfolio-shell">
+  {% with screenshot=project.thumbnail %}{% if screenshot %}<a class="portfolio-hero-image" href="{{ screenshot.get_absolute_url }}" target="_blank" rel="noopener" aria-label="Open screenshot of {{ project.title }}"><img src="{{ screenshot.get_absolute_url }}" alt="{{ screenshot.caption|default:project.title }}" width="1280" height="800"></a>{% endif %}{% endwith %}
+  <div class="portfolio-story"><div class="portfolio-story-main">
+    {% if project.description %}<section class="portfolio-story-panel"><h2>Project overview</h2>{{ project.description|linebreaks }}</section>{% endif %}
+    {% if project.challenge %}<section class="portfolio-story-panel"><h2>The challenge</h2>{{ project.challenge|linebreaks }}</section>{% endif %}
+    {% if project.solution %}<section class="portfolio-story-panel"><h2>The solution</h2>{{ project.solution|linebreaks }}</section>{% endif %}
+    {% if project.outcome %}<section class="portfolio-story-panel"><h2>The outcome</h2>{{ project.outcome|linebreaks }}</section>{% endif %}
+    {% if not project.description and not project.challenge and not project.solution and not project.outcome %}<section class="portfolio-story-panel"><h2>About this project</h2><p>{{ project.summary }}</p></section>{% endif %}
+  </div><aside class="portfolio-facts"><p class="portfolio-eyebrow">At a glance</p><h2>Project information</h2><dl><div><dt>Platform</dt><dd>{{ project.get_project_type_display }}</dd></div><div><dt>Status</dt><dd>{{ project.get_stage_display }}</dd></div>{% if project.industry %}<div><dt>Sector</dt><dd>{{ project.industry }}</dd></div>{% endif %}{% if project.contribution %}<div><dt>Contribution</dt><dd>{{ project.contribution }}</dd></div>{% endif %}{% if project.project_year %}<div><dt>Project year</dt><dd>{{ project.project_year }}</dd></div>{% endif %}</dl>
+    {% if project.tech_stack %}<div class="portfolio-tech" aria-label="Technologies">{% for tech in project.tech_stack|split_tags %}<span>{{ tech }}</span>{% endfor %}</div>{% endif %}
+    {% if project.project_type == 'web' and project.project_url %}<a class="btn btn-primary" href="{{ project.project_url }}" target="_blank" rel="noopener noreferrer">Open web application <i class="bi bi-box-arrow-up-right ms-1" aria-hidden="true"></i></a>{% endif %}
+    {% if can_review %}<a href="{% url 'accounts:project_testimonial' project.pk %}" class="btn btn-soft">Review your project</a>{% else %}<a href="{% url 'capstone:request_new' %}" class="btn btn-soft">Discuss a project</a>{% endif %}
+  </aside></div>
+  {% if project.screenshots.count > 1 %}<section class="mt-5" aria-labelledby="screenshots-title"><h2 class="h4 mb-4" id="screenshots-title">More project screens</h2><div class="portfolio-gallery">{% for screenshot in project.screenshots.all|slice:'1:' %}<figure><a href="{{ screenshot.get_absolute_url }}" target="_blank" rel="noopener"><img src="{{ screenshot.get_absolute_url }}" alt="{{ screenshot.caption|default:project.title }}" loading="lazy"></a>{% if screenshot.caption %}<figcaption>{{ screenshot.caption }}</figcaption>{% endif %}</figure>{% endfor %}</div></section>{% endif %}
+  <section class="mt-5" aria-labelledby="reviews-title"><h2 class="h4 mb-4" id="reviews-title">Customer feedback</h2><div class="row g-4">{% for review in reviews %}<div class="col-md-6"><figure class="card p-4 mb-0 h-100">{% include "partials/_stars.html" with rating=review.rating %}<blockquote class="mt-3"><p>{{ review.message }}</p></blockquote><figcaption><strong>{{ review.name }}</strong>{% if review.role %}<span class="small text-body-secondary"> · {{ review.role }}</span>{% endif %}</figcaption></figure></div>{% empty %}<div class="col"><p class="text-body-secondary">No published feedback for this project yet.</p></div>{% endfor %}</div></section>
+</div></div>
+{% endblock %}
