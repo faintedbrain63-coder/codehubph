@@ -23,7 +23,7 @@ class SiteSettings(models.Model):
     tagline = models.CharField(
         max_length=200, default="Custom web apps, mobile apps and software for students, government and businesses."
     )
-    contact_email = models.EmailField(default="support@example.com")
+    contact_email = models.EmailField(default="ragus.christian1989@gmail.com")
     contact_phone = models.CharField(max_length=30, blank=True)
     paypal_me_url = models.URLField(blank=True, help_text="Leave blank to use PAYPAL_ME_URL from .env.")
     gcash_account_name = models.CharField(max_length=100, blank=True)
