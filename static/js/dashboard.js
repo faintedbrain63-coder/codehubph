@@ -2,6 +2,23 @@
 (function () {
   "use strict";
 
+  // Visitors location: show country names ("CA" -> "Canada") in the viewer's language.
+  if (!window.Intl || !Intl.DisplayNames) return;
+  const regions = new Intl.DisplayNames([document.documentElement.lang || "en"], { type: "region" });
+  document.querySelectorAll("[data-region]").forEach(function (el) {
+    const code = el.dataset.region;
+    let name;
+    try { name = regions.of(code); } catch (e) { return; }
+    if (!name || name === code) return;
+    el.textContent = name;
+    const row = el.closest("[title]");
+    if (row) row.title = name + row.title.slice(code.length);
+  });
+})();
+
+(function () {
+  "use strict";
+
   const canvas = document.getElementById("revenue-chart");
   const source = document.getElementById("chart-data");
   if (!canvas || !source) return;

@@ -32,6 +32,46 @@
     <a class="attention-item" href="{% url 'dashboard:testimonial_list' %}?status=pending"><span class="attention-icon"><i class="bi bi-chat-square-heart" aria-hidden="true"></i></span><span>Comments to review<small>Moderate before publishing</small></span><b>{{ workspace_counts.reviews }}</b></a>
   </div></div></section>
 </div>
+<div class="row g-4 mb-4 viz-palette">
+  <section class="col-xl-7" aria-labelledby="locations-title"><div class="card h-100">
+    <div class="card-header"><div><h2 class="h6 mb-1" id="locations-title">Visitors location</h2><span class="small text-body-secondary">Unique visitors by country · All time</span></div><span class="workspace-count" title="Unique visitors">{{ locations.total|floatformat:"0g" }}</span></div>
+    <div class="p-4">
+      {% if locations.rows %}
+      <ol class="geo-bars" aria-label="Unique visitors by country">
+        {% for row in locations.rows %}
+        <li class="geo-row" title="{{ row.label|default:row.code }}: {{ row.visitors|floatformat:'0g' }} visitor{{ row.visitors|pluralize }} ({{ row.percent }}%)">
+          <span class="geo-name"{% if row.code %} data-region="{{ row.code }}"{% endif %}>{{ row.label|default:row.code }}</span>
+          <span class="geo-track" aria-hidden="true"><span class="geo-bar{% if not row.code %} is-muted{% endif %}" style="width:{{ row.width|stringformat:'f' }}%"></span></span>
+          <span class="geo-value"><strong>{{ row.visitors|floatformat:"0g" }}</strong><small>{{ row.percent }}%</small></span>
+        </li>
+        {% endfor %}
+      </ol>
+      <p class="small text-body-secondary mt-3 mb-0">{{ locations.countries }} countr{{ locations.countries|pluralize:"y,ies" }}. Locations come from Cloudflare. "Unknown" covers visitors counted before location tracking or without a detected country.</p>
+      {% else %}
+      <p class="small text-body-secondary mb-0">No visitors counted yet. Countries appear here once people open the storefront.</p>
+      {% endif %}
+    </div>
+  </div></section>
+  <section class="col-xl-5" aria-labelledby="storage-title"><div class="card h-100">
+    <div class="card-header"><div><h2 class="h6 mb-1" id="storage-title">Storage capacity</h2><span class="small text-body-secondary">Server disk holding uploads · Refreshes every 10 minutes</span></div></div>
+    <div class="p-4">
+      {% if storage %}
+      <div class="storage-headline"><strong>{{ storage.used|filesizeformat }}</strong><span>used of {{ storage.total|filesizeformat }} · {{ storage.used_percent }}%</span></div>
+      <div class="storage-bar" role="img" aria-label="{{ storage.used_percent }}% of {{ storage.total|filesizeformat }} used, {{ storage.free|filesizeformat }} free">
+        {% for segment in storage.segments %}{% if segment.bytes %}<span class="storage-seg storage-{{ segment.key }}" style="flex-grow:{{ segment.percent|stringformat:'f' }}" title="{{ segment.label }}: {{ segment.bytes|filesizeformat }} ({{ segment.percent }}%)"></span>{% endif %}{% endfor %}
+      </div>
+      <ul class="storage-legend">
+        {% for segment in storage.segments %}
+        <li><span class="storage-swatch storage-{{ segment.key }}" aria-hidden="true"></span><span>{{ segment.label }}</span><strong>{{ segment.bytes|filesizeformat }}</strong><small>{% if segment.bytes and segment.percent < 0.1 %}&lt;0.1{% else %}{{ segment.percent }}{% endif %}%</small></li>
+        {% endfor %}
+      </ul>
+      {% if storage.is_low %}<p class="storage-alert mb-0"><i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i><span><strong>Low disk space.</strong> Remove old uploads or expand the disk before new files fail to save.</span></p>{% endif %}
+      {% else %}
+      <p class="small text-body-secondary mb-0">Storage usage could not be read on this server.</p>
+      {% endif %}
+    </div>
+  </div></section>
+</div>
 <div class="row g-4">
   {% if stats.orders %}<section class="col-xl-8"><div class="card"><div class="card-header"><h2 class="h6 mb-0">Previous purchase history</h2><a href="{% url 'dashboard:order_list' %}">View history <i class="bi bi-arrow-right" aria-hidden="true"></i></a></div>
     {% if recent_orders %}<div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr><th scope="col">Order</th><th scope="col">Customer</th><th scope="col">Amount</th><th scope="col">Status</th></tr></thead><tbody>{% for order in recent_orders %}<tr><td><a href="{% url 'dashboard:order_detail' order.number %}" class="fw-semibold">{{ order.number }}</a><div class="small text-body-secondary">{{ order.created_at|date:"M j, g:i A" }}</div></td><td>{{ order.user.email }}</td><td>{{ order.total|money }}</td><td>{% status_badge order.status order.get_status_display %}</td></tr>{% endfor %}</tbody></table></div>

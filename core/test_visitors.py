@@ -1,7 +1,7 @@
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
-from core.models import VisitorCounter
+from core.models import VisitorCounter, VisitorCountry
 from core.visitors import COOKIE_NAME
 
 BROWSER = {"HTTP_USER_AGENT": "Mozilla/5.0 (Windows NT 10.0) Chrome/130", "HTTP_ACCEPT": "text/html,*/*"}
@@ -31,3 +31,16 @@ class VisitorCounterTests(TestCase):
         response = self.visit()
         self.assertContains(response, "nav-visitors")
         self.assertContains(response, "1,234")
+
+    @override_settings(BEHIND_PROXY=True)
+    def test_records_cloudflare_country(self):
+        self.visit(HTTP_CF_IPCOUNTRY="ca")
+        self.visit(client=self.client_class(), HTTP_CF_IPCOUNTRY="CA")
+        self.visit(client=self.client_class(), HTTP_CF_IPCOUNTRY="XX")
+        self.assertEqual(VisitorCounter.current(), 3)
+        self.assertEqual(list(VisitorCountry.objects.values_list("code", "visitors")), [("CA", 2)])
+
+    @override_settings(BEHIND_PROXY=False)
+    def test_country_header_ignored_without_proxy(self):
+        self.visit(HTTP_CF_IPCOUNTRY="CA")
+        self.assertFalse(VisitorCountry.objects.exists())

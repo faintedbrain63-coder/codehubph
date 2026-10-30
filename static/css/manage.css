@@ -294,3 +294,34 @@
 .concept-slide-number { font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--bs-secondary-color); margin-bottom: .25rem; }
 .concept-ai-text { white-space: pre-wrap; overflow-wrap: anywhere; }
 .concept-prompt { max-height: 28rem; overflow-y: auto; font-family: var(--bs-font-monospace); }
+
+/* Visitors location (single-series bars) and storage capacity (segmented bar). */
+.viz-palette { --viz-1: #2a78d6; --viz-2: #eb6834; --viz-3: #1baf7a; --viz-track: var(--line); }
+[data-bs-theme="dark"] .viz-palette { --viz-1: #3987e5; --viz-2: #d95926; --viz-3: #199e70; }
+.geo-bars { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.geo-row { display: grid; grid-template-columns: minmax(96px, 30%) 1fr auto; align-items: center; gap: 12px; padding: 6px 8px; margin-inline: -8px; border-radius: 6px; font-size: 13px; }
+.geo-row:hover { background: var(--surface-alt); }
+.geo-name { color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.geo-track { display: block; height: 10px; }
+.geo-bar { display: block; height: 100%; min-width: 4px; border-radius: 0 4px 4px 0; background: var(--viz-1); }
+.geo-bar.is-muted { background: var(--muted); opacity: .5; }
+.geo-value { display: flex; align-items: baseline; justify-content: flex-end; gap: 6px; min-width: 88px; font-variant-numeric: tabular-nums; }
+.geo-value strong { color: var(--ink); }
+.geo-value small { min-width: 40px; color: var(--muted); font-size: 11px; text-align: right; }
+.storage-headline { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; margin-bottom: 14px; }
+.storage-headline strong { color: var(--ink); font-size: clamp(22px,2vw,29px); font-weight: 700; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+.storage-headline span { color: var(--muted); font-size: 13px; }
+.storage-bar { display: flex; gap: 2px; height: 14px; border-radius: 4px; overflow: hidden; }
+.storage-seg { display: block; flex-basis: 0; min-width: 3px; }
+.storage-public { background: var(--viz-1); }
+.storage-private { background: var(--viz-2); }
+.storage-other { background: var(--viz-3); }
+.storage-free { background: var(--viz-track); }
+.storage-legend { list-style: none; display: grid; gap: 10px; margin: 18px 0 0; padding: 0; font-size: 13px; }
+.storage-legend li { display: grid; grid-template-columns: 10px 1fr auto 44px; align-items: center; gap: 10px; color: var(--ink); }
+.storage-legend strong { font-variant-numeric: tabular-nums; }
+.storage-legend small { color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+.storage-swatch { width: 10px; height: 10px; border-radius: 3px; }
+.storage-swatch.storage-free { box-shadow: inset 0 0 0 1px var(--muted); }
+.storage-alert { display: flex; gap: 10px; margin-top: 16px; padding: 10px 12px; border-radius: 8px; background: var(--brand-soft); color: var(--ink); font-size: 13px; }
+.storage-alert i { color: #d97706; }

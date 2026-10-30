@@ -28,6 +28,7 @@ from core.models import ContactMessage, PortfolioProject, SiteSettings, Testimon
 from core.notifications import notify_capstone_status, notify_download_access_reset
 from core.sales import product_sales_only
 from dashboard.ai.providers import PROVIDERS
+from dashboard.insights import storage_usage, visitor_locations
 from dashboard.decorators import staff_required
 from dashboard.forms import (
     AdminMessageForm,
@@ -114,6 +115,8 @@ def home(request):
         "chart": chart,
         "days": days,
         "today": today,
+        "locations": visitor_locations(),
+        "storage": storage_usage(),
     }
     return render(request, "dashboard/home.html", context)
 

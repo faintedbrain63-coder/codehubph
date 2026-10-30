@@ -373,3 +373,24 @@ class VisitorCounter(models.Model):
     @classmethod
     def current(cls):
         return cls.objects.filter(pk=1).values_list("total", flat=True).first() or 0
+
+
+class VisitorCountry(models.Model):
+    """Unique visitors per country (ISO 3166-1 alpha-2), counted alongside VisitorCounter."""
+
+    code = models.CharField(max_length=2, unique=True)
+    visitors = models.PositiveBigIntegerField(default=0)
+
+    class Meta:
+        ordering = ["-visitors", "code"]
+        verbose_name_plural = "visitor countries"
+
+    def __str__(self):
+        return f"{self.code}: {self.visitors}"
+
+    @classmethod
+    def increment(cls, code):
+        if not cls.objects.filter(code=code).update(visitors=models.F("visitors") + 1):
+            obj, created = cls.objects.get_or_create(code=code, defaults={"visitors": 1})
+            if not created:
+                cls.objects.filter(code=code).update(visitors=models.F("visitors") + 1)
