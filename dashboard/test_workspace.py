@@ -48,6 +48,27 @@ class WorkspaceTests(BaseTestCase):
             "reviews": reverse("dashboard:testimonial_list"), "settings": reverse("dashboard:settings"),
             "search": reverse("dashboard:search") + "?q=Inventory",
         }
+        if os.environ.get("CODEHUB_RENDER_PREVIEW") == "1":
+            import io
+            from docx import Document
+            from django.core.files.base import ContentFile
+            document = Document()
+            document.add_heading("Example project requirements", 0)
+            document.add_paragraph("A project with user accounts, records and reporting.")
+            buffer = io.BytesIO()
+            document.save(buffer)
+            self.req.concept_file.save("requirements.docx", ContentFile(buffer.getvalue()))
+            paths.update({
+                "product-detail": reverse("dashboard:product_detail", args=[self.product.pk]),
+                "product-edit": reverse("dashboard:product_edit", args=[self.product.pk]),
+                "service-list": reverse("dashboard:capstone_project_list"),
+                "service-detail": reverse("dashboard:capstone_project_detail", args=[self.project.pk]),
+                "service-edit": reverse("dashboard:capstone_project_edit", args=[self.project.pk]),
+                "order-detail": reverse("dashboard:order_detail", args=[self.order.number]),
+                "customer-form": reverse("dashboard:customer_edit", args=[self.customer.pk]),
+                "testimonial-form": reverse("dashboard:testimonial_edit", args=[self.review.pk]),
+                "concept-file": reverse("dashboard:capstone_request_concept_view", args=[self.req.reference]),
+            })
         for name, url in paths.items():
             with self.subTest(page=name):
                 response = self.client.get(url)
@@ -82,11 +103,76 @@ class WorkspaceTests(BaseTestCase):
             type(self.customer).objects.filter(pk=self.customer.pk).update(onboarding_completed_at=timezone.now())
             for name, url in {"account": reverse("accounts:dashboard"), "settings": reverse("accounts:settings"),
                               "orders": reverse("orders:list"),
+                              "order-detail": reverse("orders:detail", args=[self.order.number]),
+                              "requests": reverse("capstone:my_requests"),
+                              "request-detail": self.req.get_absolute_url(),
+                              "request-form": reverse("capstone:request_new"),
+                              "password": reverse("accounts:password_change"),
+                              "testimonial": reverse("accounts:testimonial"),
                               "checkout": self.order.get_payment_url(),
                               "invoice": reverse("orders:invoice", args=[self.order.number])}.items():
                 response = self.client.get(url)
                 self.assertEqual(response.status_code, 200)
                 (directory / f"customer-{name}.html").write_bytes(response.content)
+            from core.models import SiteSettings
+            site = SiteSettings.load()
+            site.gcash_number = "09170000000"
+            site.gcash_account_name = "Example recipient"
+            site.paypal_me_url = "https://paypal.me/example"
+            site.save()
+            self.payment.status = Payment.Status.FAILED
+            self.payment.save(update_fields=["status"])
+            for method in ("gcash", "paypal"):
+                response = self.client.get(self.order.get_payment_url(), {"method": method})
+                self.assertEqual(response.status_code, 200)
+                self.assertContains(response, 'data-panel="' + method + '"')
+                (directory / f"checkout-{method}.html").write_bytes(response.content)
+            session = self.client.session
+            session["cart"] = [self.product.pk]
+            session.save()
+            for name, route, args in (
+                ("public-product", "catalog:detail", [self.product.slug]),
+                ("public-service", "capstone:detail", [self.project.slug]),
+                ("public-cart", "orders:cart", []),
+                ("public-terms", "core:terms", []),
+                ("public-license", "core:license", []),
+            ):
+                response = self.client.get(reverse(route, args=args))
+                self.assertEqual(response.status_code, 200)
+                (directory / f"{name}.html").write_bytes(response.content)
+            # Admin screens use the standard Django responsive styles plus our overrides.
+            self.staff.is_superuser = True
+            self.staff.save(update_fields=["is_superuser"])
+            self.client.force_login(self.staff)
+            from django.contrib import admin
+            shutil.copytree(Path(admin.__file__).parent / "static/admin", site_root / "static/admin", dirs_exist_ok=True)
+            catalog = self.client.get(reverse("admin:jsi18n"))
+            (site_root / "static/admin-preview-i18n.js").write_bytes(catalog.content)
+            for name, url in {"admin-index": reverse("admin:index"),
+                              "admin-users": reverse("admin:accounts_user_changelist"),
+                              "admin-user-edit": reverse("admin:accounts_user_change", args=[self.customer.pk])}.items():
+                response = self.client.get(url)
+                self.assertEqual(response.status_code, 200)
+                html = response.content.decode().replace('/admin/jsi18n/', '/static/admin-preview-i18n.js')
+                html = html.replace('<head>', '<head><meta charset="utf-8">')
+                (directory / f"{name}.html").write_text(html, encoding="utf-8")
+            response = self.client.post(reverse("dashboard:product_create"), {})
+            self.assertEqual(response.status_code, 200)
+            (directory / "product-validation.html").write_bytes(response.content)
+            self.client.logout()
+            response = self.client.get(reverse("admin:login"))
+            (directory / "admin-login.html").write_bytes(response.content)
+            response = self.client.post(reverse("accounts:register"), {})
+            self.assertEqual(response.status_code, 200)
+            (directory / "registration-validation.html").write_bytes(response.content)
+            from django.template.loader import render_to_string
+            request = RequestFactory().get("/preview-error/")
+            from django.contrib.auth.models import AnonymousUser
+            request.user = AnonymousUser()
+            request.session = self.client.session
+            for template in ("403.html", "404.html", "500.html", "accounts/locked_out.html"):
+                html = render_to_string(template, request=request)
+                (directory / ("error-" + Path(template).name)).write_text(html, encoding="utf-8")
 
     def test_sidebar_counts_and_current_section_are_real(self):
         response = self.client.get(reverse("dashboard:payment_list"))

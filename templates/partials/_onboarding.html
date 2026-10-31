@@ -1,7 +1,7 @@
 {# First-login tutorial for customers. Opens automatically until finished or skipped; can be replayed from the account page. #}
 <div class="modal fade onboarding-modal" id="onboarding" tabindex="-1" aria-labelledby="onboarding-title" aria-describedby="onboarding-progress"
      {% if not user.onboarding_completed_at %}data-onboarding-autostart{% endif %}>
-  <div class="modal-dialog modal-dialog-centered">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content">
       <form method="post" action="{% url 'accounts:onboarding_done' %}" data-onboarding-form>
         {% csrf_token %}

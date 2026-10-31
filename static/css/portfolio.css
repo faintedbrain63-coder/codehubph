@@ -108,7 +108,7 @@
 .portfolio-lightbox-kicker { margin: 0 0 .15rem; color: var(--lb-muted); font: 600 .68rem/1.4 var(--font-mono); letter-spacing: .16em; text-transform: uppercase; }
 .portfolio-lightbox-title { margin: 0; max-width: 42ch; color: var(--lb-ink); font-size: 1.05rem; line-height: 1.3; letter-spacing: -.02em; }
 .portfolio-lightbox-bar > div:first-child { min-width: 0; }
-.portfolio-lightbox-count { margin: 0 1.25rem; color: var(--lb-ink); font: 600 .95rem/1 var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: .08em; }
+.portfolio-lightbox-count { margin: 0 1.25rem; color: var(--lb-ink); font: 600 .95rem/1 var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: .08em; white-space: nowrap; flex-shrink: 0; }
 .portfolio-lightbox-close, .portfolio-lightbox-nav { display: grid; place-items: center; border: 1px solid rgba(255, 255, 255, .18); background: rgba(255, 255, 255, .08); color: var(--lb-ink); backdrop-filter: blur(10px); transition: background .2s ease, transform .2s ease, border-color .2s ease; }
 .portfolio-lightbox-close { width: 44px; height: 44px; flex: 0 0 44px; border-radius: 50%; }
 .portfolio-lightbox-close:hover, .portfolio-lightbox-nav:hover { background: rgba(255, 255, 255, .16); border-color: rgba(255, 255, 255, .4); transform: scale(1.05); }
@@ -149,6 +149,8 @@ body.portfolio-lightbox-open .modal-backdrop.show { opacity: 1; background: #070
   .portfolio-lightbox-nav.is-next { right: .7rem; top: calc(50% - 24px); }
   .portfolio-lightbox-frame img { max-height: 58vh; }
   .portfolio-lightbox-count { margin-left: auto; }
+  .portfolio-lightbox-bar { gap: .5rem; }
+  .portfolio-lightbox-count { margin-right: .5rem; }
   .portfolio-view-cue { opacity: 1; transform: none; }
 }
 @media (prefers-reduced-motion: reduce) {

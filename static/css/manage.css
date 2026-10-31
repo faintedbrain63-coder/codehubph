@@ -281,6 +281,15 @@
 @media (prefers-reduced-motion: reduce) {
   .upload-modal[open], .um-fill, .um-fill::after { animation: none !important; transition: none !important; }
 }
+/* Short landscape screens must retain access to progress and cancellation. */
+@media (max-height: 600px) {
+  .manage-page .manage-sidebar { overflow-y: auto; }
+  .manage-page .workspace-navigation { flex: 0 0 auto; overflow: visible; }
+  .upload-modal { overflow-y: auto; }
+  .um-head, .um-summary, .um-files, .um-alert, .um-confirm, .um-foot { flex-shrink: 0; }
+  .um-files { flex-grow: 0; }
+  .um-foot, .um-confirm { position: sticky; bottom: 0; z-index: 1; background: var(--surface); }
+}
 
 /* Concept file viewer and AI analysis */
 .concept-pdf { display: block; width: 100%; height: min(80vh, 1100px); border: 1px solid var(--bs-border-color); border-radius: .75rem; background: var(--bs-tertiary-bg); }

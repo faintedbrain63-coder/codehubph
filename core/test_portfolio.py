@@ -354,6 +354,10 @@ class PortfolioTests(BaseTestCase):
         root = Path(settings.BASE_DIR) / ".qa/site"
         export = os.environ.get("CODEHUB_RENDER_PORTFOLIO") == "1"
         if export:
+            for index in range(2):
+                PortfolioScreenshot.objects.create(project=web,
+                    image=SimpleUploadedFile(f"screen-{index}.png", file.getvalue(), content_type="image/png"),
+                    caption="Example additional screen " + str(index + 1))
             (root / "previews/portfolio-images").mkdir(parents=True, exist_ok=True)
             shutil.copytree(Path(settings.BASE_DIR) / "static", root / "static", dirs_exist_ok=True)
             for shot in PortfolioScreenshot.objects.all():

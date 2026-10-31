@@ -15,6 +15,16 @@ input, textarea, select, .button, input[type=submit], input[type=button] { font-
 td, th, label, #changelist-filter, #changelist .actions { font-size: .9rem; }
 body #changelist table th, body #changelist table td { font-size: .9rem; }
 small, .small, .help, .quiet, .mini { font-size: .8rem; }
+.aligned .flex-container > div, .aligned .readonly { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+.aligned .flex-container > div > p { max-width: 100%; overflow-wrap: anywhere; }
+input, textarea, select { box-sizing: border-box; max-width: 100%; }
+.selector, .selector-available, .selector-chosen { min-width: 0; max-width: 100%; }
+.selector .selector-filter input { min-width: 0; }
+@media (min-width: 768px) and (max-width: 1024px) {
+  .aligned .flex-container:not(.checkbox-row) { flex-wrap: wrap; }
+  .aligned .flex-container > label { flex-basis: 100%; margin-bottom: 8px; }
+  .aligned .related-widget-wrapper { width: 100%; }
+}
 @media (max-width: 767px) {
   #main { flex-wrap: wrap; }
   #main > #nav-sidebar { display: block; position: static; flex: 1 0 100%; margin: 0; max-height: none; visibility: visible; border: 0; }

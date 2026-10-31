@@ -12,6 +12,7 @@ const root = path.resolve(__dirname, "..");
 const origin = "http://127.0.0.1:8766";
 const chrome = process.env.CHROME_BINARY || "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
 const artifacts = path.join(root, ".qa");
+const matrixName = process.env.CODEHUB_RENDER_NAME || 'matrix';
 let browser, socket;
 
 async function run() {
@@ -22,7 +23,7 @@ async function run() {
   await fs.mkdir(artifacts, { recursive: true });
   browser = spawn(chrome, ["--headless", "--disable-gpu", "--no-first-run", "--no-default-browser-check",
     "--disable-background-networking", "--remote-debugging-port=0", "--disable-renderer-backgrounding",
-    "--user-data-dir=" + path.join(artifacts, "render-profile"), "about:blank"],
+    "--user-data-dir=" + path.join(artifacts, process.env.CODEHUB_RENDER_CONTROLS === '1' ? 'render-profile-controls' : process.env.CODEHUB_RENDER_NAME ? 'render-profile-' + matrixName : 'render-profile'), "about:blank"],
     { windowsHide: true, stdio: ["ignore", "ignore", "pipe"] });
   const endpoint = await new Promise((resolve, reject) => {
     let stderr = "";
@@ -44,7 +45,7 @@ async function run() {
       const task = pending.get(data.id); pending.delete(data.id); clearTimeout(task.timer);
       if (data.error) task.reject(new Error(JSON.stringify(data.error))); else task.resolve(data.result);
     } else {
-      if (data.method === "Runtime.exceptionThrown") exceptions.push(data.params.exceptionDetails.text);
+      if (data.method === "Runtime.exceptionThrown") exceptions.push(data.params.exceptionDetails.exception?.description || data.params.exceptionDetails.text);
       const key = data.sessionId + ":" + data.method;
       if (events.has(key)) { events.get(key)(data.params); events.delete(key); }
     }
@@ -62,9 +63,27 @@ async function run() {
   await send("Page.enable", {}, sessionId);
   await send("Runtime.enable", {}, sessionId);
   await send("Network.enable", {}, sessionId);
+  await send('Network.setCacheDisabled', {cacheDisabled: true}, sessionId);
   // Offline font fallback: verify that layout, icons and controls do not need a CDN.
   await send("Network.setBlockedURLs", { urls: ["*fonts.googleapis.com*", "*fonts.gstatic.com*", "*googlesyndication.com*", "*doubleclick.net*"] }, sessionId);
-  const cases = process.env.CODEHUB_RENDER_AI === "1" ? [
+  const controls = process.env.CODEHUB_RENDER_CONTROLS === '1';
+  const matrix = process.env.CODEHUB_RENDER_MATRIX === "1" || controls;
+  const matrixWidths = (process.env.CODEHUB_RENDER_WIDTHS || '320,360,576,768,992,1200,1440,2560').split(',').map(Number);
+  const cases = controls ? [
+    ['privacy', 'public-register.html'], ['license', 'public-register.html'],
+    ['lightbox', 'portfolio-detail.html'], ['onboarding', 'customer-onboarding.html'],
+    ['navbar', 'customer-settings.html'], ['account-menu', 'customer-settings.html'],
+    ['sidebar', 'overview.html'], ['confirmation', 'product-form.html'],
+    ['upload', 'product-form.html'],
+    ['upload-cancel', 'product-form.html'], ['upload-error', 'product-form.html'],
+    ['onboarding-last', 'customer-onboarding.html'],
+  ].flatMap(([state, file]) => [[320, 568], [768, 1024], [992, 740], [1440, 900], [740, 360]]
+    .map(([width, height]) => [state + '-' + width + '-' + height, file, width, height]))
+    : matrix ? (await fs.readdir(path.join(artifacts, 'site/previews')))
+    .filter(file => file.endsWith('.html') && (!process.env.CODEHUB_RENDER_FILTER || new RegExp(process.env.CODEHUB_RENDER_FILTER).test(file)))
+    .flatMap(file => matrixWidths.map(width =>
+      [file.replace('.html', '') + '-' + width, file, width, width < 768 ? 740 : 1000]))
+    : process.env.CODEHUB_RENDER_AI === "1" ? [
     ["ai-settings-wide", "ai-settings.html", 1440, 1000],
     ["ai-settings-mobile", "ai-settings.html", 390, 844],
     ["ai-settings-dark", "ai-settings.html", 1440, 1000],
@@ -145,6 +164,7 @@ async function run() {
     ["onboarding-mobile", "customer-onboarding.html", 390, 844],
   ];
   const results = [];
+  if (matrix) await send('Emulation.setEmulatedMedia', {features: [{name: 'prefers-reduced-motion', value: 'reduce'}]}, sessionId);
   for (const [name, file, width, height] of cases) {
     await send("Emulation.setDeviceMetricsOverride", { width, height, deviceScaleFactor: 1, mobile: width < 992 }, sessionId);
     const loaded = new Promise((resolve, reject) => {
@@ -155,8 +175,48 @@ async function run() {
     url.searchParams.set("qa", name); // Force a document load even when only the hash changes.
     await send("Page.navigate", { url: url.href }, sessionId);
     await loaded;
+    if (process.env.CODEHUB_RENDER_STRESS === '1') {
+      await send('Runtime.evaluate', {expression: `(() => {
+        const longEmail = 'customer'.repeat(8) + '@' + 'organization'.repeat(5) + '.example.com';
+        document.querySelectorAll('a[href^="mailto:"]').forEach(el => { el.textContent = longEmail; });
+        document.querySelectorAll('h1, .portfolio-project-title').forEach(el => { el.textContent = 'Project' + 'X'.repeat(140); });
+        document.querySelectorAll('.nav-account > span:last-of-type').forEach(el => { el.textContent = longEmail; });
+        document.querySelectorAll('.metric-value').forEach(el => { el.textContent = '₱999,999,999,999.99'; });
+      })()`}, sessionId);
+    }
+    if (controls) {
+      const opened = await send('Runtime.evaluate', {expression: `(() => {
+        const state = ${JSON.stringify(name.replace(/-\d+-\d+$/, ''))};
+        if (state === 'privacy' || state === 'license') bootstrap.Modal.getOrCreateInstance(document.getElementById('legal-' + state)).show();
+        if (state === 'lightbox') document.querySelector('[data-lightbox-open]').click();
+        if (state.startsWith('onboarding')) {
+          bootstrap.Modal.getOrCreateInstance(document.getElementById('onboarding')).show();
+          if (state === 'onboarding-last') for (let step = 0; step < 3; step++) document.querySelector('[data-onboarding-next]').click();
+        }
+        if (state === 'navbar' && innerWidth < 1200) bootstrap.Collapse.getOrCreateInstance(document.getElementById('mainNav'), {toggle: false}).show();
+        if (state === 'account-menu') {
+          if (innerWidth < 1200) bootstrap.Collapse.getOrCreateInstance(document.getElementById('mainNav'), {toggle: false}).show();
+          bootstrap.Dropdown.getOrCreateInstance(document.querySelector('.nav-account')).show();
+        }
+        if (state === 'sidebar' && innerWidth < 992) document.querySelector('[data-sidebar-open]').click();
+        if (state === 'confirmation') Swal.fire({title: 'Delete this project?', text: 'All files and screenshots will be removed.', showCancelButton: true, confirmButtonText: 'Delete project', cancelButtonText: 'Keep editing'});
+        if (state.startsWith('upload')) {
+          // Keep the request pending locally: exercise the real progress dialog without sending files.
+          window.fetch = state === 'upload-error' ? () => Promise.reject(new TypeError('Preview connection interrupted')) : () => new Promise(() => {});
+          const input = document.querySelector('input[data-chunked-upload]');
+          const files = new DataTransfer();
+          files.items.add(new File(['preview only'], 'project-deliverables-with-a-long-file-name.zip', {type: 'application/zip'}));
+          input.files = files.files;
+          input.form.classList.remove('needs-validation');
+          input.form.dispatchEvent(new Event('submit', {bubbles: true, cancelable: true}));
+          if (state === 'upload-cancel') document.querySelector('.upload-modal .btn-outline-danger').click();
+        }
+      })()`}, sessionId);
+      assert.equal(opened.exceptionDetails, undefined, name + ': control opens successfully');
+    }
     if (process.env.CODEHUB_RENDER_PORTFOLIO === "1" || process.env.CODEHUB_RENDER_AI === "1") await send("Runtime.evaluate", { expression: "document.documentElement.setAttribute('data-bs-theme', '" + (name.endsWith("-dark") ? "dark" : "light") + "')" }, sessionId);
     await send("Runtime.evaluate", { expression: "new Promise(resolve => setTimeout(resolve, " + (process.env.CODEHUB_RENDER_PORTFOLIO === "1" ? 1000 : 350) + "))", awaitPromise: true }, sessionId);
+    if (controls && name.startsWith('account-menu-')) await send('Runtime.evaluate', {expression: "const menu = document.getElementById('mainNav'); menu.scrollTop = menu.scrollHeight;"}, sessionId);
     const measured = await send("Runtime.evaluate", { expression: `(() => {
       const sidebar = document.getElementById('manageSidebar');
       const modal = document.querySelector('.legal-modal.show');
@@ -166,6 +226,7 @@ async function run() {
         legalModal: modalContent ? {top: modalContent.top, bottom: modalContent.bottom, width: modalContent.width,
           scrollable: modalBody.scrollHeight > modalBody.clientHeight} : null,
         sidebarVisible: sidebar ? getComputedStyle(sidebar).visibility : null,
+        sidebarNavigationHeight: sidebar ? document.querySelector('.workspace-navigation')?.clientHeight : null,
         menuExpanded: document.querySelector('[data-sidebar-open]')?.getAttribute('aria-expanded'),
         mainInert: document.querySelector('.manage-main')?.inert,
         stylesLoaded: getComputedStyle(document.documentElement).fontSize === '18px',
@@ -175,10 +236,63 @@ async function run() {
         containerWidth: document.querySelector('.container')?.getBoundingClientRect().width,
         measureWidths: Array.from(document.querySelectorAll('.prose, .auth-shell, .auth-card, .document-measure, .form-measure')).map(el => Math.round(el.getBoundingClientRect().width)),
         clippedContent: Array.from(document.querySelectorAll('.lp-cat-row, .lp-path')).filter(el => el.getBoundingClientRect().right > innerWidth + 1 || el.getBoundingClientRect().left < -1).length,
-        overflow: Array.from(document.querySelectorAll('body *')).filter(el => el.getBoundingClientRect().right > visualViewport.width + 1 && el.getBoundingClientRect().left >= 0).slice(0,12).map(el => ({tag: el.tagName, className: el.className, width: Math.round(el.getBoundingClientRect().width)})),
+        overflow: Array.from(document.querySelectorAll('body *')).filter(el => el.getBoundingClientRect().right > visualViewport.width + 1 && el.getBoundingClientRect().left >= 0).slice(0,12).map(el => ({tag: el.tagName, className: el.className, text: el.textContent.slice(0, 100), width: Math.round(el.getBoundingClientRect().width), whiteSpace: getComputedStyle(el).whiteSpace, overflowWrap: getComputedStyle(el).overflowWrap})),
         iconFont: sidebar ? getComputedStyle(document.querySelector('.workspace-logo i'), '::before').fontFamily : null};
     })()`, returnByValue: true }, sessionId);
     const report = measured.result.value;
+    if (matrix) {
+      const details = await send('Runtime.evaluate', { expression: `(() => {
+        const clipped = [];
+        for (const el of document.querySelectorAll('a, button, input, select, textarea, h1, h2, p, label, .geo-row, .storage-legend li')) {
+          const r = el.getBoundingClientRect(), style = getComputedStyle(el);
+          if (!r.width || !r.height || style.visibility !== 'visible') continue;
+          const internalOverflow = el.matches('h1, h2, .btn') && el.clientWidth > 0 && el.scrollWidth > el.clientWidth + 2;
+          if (!internalOverflow && r.left >= -1 && r.right <= ${width} + 1) continue;
+          let scrollable = false;
+          for (let parent = el.parentElement; parent && parent !== document.body; parent = parent.parentElement) {
+            if (['auto', 'scroll'].includes(getComputedStyle(parent).overflowX)) { scrollable = true; break; }
+          }
+          if (!scrollable) clipped.push({tag: el.tagName, className: el.className, text: (el.innerText || el.name || '').slice(0, 90), left: Math.round(r.left), right: Math.round(r.right), internalOverflow});
+        }
+        return clipped;
+      })()`, returnByValue: true }, sessionId);
+      report.clippedControls = details.result.value;
+      report.requestedWidth = width;
+      if (controls) {
+        const navigation = await send('Runtime.evaluate', {expression: `(() => {
+          const collapse = document.querySelector('.site-navbar .navbar-collapse.show');
+          if (!collapse || innerWidth >= 1200) return null;
+          return {bottom: document.querySelector('.site-navbar').getBoundingClientRect().bottom,
+            height: innerHeight, scrollable: collapse.scrollHeight <= collapse.clientHeight + 1 || ['auto', 'scroll'].includes(getComputedStyle(collapse).overflowY)};
+        })()`, returnByValue: true}, sessionId);
+        report.navigation = navigation.result.value;
+        const overlay = await send('Runtime.evaluate', {expression: `(() => {
+          const modal = document.querySelector('.modal.show .modal-content, .swal2-popup, .upload-modal[open]');
+          if (!modal) return null;
+          const r = modal.getBoundingClientRect();
+          return {left: r.left, right: r.right, top: r.top, bottom: r.bottom, height: innerHeight,
+            inaccessibleButtons: [...modal.querySelectorAll('button, a.btn')].filter(el => {
+              const b = el.getBoundingClientRect();
+              if (!b.width || !b.height || (b.top >= r.top - 1 && b.bottom <= r.bottom + 1)) return false;
+              for (let p = el.parentElement; p && p !== modal; p = p.parentElement) {
+                if (['auto', 'scroll'].includes(getComputedStyle(p).overflowY)) return false;
+              }
+              return !['auto', 'scroll'].includes(getComputedStyle(modal).overflowY);
+            }).map(el => el.textContent.trim() || el.getAttribute('aria-label')),
+            bodyCanScroll: [...modal.querySelectorAll('.modal-body, .swal2-html-container')].every(el => el.scrollHeight <= el.clientHeight + 1 || ['auto', 'scroll'].includes(getComputedStyle(el).overflowY))};
+        })()`, returnByValue: true}, sessionId);
+        report.overlay = overlay.result.value;
+      }
+      results.push({name, ...report});
+      if (results.length % 8 === 0) console.log('Checked', results.length, 'of', cases.length, 'cases');
+      await fs.writeFile(path.join(artifacts, controls ? 'controls-progress.json' : matrixName + '-progress.json'), JSON.stringify({results, exceptions}, null, 2));
+      if (controls || process.env.CODEHUB_RENDER_SHOTS === '1' || report.scrollWidth > width + 1 || report.clippedControls.length) {
+        console.log(name, JSON.stringify({scrollWidth: report.scrollWidth, clipped: report.clippedControls}));
+        const shot = await send('Page.captureScreenshot', {format: 'png'}, sessionId);
+        await fs.writeFile(path.join(artifacts, name + '.png'), Buffer.from(shot.data, 'base64'));
+      }
+      continue;
+    }
     if (name === "ai-settings-wide") {
       const behavior = await send("Runtime.evaluate", {expression: `(() => {
         const provider = document.getElementById('id_provider');
@@ -230,8 +344,16 @@ async function run() {
     if (report.tableFont) assert.ok(report.tableFont >= 16, name + ": readable table text");
     results.push({ name, ...report });
   }
+  await fs.writeFile(path.join(artifacts, controls ? 'controls-results.json' : matrix ? matrixName + '-results.json' : 'render-results.json'), JSON.stringify({ results, exceptions }, null, 2));
   assert.deepEqual(exceptions, [], "No browser JavaScript exceptions");
-  await fs.writeFile(path.join(artifacts, "render-results.json"), JSON.stringify({ results, exceptions }, null, 2));
+  if (matrix) {
+    const failed = results.filter(r => r.width !== r.requestedWidth || r.scrollWidth > r.requestedWidth + 1 || r.clippedControls.length ||
+      (r.sidebarVisible === 'visible' && r.sidebarNavigationHeight !== null && r.sidebarNavigationHeight < 1) ||
+      (r.navigation && (r.navigation.bottom > r.navigation.height + 1 || !r.navigation.scrollable)) ||
+      (r.overlay && (r.overlay.left < -1 || r.overlay.right > r.requestedWidth + 1 || r.overlay.top < -1 || r.overlay.bottom > r.overlay.height + 1 || !r.overlay.bodyCanScroll || r.overlay.inaccessibleButtons.length)));
+    console.log('Matrix complete:', results.length, 'cases;', failed.length, 'cases need review');
+    assert.deepEqual(failed.map(r => r.name), [], 'Responsive content and overlays fit their viewports');
+  }
   // Close only the browser launched by this script.
   await send("Browser.close").catch(() => {});
 }

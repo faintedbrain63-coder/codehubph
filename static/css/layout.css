@@ -46,6 +46,38 @@ body { overflow-x: hidden; }
 .lp-cat-row { min-width: 0; max-width: 100%; }
 .lp-cat-copy { flex: 1; min-width: 0; }
 
+/* Let content shrink inside flex/grid layouts instead of clipping at the page edge. */
+.row > *, .card-header > *, .modal-header > *, .workspace-page-actions > *,
+.assistant-toolbar > *, .attention-item > span:nth-child(2) { min-width: 0; }
+.form-control, .form-select { min-width: 0; max-width: 100%; }
+.modal-content, .modal-body { overflow-wrap: anywhere; }
+h1, h2, h3 { overflow-wrap: anywhere; }
+.site-footer .footer-legal { flex-wrap: wrap; }
+.site-footer li, .site-footer a { overflow-wrap: anywhere; min-width: 0; }
+.btn { max-width: 100%; overflow-wrap: anywhere; }
+.manage-page .btn { white-space: normal; }
+.tag { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+.lp-contact-list a { min-width: 0; overflow-wrap: anywhere; }
+.onboarding-modal .modal-content > form { display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+.onboarding-modal .modal-body { min-height: 0; }
+.manage-page .manage-heading { flex-wrap: wrap; }
+.manage-page .manage-heading > div:first-child { min-width: 0; flex: 1 1 22rem; }
+.workspace-page-actions { max-width: 100%; flex-shrink: 1; }
+/* Bootstrap's largest row gutters need matching space at laptop widths. */
+@media (min-width: 992px) {
+  :root { --page-gutter: clamp(1.5rem, 2vw, 40px); }
+}
+.site-navbar .navbar-collapse { min-width: 0; }
+.site-navbar .nav-account > span:last-of-type { max-width: 10rem; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 1199.98px) {
+  .site-navbar .navbar-collapse { max-height: calc(100dvh - var(--nav-h)); overflow-y: auto; overscroll-behavior: contain; }
+}
+@media (min-width: 1200px) {
+  .site-navbar .navbar-collapse, .site-navbar .navbar-nav { flex-wrap: wrap; }
+  .site-navbar .navbar-nav { min-width: 0; }
+  .site-navbar .navbar-nav.me-auto { flex: 1 1 28rem; }
+}
+
 /* The workspace uses all space alongside its sidebar, even on ultrawide screens. */
 .manage-page { --workspace-sidebar: 288px; font-size: 17px; }
 .manage-page .manage-content { max-width: none; }
@@ -110,5 +142,16 @@ body { overflow-x: hidden; }
   .workspace-save-bar button[name="save_action"] { order: 3; width: 100%; }
   .manage-page .manage-sidebar { width: min(320px, calc(100vw - 32px)); }
   .manage-page .workspace-filters .btn, .manage-page .workspace-page-actions .btn { font-size: 15px; }
+  .workspace-page-actions { flex-wrap: wrap; }
+  .metric-value, .metric-foot { overflow-wrap: anywhere; }
+  .assistant-toolbar { flex-wrap: wrap; }
+  .assistant-toolbar form { max-width: 100%; }
+  /* Keep labels and values readable; give the bar its own full-width row. */
+  .geo-row { grid-template-columns: minmax(0, 1fr) auto; gap: 6px 10px; }
+  .geo-track { grid-column: 1 / -1; grid-row: 2; }
+  .geo-value { min-width: 0; flex-wrap: wrap; }
+  .storage-legend li { grid-template-columns: 10px minmax(0, 1fr) auto; gap: 6px; }
+  .storage-legend li > span:nth-child(2), .storage-legend strong { overflow-wrap: anywhere; }
+  .storage-legend small { grid-column: 3; }
 }
 @media print { :root { font-size: 12pt; } .container { padding-inline: 0; } .document-measure, .prose { max-width: none; } }
