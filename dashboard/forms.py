@@ -58,6 +58,10 @@ class CapstoneProjectForm(ChunkedUploadFormMixin, forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         configure_upload_fields(self, ("source_code", "documentation"))
+        self.fields["thumbnail"].help_text = (
+            "Cover image on the service card and project page. "
+            f"JPG, PNG, WEBP, or GIF, up to {settings.MAX_IMAGE_MB} MB."
+        )
 
     class Meta:
         model = CapstoneProject
@@ -66,11 +70,39 @@ class CapstoneProjectForm(ChunkedUploadFormMixin, forms.ModelForm):
             "suggested_price", "thumbnail", "source_code", "documentation", "status",
         )
         widgets = {
-            "description": forms.Textarea(attrs={"rows": 6}),
-            "features": forms.Textarea(attrs={"rows": 5}),
+            "title": forms.TextInput(attrs={"placeholder": "Barangay Document Request System"}),
+            "slug": forms.TextInput(attrs={"placeholder": "barangay-document-request"}),
+            "short_description": forms.TextInput(attrs={
+                "placeholder": "Online document requests and status tracking for a barangay office.",
+            }),
+            "description": forms.Textarea(attrs={
+                "rows": 6,
+                "placeholder": (
+                    "Residents file requests online. Staff review each request, and the office "
+                    "tracks the document from filing to release."
+                ),
+            }),
+            "features": forms.Textarea(attrs={
+                "rows": 5,
+                "placeholder": "Online request form\nStaff approval workflow\nDocument status tracking",
+            }),
+            "tech_stack": forms.TextInput(attrs={"placeholder": "Django, PostgreSQL, Bootstrap"}),
             "source_code": ChunkedFileInput,
             "documentation": ChunkedFileInput,
-            "suggested_price": forms.NumberInput(attrs={"step": "0.01", "min": "1"}),
+            "suggested_price": forms.NumberInput(attrs={"step": "0.01", "min": "1", "placeholder": "15000.00"}),
+        }
+        help_texts = {
+            "title": "Public name of this service. It appears as the page title and in search results.",
+            "slug": "Web address for this service. Leave blank to create it from the title. Use lowercase words separated by hyphens if you set it yourself.",
+            "field": "Kind of system you are offering. Customers see this as a tag and can filter the catalog by it.",
+            "short_description": "One sentence under the title and on the service card. Keep it within 220 characters.",
+            "description": "Longer explanation under “About this system.” Describe who uses it and what the system does.",
+            "features": "One feature or module per line. Each line becomes a checklist item on the public page.",
+            "tech_stack": "Comma-separated technologies. They appear as tags on the service page and are included in search.",
+            "status": "Draft stays in this workspace. Published appears on the public project services page.",
+            "suggested_price": "Starting price in Philippine pesos, shown as “Starting at.” You can quote a different amount after reviewing the customer’s requirements.",
+            "source_code": "Optional sample source or installer. Customers can download it only after their request is paid. Upload a custom build on each request when it is ready.",
+            "documentation": "Optional manuals or thesis files, such as a PDF or Word document. Customers can download them only after payment.",
         }
 
 

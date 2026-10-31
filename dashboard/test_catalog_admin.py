@@ -137,6 +137,25 @@ class CatalogAdminTests(BaseTestCase):
         self.assertEqual(sold.status, "draft")
         self.assertEqual(order.items.get().product_id, sold.pk)
 
+    def test_capstone_project_form_explains_each_field(self):
+        from django.template.loader import render_to_string
+
+        from dashboard.forms import CapstoneProjectForm
+
+        form = CapstoneProjectForm()
+        html = "".join(render_to_string("partials/_field.html", {"field": form[name]}) for name in form.fields)
+        self.assertIn('placeholder="Barangay Document Request System"', html)
+        self.assertIn('placeholder="barangay-document-request"', html)
+        self.assertIn("Online request form", html)
+        self.assertIn('placeholder="Django, PostgreSQL, Bootstrap"', html)
+        self.assertIn('placeholder="15000.00"', html)
+        self.assertIn("Leave blank to create it from the title.", html)
+        self.assertIn("One feature or module per line.", html)
+        self.assertIn("Draft stays in this workspace.", html)
+        self.assertIn("Kind of system you are offering.", html)
+        self.assertIn("JPG, PNG, WEBP, or GIF", html)
+        self.assertIn("Customers can download it only after their request is paid.", html)
+
     def test_capstone_create_read_update_and_delete(self):
         self.assertRedirects(self.client.post(reverse("dashboard:capstone_project_create"), self.project_data(status="published")), reverse("dashboard:capstone_project_list"))
         project = CapstoneProject.objects.get()
