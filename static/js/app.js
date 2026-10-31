@@ -18,9 +18,9 @@
     });
   }
 
-  let savedTheme = "light";
-  try { savedTheme = localStorage.getItem(THEME_KEY) || "light"; } catch (e) {}
-  applyTheme(savedTheme === "dark" ? "dark" : "light");
+  let savedTheme = "dark";
+  try { savedTheme = localStorage.getItem(THEME_KEY) || "dark"; } catch (e) {}
+  applyTheme(savedTheme === "light" ? "light" : "dark");
 
   document.addEventListener("click", function (event) {
     const toggle = event.target.closest("[data-theme-toggle]");

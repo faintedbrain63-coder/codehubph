@@ -1,5 +1,5 @@
 {% load static %}<!doctype html>
-<html lang="en" data-bs-theme="light">
+<html lang="en" data-bs-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -15,7 +15,7 @@
     (function () {
       try {
         var t = localStorage.getItem("fb-theme");
-        if (t) document.documentElement.setAttribute("data-bs-theme", t);
+        document.documentElement.setAttribute("data-bs-theme", t === "light" ? "light" : "dark");
       } catch (e) {}
     })();
   </script>

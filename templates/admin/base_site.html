@@ -5,6 +5,13 @@
   <div id="site-name"><a href="{% url 'admin:index' %}">{{ SITE_NAME }} — Django admin</a></div>
   {% if user.is_anonymous %}{% include "admin/color_theme_toggle.html" %}{% endif %}
 {% endblock %}
+{% block dark-mode-vars %}
+  <link rel="stylesheet" href="{% static 'admin/css/dark_mode.css' %}">
+  <script>
+    try { if (!localStorage.getItem("theme")) localStorage.setItem("theme", "dark"); } catch (e) {}
+  </script>
+  <script src="{% static 'admin/js/theme.js' %}"></script>
+{% endblock %}
 {% block extrastyle %}{{ block.super }}
   <link rel="stylesheet" href="{% static 'vendor/sweetalert2/sweetalert2.min.css' %}">
   <link rel="stylesheet" href="{% static 'css/alerts.css' %}">
