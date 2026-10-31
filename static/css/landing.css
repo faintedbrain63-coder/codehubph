@@ -1106,6 +1106,14 @@ html:has(.landing) { scroll-padding-top: calc(var(--nav-h) + 0.5rem); }
   .lp-motion-section .lp-path { transition: box-shadow .5s, border-color .5s, transform 1.2s var(--lp-ease), opacity .9s; }
   .lp-motion-section .lp-path:hover { box-shadow: 0 28px 65px -35px #6366f199, inset 0 1px #a5b4fc80; }
 }
+/* Side-by-side cards keep their inset on short laptop windows. Only a narrow screen compresses them. */
+@media (max-width: 767.98px) {
+  .lp-experience-platforms { gap: 0; }
+  .lp-platform { padding: 1rem 1rem; }
+  .lp-platform-number { font-size: .5rem; letter-spacing: .08em; }
+  .lp-platform h3 { font-size: .8rem; line-height: 1.45; }
+  .lp-platform p { font-size: .6rem; line-height: 1.5; }
+}
 @media (max-width: 767.98px), (max-height: 740px) {
   .lp-experience-stage { min-height: 580px; }
   .lp-experience-content { padding-top: 1.25rem; padding-bottom: 1rem; }
@@ -1118,11 +1126,6 @@ html:has(.landing) { scroll-padding-top: calc(var(--nav-h) + 0.5rem); }
   .lp-experience-orbit { width: 62vw; left: 89%; top: 39%; opacity: .55; }
   .lp-orbit-core { font-size: 1.75rem; }
   .lp-orbit-core > span { display: none; }
-  .lp-experience-platforms { gap: 0; }
-  .lp-platform { padding: 1rem .65rem; }
-  .lp-platform-number { font-size: .5rem; letter-spacing: .08em; }
-  .lp-platform h3 { font-size: .8rem; line-height: 1.45; }
-  .lp-platform p { font-size: .6rem; line-height: 1.5; }
   .lp-experience-bottom { font-size: .5rem; }
   .lp-js .lp-motion-section [data-reveal] { transform: translateY(36px); }
   .lp-js .lp-motion-section [data-reveal].is-visible { transform: none; }
