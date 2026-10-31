@@ -200,7 +200,7 @@ html:has(.landing) { scroll-padding-top: calc(var(--nav-h) + 0.5rem); }
 .lp-title {
   margin-bottom: 1.3rem;
   font-family: var(--font-display);
-  font-size: clamp(2.55rem, 5.6vw, 4.35rem);
+  font-size: clamp(2.2rem, 4.8vw, 3.75rem);
   font-weight: 700;
   line-height: 1.03;
   letter-spacing: -0.045em;
@@ -948,7 +948,7 @@ html:has(.landing) { scroll-padding-top: calc(var(--nav-h) + 0.5rem); }
   .lp-float { display: none; }
   .lp-console-wrap { padding: 0.5rem 0; }
   .lp-console-body { padding: 1rem 0.9rem; }
-  .lp-title { font-size: clamp(2.25rem, 10.5vw, 3rem); }
+  .lp-title { font-size: clamp(2rem, 9vw, 2.6rem); }
   .lp-stats { border-radius: var(--radius); }
   .lp-stat { padding: 0.9rem 1rem; }
   .lp-review { flex-basis: 88vw; }
@@ -1105,7 +1105,7 @@ html:has(.landing) { scroll-padding-top: calc(var(--nav-h) + 0.5rem); }
 .lp-experience-dot { width: 6px; height: 6px; border-radius: 50%; background: #66e8ff; box-shadow: 0 0 16px #22d3ee; }
 .lp-experience-copy { margin-block: auto; padding-block: 2rem; width: 52%; position: relative; z-index: 3; }
 .lp-experience-kicker { color: #8ba8d0; font-size: .75rem; letter-spacing: .06em; }
-.lp-experience-copy h2 { font-size: clamp(3rem, 6.3vw, 7.5rem); line-height: .98; letter-spacing: -.065em; font-weight: 700; margin: 1.25rem 0 1.5rem; color: #fff; }
+.lp-experience-copy h2 { font-size: clamp(2.5rem, 5.2vw, 5.5rem); line-height: .98; letter-spacing: -.065em; font-weight: 700; margin: 1.25rem 0 1.5rem; color: #fff; }
 .lp-experience-copy h2 > span { background: linear-gradient(115deg, #c7d2fe 0, #8e99ff 40%, #5be7f4 95%); background-clip: text; -webkit-background-clip: text; color: transparent; }
 .lp-experience-description { font-size: clamp(.95rem, 1.2vw, 1.15rem); line-height: 1.75; color: #acbdd7; }
 .lp-experience-link { display: inline-flex; gap: 1.5rem; padding: .8rem 0; color: #e4f5ff; font-size: .85rem; text-decoration: none; border-bottom: 1px solid #5de4ff66; }
@@ -1170,7 +1170,7 @@ html:has(.landing) { scroll-padding-top: calc(var(--nav-h) + 0.5rem); }
   .lp-experience-coordinate { display: none; }
   .lp-experience-top { font-size: .55rem; }
   .lp-experience-copy { width: 70%; padding-block: 1.5rem; }
-  .lp-experience-copy h2 { font-size: clamp(2.75rem, 8vw, 4.5rem); }
+  .lp-experience-copy h2 { font-size: clamp(2.25rem, 8vw, 3.5rem); }
   .lp-experience-kicker { max-width: 14rem; font-size: .65rem; }
   .lp-experience-description { font-size: .8rem; }
   .lp-experience-orbit { width: 62vw; left: 89%; top: 39%; opacity: .55; }

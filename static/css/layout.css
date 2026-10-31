@@ -2,8 +2,10 @@
 /* Outer containers fill the screen up to a 1920px layout; past that (ultrawide) the content is centred so the
    navbar, columns and card grids don't drift to opposite edges. Section backgrounds still run full-bleed.
    Text, forms and documents keep their own reading measure inside the container. */
-:root { font-size: 18px; --page-gutter: clamp(16px, 2vw, 40px); --page-max: 1920px; --measure: 72ch; }
+:root { font-size: 15px; --page-gutter: clamp(16px, 2vw, 40px); --page-max: 1920px; --measure: 72ch; }
 body { font-size: 1rem; }
+/* Large desktops get one step up; phones, tablets and laptops stay compact. */
+@media (min-width: 1600px) { :root { font-size: 16px; } }
 /* Pages never scroll sideways: decorative layers and long unbroken text must not widen the document.
    Set on body only: the browser applies it to the window, so the sticky navbar keeps working and
    Bootstrap's modal scroll lock (inline overflow on body) still takes over. Setting it on html as well
@@ -22,7 +24,7 @@ body { overflow-x: hidden; }
   .card-grid.row-cols-lg-3 > * { width: 25%; }
 }
 .small, small { font-size: .875em; }
-.form-control, .form-select { font-size: 1rem; min-height: 46px; }
+.form-control, .form-select { font-size: 1rem; min-height: 40px; }
 .form-label, .form-check-label { font-size: 1rem; }
 .form-text, .invalid-feedback { font-size: .875rem; line-height: 1.6; }
 .form-control-sm, .form-select-sm { font-size: .9rem; }
@@ -85,45 +87,45 @@ h1, h2, h3 { overflow-wrap: anywhere; }
 }
 
 /* The workspace uses all space alongside its sidebar, even on ultrawide screens. */
-.manage-page { --workspace-sidebar: 288px; font-size: 17px; }
+.manage-page { --workspace-sidebar: 256px; font-size: 15px; }
 .manage-page .manage-content { max-width: none; }
-.manage-page .manage-heading p.text-body-secondary { max-width: var(--measure); font-size: 17px; }
-.manage-page .manage-heading h1 { font-size: clamp(28px, 2.3vw, 36px); }
-.manage-page .sidebar-brand { font-size: 16px; }
-.manage-page .sidebar-brand span small { font-size: 14px; }
-.workspace-label { font-size: 16px; }
-.workspace-label small { font-size: 14px; }
-.workspace-avatar { font-size: 15px; width: 38px; height: 38px; flex-basis: 38px; }
-.manage-page .sidebar-heading { font-size: 13px; }
-.manage-page .manage-sidebar .nav-link { font-size: 16px; min-height: 46px; }
-.manage-page .sidebar-foot .nav-link { font-size: 15px; }
-.workspace-count { font-size: 13px; }
-.workspace-categories { font-size: 15px; }
-.workspace-user-name { font-size: 14px; }
-.workspace-user-name small { font-size: 13px; }
-.workspace-location nav, .workspace-menu, .workspace-search input { font-size: 16px; }
-.workspace-icon { min-width: 40px; min-height: 40px; font-size: 20px; }
-.workspace-eyebrow, .workspace-back, .workspace-footer { font-size: 14px; }
-.manage-page .btn { font-size: 16px; padding: 10px 16px; }
-.manage-page .btn-sm { font-size: 14px; padding: 8px 12px; }
-.manage-page .h5 { font-size: 22px; }
-.manage-page .h6 { font-size: 18px; }
+.manage-page .manage-heading p.text-body-secondary { max-width: var(--measure); font-size: 15px; }
+.manage-page .manage-heading h1 { font-size: clamp(22px, 2vw, 30px); }
+.manage-page .sidebar-brand { font-size: 15px; }
+.manage-page .sidebar-brand span small { font-size: 12px; }
+.workspace-label { font-size: 14px; }
+.workspace-label small { font-size: 12px; }
+.workspace-avatar { font-size: 13px; width: 32px; height: 32px; flex-basis: 32px; }
+.manage-page .sidebar-heading { font-size: 11px; }
+.manage-page .manage-sidebar .nav-link { font-size: 14px; min-height: 38px; }
+.manage-page .sidebar-foot .nav-link { font-size: 13px; }
+.workspace-count { font-size: 11px; }
+.workspace-categories { font-size: 13px; }
+.workspace-user-name { font-size: 13px; }
+.workspace-user-name small { font-size: 11px; }
+.workspace-location nav, .workspace-menu, .workspace-search input { font-size: 14px; }
+.workspace-icon { min-width: 34px; min-height: 34px; font-size: 17px; }
+.workspace-eyebrow, .workspace-back, .workspace-footer { font-size: 12px; }
+.manage-page .btn { font-size: 14px; padding: 7px 13px; }
+.manage-page .btn-sm { font-size: 12px; padding: 5px 10px; }
+.manage-page .h5 { font-size: 18px; }
+.manage-page .h6 { font-size: 15px; }
 .manage-page .card-header { flex-wrap: wrap; }
-.manage-page .card-header a { font-size: 15px; }
-.manage-page .table { font-size: 16px; }
-.manage-page .table thead th, .manage-page .table .small { font-size: 14px; }
-.manage-page .status-badge { font-size: 13px; }
-.manage-page .form-control, .manage-page .form-select { font-size: 17px; min-height: 46px; }
-.manage-page .form-label { font-size: 16px; }
-.manage-page .form-text, .manage-page .form-control[type="file"], .workspace-upload-status { font-size: 14px; }
-.workspace-filters label, .workspace-results, .workspace-save-bar .save-hint { font-size: 14px; }
+.manage-page .card-header a { font-size: 13px; }
+.manage-page .table { font-size: 14px; }
+.manage-page .table thead th, .manage-page .table .small { font-size: 12px; }
+.manage-page .status-badge { font-size: 11px; }
+.manage-page .form-control, .manage-page .form-select { font-size: 16px; min-height: 38px; }
+.manage-page .form-label { font-size: 14px; }
+.manage-page .form-text, .manage-page .form-control[type="file"], .workspace-upload-status { font-size: 12px; }
+.workspace-filters label, .workspace-results, .workspace-save-bar .save-hint { font-size: 12px; }
 .workspace-filters > div { min-width: 155px; flex-basis: 180px; }
 .workspace-filters .filter-page-size { min-width: 90px; }
-.metric-top, .workspace-callout p, .attention-item > span:nth-child(2) { font-size: 16px; }
-.metric-foot, .attention-item small { font-size: 14px; }
-.metric-value { font-size: clamp(28px, 2.2vw, 36px); }
-.manage-page .empty-state h2 { font-size: 21px; }
-.manage-page .empty-state p { font-size: 16px; max-width: 34rem; }
+.metric-top, .workspace-callout p, .attention-item > span:nth-child(2) { font-size: 14px; }
+.metric-foot, .attention-item small { font-size: 12px; }
+.metric-value { font-size: clamp(22px, 1.9vw, 30px); }
+.manage-page .empty-state h2 { font-size: 18px; }
+.manage-page .empty-state p { font-size: 14px; max-width: 34rem; }
 .manage-page #chart-days { min-width: 7rem; }
 
 @media (max-width: 575.98px) {
@@ -134,20 +136,20 @@ h1, h2, h3 { overflow-wrap: anywhere; }
   .manage-page .manage-topbar { gap: 8px; }
   .workspace-location { gap: 8px; }
   .workspace-header-actions { gap: 2px; }
-  .workspace-location nav { font-size: 14px; }
-  .workspace-menu { font-size: 15px; }
+  .workspace-location nav { font-size: 13px; }
+  .workspace-menu { font-size: 13px; }
   .workspace-search input { font-size: 16px; }
   .workspace-filters > div { flex: 1 1 140px; min-width: 0; }
   .workspace-filters .filter-search, .workspace-filters .filter-actions { flex-basis: 100%; }
   .workspace-filters .filter-actions { flex-wrap: wrap; }
   .workspace-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); }
-  .metric-top { font-size: 14px; }
-  .metric-foot { font-size: 13px; }
+  .metric-top { font-size: 13px; }
+  .metric-foot { font-size: 12px; }
   .workspace-save-bar .btn-primary { order: 1; }
   .workspace-save-bar a { order: 2; }
   .workspace-save-bar button[name="save_action"] { order: 3; width: 100%; }
   .manage-page .manage-sidebar { width: min(320px, calc(100vw - 32px)); }
-  .manage-page .workspace-filters .btn, .manage-page .workspace-page-actions .btn { font-size: 15px; }
+  .manage-page .workspace-filters .btn, .manage-page .workspace-page-actions .btn { font-size: 13px; }
   .workspace-page-actions { flex-wrap: wrap; }
   .metric-value, .metric-foot { overflow-wrap: anywhere; }
   .assistant-toolbar { flex-wrap: wrap; }
@@ -164,6 +166,8 @@ h1, h2, h3 { overflow-wrap: anywhere; }
 
 /* Phones: calmer page-header copy and full-width primary actions. */
 @media (max-width: 575.98px) {
-  .page-header .fs-5 { font-size: 1.05rem !important; line-height: 1.65; }
+  .page-header .fs-5 { font-size: 1rem !important; line-height: 1.65; }
   .page-header .d-flex.flex-wrap > .btn { flex: 1 1 100%; }
+  /* iOS zooms into inputs under 16px; keep fields at 16px on phones. */
+  .form-control, .form-select { font-size: 16px; }
 }
