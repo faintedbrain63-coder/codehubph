@@ -1,8 +1,8 @@
-{% now "Y" as year %}
+{% load core_tags %}{% now "Y" as year %}
 <footer class="site-footer mt-auto" data-bs-theme="dark">
   <div class="container footer-main">
     <div class="row g-4 g-lg-5">
-      <div class="col-lg-4">
+      <div class="col-lg-3">
         <a class="d-inline-flex align-items-center gap-2 text-decoration-none" href="{% url 'core:home' %}" aria-label="{{ SITE_NAME }} home">
           <span class="brand-mark" aria-hidden="true"><i class="bi bi-lightning-charge-fill"></i></span>
           <span class="fw-bold text-white font-display">{{ SITE_NAME }}</span>
@@ -40,11 +40,11 @@
           {% if has_order_history %}<li><a href="{% url 'orders:list' %}">Purchase history</a></li>{% endif %}
         </ul>
       </div>
-      <div class="col-6 col-lg-2">
+      <div class="col-6 col-lg-3">
         <h2>Contact</h2>
         <ul class="list-unstyled small d-grid gap-2">
           <li><a href="{% url 'core:home' %}#contact">Send a message</a></li>
-          <li><a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a></li>
+          <li><a href="mailto:{{ site.contact_email }}">{{ site.contact_email|email_breaks }}</a></li>
           {% if site.contact_phone %}<li><span class="text-secondary">{{ site.contact_phone }}</span></li>{% endif %}
         </ul>
       </div>

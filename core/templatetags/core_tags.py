@@ -125,3 +125,12 @@ def query_transform(context, **kwargs):
 def active(context, *url_prefixes):
     path = context["request"].path
     return "active" if any(path.startswith(p) for p in url_prefixes) else ""
+
+
+@register.filter
+def email_breaks(value):
+    """Let a long address wrap before the @ instead of mid-word."""
+    local, at, domain = str(value or "").partition("@")
+    if not at:
+        return value
+    return format_html("{}<wbr>@{}", local, domain)

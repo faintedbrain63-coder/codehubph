@@ -53,7 +53,7 @@ body { overflow-x: hidden; }
 .modal-content, .modal-body { overflow-wrap: anywhere; }
 h1, h2, h3 { overflow-wrap: anywhere; }
 .site-footer .footer-legal { flex-wrap: wrap; }
-.site-footer li, .site-footer a { overflow-wrap: anywhere; min-width: 0; }
+.site-footer li, .site-footer a { overflow-wrap: break-word; min-width: 0; }
 .btn { max-width: 100%; overflow-wrap: anywhere; }
 .manage-page .btn { white-space: normal; }
 .tag { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
@@ -72,10 +72,16 @@ h1, h2, h3 { overflow-wrap: anywhere; }
 @media (max-width: 1199.98px) {
   .site-navbar .navbar-collapse { max-height: calc(100dvh - var(--nav-h)); overflow-y: auto; overscroll-behavior: contain; }
 }
+/* Links stay on one row; laptop widths tighten spacing instead of wrapping. */
 @media (min-width: 1200px) {
-  .site-navbar .navbar-collapse, .site-navbar .navbar-nav { flex-wrap: wrap; }
+  .site-navbar .navbar-collapse, .site-navbar .navbar-nav { flex-wrap: nowrap; }
   .site-navbar .navbar-nav { min-width: 0; }
-  .site-navbar .navbar-nav.me-auto { flex: 1 1 28rem; }
+  .site-navbar .navbar-nav.me-auto { flex: 1 1 auto; margin-left: 1rem !important; }
+}
+@media (min-width: 1200px) and (max-width: 1499.98px) {
+  .site-navbar .navbar-brand small { display: none; }
+  .site-navbar .nav-link { padding-inline: 0.55rem !important; }
+  .site-navbar .navbar-nav.me-auto { gap: 0 !important; margin-left: 0.5rem !important; }
 }
 
 /* The workspace uses all space alongside its sidebar, even on ultrawide screens. */
@@ -155,3 +161,9 @@ h1, h2, h3 { overflow-wrap: anywhere; }
   .storage-legend small { grid-column: 3; }
 }
 @media print { :root { font-size: 12pt; } .container { padding-inline: 0; } .document-measure, .prose { max-width: none; } }
+
+/* Phones: calmer page-header copy and full-width primary actions. */
+@media (max-width: 575.98px) {
+  .page-header .fs-5 { font-size: 1.05rem !important; line-height: 1.65; }
+  .page-header .d-flex.flex-wrap > .btn { flex: 1 1 100%; }
+}

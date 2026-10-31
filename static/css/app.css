@@ -1205,6 +1205,10 @@ textarea.form-control { min-height: 7rem; }
 }
 .account-nav::-webkit-scrollbar { display: none; }
 .account-nav .nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-shrink: 0;
   padding: 0.45rem 0.85rem;
   border-radius: 999px;
   color: var(--muted);
@@ -1269,6 +1273,9 @@ textarea.form-control { min-height: 7rem; }
 .feature-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.7rem; }
 .feature-list li { display: flex; align-items: flex-start; gap: 0.6rem; font-size: 0.92rem; }
 .feature-list i { margin-top: 0.15rem; color: var(--success); }
+/* The grid owns the columns; neutralise Bootstrap's row/col sizing. */
+.feature-list.row { margin: 0; }
+.feature-list.row > li { width: auto; max-width: none; padding: 0.7rem 0.85rem; margin: 0; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); }
 @media (min-width: 768px) {
   .feature-list.row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

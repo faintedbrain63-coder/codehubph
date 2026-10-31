@@ -94,13 +94,22 @@
     const full = typed.textContent;
     const caret = typed.parentElement.querySelector(".lp-lead-caret");
     if (!reduceMotion) {
+      // The untyped remainder stays in the layout as invisible text, so the
+      // paragraph keeps its final height and nothing below it shifts.
+      const shown = document.createElement("span");
+      const ghost = document.createElement("span");
+      ghost.className = "lp-type-ghost";
+      ghost.textContent = full;
       typed.textContent = "";
+      typed.append(shown);
+      if (caret) { typed.append(caret); caret.hidden = false; }
+      typed.append(ghost);
       typed.classList.add("is-typing");
-      if (caret) caret.hidden = false;
       let index = 0;
       const typeNext = function () {
         index += 1;
-        typed.textContent = full.slice(0, index);
+        shown.textContent = full.slice(0, index);
+        ghost.textContent = full.slice(index);
         if (index >= full.length) {
           typed.classList.add("is-done");
           if (caret) caret.hidden = true;

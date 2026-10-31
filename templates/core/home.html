@@ -45,7 +45,7 @@
           <div class="lp-console">
             <div class="lp-console-bar"><span></span><span></span><span></span><div class="lp-console-url"><i class="bi bi-lock-fill"></i> {{ SITE_NAME }} · project workspace</div></div>
             <div class="lp-console-body">
-              <div class="d-flex justify-content-between align-items-center"><div><div class="lp-mini-label">Your custom project</div><span class="lp-mono">From brief to delivery</span></div><span class="lp-status"><span class="lp-status-dot"></span>In progress</span></div>
+              <div class="d-flex justify-content-between align-items-center gap-3"><div><div class="lp-mini-label">Your custom project</div><span class="lp-mono">From brief to delivery</span></div><span class="lp-status"><span class="lp-status-dot"></span>In progress</span></div>
               <div class="lp-pipeline">
                 <div class="lp-pipe-step is-done"><i class="bi bi-chat-text"></i><span>Brief</span></div>
                 <div class="lp-pipe-step is-done"><i class="bi bi-file-earmark-check"></i><span>Quote</span></div>
@@ -70,7 +70,7 @@
 {% include "partials/_landing_experience.html" %}
 <section class="section lp-section" id="start" aria-labelledby="services-title">
   <div class="container">
-    <div class="lp-section-head" data-reveal><span class="lp-section-index">01 — Our services</span><span class="lp-eyebrow">Built around your needs</span><h2 id="services-title" class="lp-h2">What would you like to create?</h2><p class="lead-muted mb-0">Choose a platform or describe your idea. We will help define a project scope that fits your requirements.</p></div>
+    <div class="lp-section-head" data-reveal><span class="lp-section-index"><b>01</b>Our services</span><h2 id="services-title" class="lp-h2">What would you like to create?</h2><p class="lead-muted mb-0">Choose a platform or describe your idea. We will help define a project scope that fits your requirements.</p></div>
     <div class="lp-paths lp-services">
       {% for service in services %}
       <article class="lp-path" data-reveal>
@@ -84,15 +84,15 @@
 </section>
 <section class="section lp-section lp-section-alt" id="clients" aria-labelledby="clients-title">
   <div class="container">
-    <div class="lp-section-head" data-reveal><span class="lp-section-index">02 — Who we build for</span><h2 id="clients-title" class="lp-h2">Your project. Your context.</h2><p class="lead-muted mb-0">From a student capstone to an organizational system, development starts with understanding the people who will use it.</p></div>
-    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-4">
-      {% for client in client_types %}<div class="col" data-reveal><article class="card p-4 h-100"><span class="icon-tile mb-3" aria-hidden="true"><i class="bi bi-{{ client.icon }}"></i></span><h3 class="h5">{{ client.label }}</h3><p class="text-body-secondary">{{ client.text }}</p><a href="{% url 'capstone:request_new' %}?client_type={{ client.value }}" class="mt-auto">Start a conversation <i class="bi bi-arrow-right" aria-hidden="true"></i></a></article></div>{% endfor %}
+    <div class="lp-section-head" data-reveal><span class="lp-section-index"><b>02</b>Who we build for</span><h2 id="clients-title" class="lp-h2">Your project. Your context.</h2><p class="lead-muted mb-0">From a student capstone to an organizational system, development starts with understanding the people who will use it.</p></div>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-3 g-md-4">
+      {% for client in client_types %}<div class="col" data-reveal><article class="card lp-client h-100"><span class="icon-tile" aria-hidden="true"><i class="bi bi-{{ client.icon }}"></i></span><h3 class="h5">{{ client.label }}</h3><p class="text-body-secondary">{{ client.text }}</p><a href="{% url 'capstone:request_new' %}?client_type={{ client.value }}" class="lp-path-foot">Start a conversation<i class="bi bi-arrow-right" aria-hidden="true"></i></a></article></div>{% endfor %}
     </div>
   </div>
 </section>
 <section class="section lp-section" id="how-it-works" aria-labelledby="process-title">
   <div class="container"><div class="lp-capstone-grid">
-    <div data-reveal><span class="lp-section-index">03 — The process</span><span class="lp-eyebrow">From idea to working system</span><h2 id="process-title" class="lp-h2">A clear plan.<br>A project built for you.</h2><p class="lead-muted">Share your goals, required features and preferred deadline. We agree on the scope before development, then keep your quote, messages, payments and deliverables together in your account.</p><a href="{% url 'capstone:request_new' %}" class="btn btn-lg btn-primary">Request a quote <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i></a></div>
+    <div data-reveal><span class="lp-section-index"><b>03</b>The process</span><h2 id="process-title" class="lp-h2">A clear plan.<br>A project built for you.</h2><p class="lead-muted">Share your goals, required features and preferred deadline. We agree on the scope before development, then keep your quote, messages, payments and deliverables together in your account.</p><a href="{% url 'capstone:request_new' %}" class="btn btn-lg btn-primary">Request a quote <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i></a></div>
     <ol class="lp-timeline" data-timeline>
       <li data-reveal><span class="lp-timeline-dot">1</span><div><h3>Tell us your requirements</h3><p>Describe your platform, intended users, features and school or organizational needs.</p></div></li>
       <li data-reveal><span class="lp-timeline-dot">2</span><div><h3>Review your quote</h3><p>Agree on scope, price, deliverables and timeline before accepting and paying.</p></div></li>
@@ -106,8 +106,7 @@
   <div class="container">
     <div class="d-md-flex justify-content-between align-items-end gap-3 mb-4" data-reveal>
       <div class="lp-section-head mb-0">
-        <span class="lp-section-index" aria-hidden="true">03 — Proof</span>
-        <span class="lp-eyebrow">Customer comments</span>
+        <span class="lp-section-index"><b>04</b>Customer reviews</span>
         <h2 id="testimonials-title" class="lp-h2 mb-2">What our customers say</h2>
         <div class="lp-review-summary">
           {% include "partials/_stars.html" with rating=testimonial_summary.average|floatformat:"0" %}
@@ -155,7 +154,7 @@
 {% include "partials/_landing_portfolio.html" %}
 
 <section class="section lp-section" id="faq" aria-labelledby="faq-title">
-  <div class="container"><div class="lp-section-head" data-reveal><span class="lp-section-index">05 — Questions</span><h2 id="faq-title" class="lp-h2">Before you start</h2></div>
+  <div class="container"><div class="lp-section-head" data-reveal><span class="lp-section-index"><b>05</b>Questions</span><h2 id="faq-title" class="lp-h2">Before you start</h2></div>
     <div class="accordion" id="faq-list">
       {% for question, answer in faqs %}<div class="accordion-item"><h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-{{ forloop.counter }}" aria-expanded="false" aria-controls="faq-{{ forloop.counter }}">{{ question }}</button></h3><div id="faq-{{ forloop.counter }}" class="accordion-collapse collapse" data-bs-parent="#faq-list"><div class="accordion-body">{{ answer }}</div></div></div>{% endfor %}
     </div>
@@ -165,12 +164,11 @@
   <div class="container">
     <div class="row g-4 g-lg-5">
       <div class="col-lg-5" data-reveal>
-        <span class="lp-section-index" aria-hidden="true">06 — Support</span>
-        <span class="lp-eyebrow">Contact</span>
+        <span class="lp-section-index"><b>06</b>Contact</span>
         <h2 id="contact-title" class="lp-h2">Questions? We are happy to help.</h2>
         <p class="lead-muted">Tell us about a student project, a departmental system or a business application. We usually reply within one business day.</p>
         <ul class="lp-contact-list">
-          <li><span class="icon-tile" aria-hidden="true"><i class="bi bi-envelope"></i></span><a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a></li>
+          <li><span class="icon-tile" aria-hidden="true"><i class="bi bi-envelope"></i></span><a href="mailto:{{ site.contact_email }}">{{ site.contact_email|email_breaks }}</a></li>
           {% if site.contact_phone %}<li><span class="icon-tile" aria-hidden="true"><i class="bi bi-telephone"></i></span><span>{{ site.contact_phone }}</span></li>{% endif %}
           <li><span class="icon-tile" aria-hidden="true"><i class="bi bi-clock"></i></span><span>Replies within one business day</span></li>
         </ul>
