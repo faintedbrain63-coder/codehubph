@@ -1059,8 +1059,9 @@ html:has(.landing) { scroll-padding-top: calc(var(--nav-h) + 0.5rem); }
 
 /* Cinematic engineering sequence. It plays on a loop; the page scrolls past it normally. */
 .lp-experience { position: relative; background: #040814; color: #edf4ff; --experience: 0; }
-.lp-experience-stage { position: relative; height: calc(100svh - var(--nav-h, 80px)); min-height: 660px; overflow: hidden; isolation: isolate; background: radial-gradient(ellipse at 73% 43%, #101f40 0, #060d20 40%, #040814 75%); }
-.lp-experience-content { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; padding-top: 2rem; padding-bottom: 1.5rem; }
+/* Fill the viewport while allowing the copy and padded cards to set a larger height. */
+.lp-experience-stage { position: relative; min-height: max(660px, calc(100svh - var(--nav-h, 80px))); overflow: hidden; isolation: isolate; background: radial-gradient(ellipse at 73% 43%, #101f40 0, #060d20 40%, #040814 75%); }
+.lp-experience-content { position: relative; z-index: 2; min-height: inherit; display: flex; flex-direction: column; padding-top: 2rem; padding-bottom: 1.5rem; }
 .lp-experience-top, .lp-experience-bottom { display: flex; justify-content: space-between; gap: 1rem; font: 500 .65rem/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: .16em; color: #99aecb; }
 .lp-experience-top { padding-bottom: 1.25rem; border-bottom: 1px solid #a5c9ff20; }
 .lp-experience-top > span:first-child { display: flex; align-items: center; gap: .65rem; text-transform: uppercase; }
@@ -1084,7 +1085,7 @@ html:has(.landing) { scroll-padding-top: calc(var(--nav-h) + 0.5rem); }
 .lp-orbit-ring-three { inset: 8%; border-top: 2px solid #67e8f9; border-bottom: 2px solid #818cf8; transform: rotate(calc(var(--experience) * -200deg)); }
 .lp-orbit-core { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; flex-direction: column; color: #e6f4ff; font: 500 clamp(2rem, 4vw, 4rem)/1 ui-monospace, monospace; letter-spacing: .12em; text-shadow: 0 0 35px #67e8f970; transform: rotate(calc(var(--experience) * -36deg)); }
 .lp-orbit-core > span { font-size: .45rem; letter-spacing: .2em; margin-top: 1rem; color: #8cb7d7; }
-.lp-experience-platforms { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: #a5c9ff25; border: 1px solid #a5c9ff25; border-radius: .75rem; overflow: hidden; }
+.lp-experience-platforms { display: grid; flex-shrink: 0; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: #a5c9ff25; border: 1px solid #a5c9ff25; border-radius: .75rem; overflow: hidden; }
 .lp-platform { position: relative; padding: 1.35rem 1.5rem; background: #071020ee; transition: background .6s, box-shadow .6s; }
 .lp-platform.is-current { background: #152547ed; box-shadow: inset 0 1px #82e7ff; }
 .lp-platform-number { font: .6rem/1.5 ui-monospace, monospace; letter-spacing: .18em; color: #8ba5cc; }
@@ -1115,7 +1116,7 @@ html:has(.landing) { scroll-padding-top: calc(var(--nav-h) + 0.5rem); }
   .lp-platform p { font-size: .6rem; line-height: 1.5; }
 }
 @media (max-width: 767.98px), (max-height: 740px) {
-  .lp-experience-stage { min-height: 580px; }
+  .lp-experience-stage { min-height: max(580px, calc(100svh - var(--nav-h, 80px))); }
   .lp-experience-content { padding-top: 1.25rem; padding-bottom: 1rem; }
   .lp-experience-coordinate { display: none; }
   .lp-experience-top { font-size: .55rem; }
