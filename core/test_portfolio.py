@@ -89,14 +89,15 @@ class PortfolioTests(BaseTestCase):
         self.assertContains(self.client.get(reverse("core:home")), "Updated portal")
         self.assertContains(self.client.get(reverse("core:portfolio_list")), "https://example.org/new")
 
-    def test_web_links_are_required_for_publication_and_reject_unsafe_schemes(self):
-        for url in ("", "javascript:alert(1)", "ftp://example.org/app", "https://secret:password@example.org/app"):
+    def test_web_links_are_optional_and_reject_unsafe_schemes(self):
+        response = self.client.post(reverse("dashboard:portfolio_create"), self.payload(title="Web app without a link", project_url=""))
+        self.assertRedirects(response, reverse("dashboard:portfolio_list"))
+        self.assertEqual(PortfolioProject.objects.get(title="Web app without a link").project_url, "")
+        for url in ("javascript:alert(1)", "ftp://example.org/app", "https://secret:password@example.org/app"):
             response = self.client.post(reverse("dashboard:portfolio_create"), self.payload(project_url=url))
             self.assertEqual(response.status_code, 200)
             self.assertIn("project_url", response.context["form"].errors)
-        self.assertFalse(PortfolioProject.objects.exists())
-        self.assertEqual(self.client.post(reverse("dashboard:portfolio_create"), self.payload(
-            project_url="", is_published="")).status_code, 302)
+        self.assertEqual(PortfolioProject.objects.count(), 1)
 
     def test_mobile_and_software_require_screenshots_only_when_published(self):
         for project_type in ("mobile", "software"):

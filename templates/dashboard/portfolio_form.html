@@ -1,7 +1,7 @@
 {% extends "dashboard/base_manage.html" %}
 {% block manage_title %}{% if project.pk %}Edit {{ project.title }}{% else %}New portfolio project{% endif %} · {% endblock %}
 {% block heading %}{% if project.pk %}Edit portfolio project{% else %}New portfolio project{% endif %}{% endblock %}
-{% block subheading %}<p class="text-body-secondary mb-0">Web apps need a link to publish. Software and mobile apps need at least one screenshot. You can save an incomplete entry as a draft.</p>{% endblock %}
+{% block subheading %}<p class="text-body-secondary mb-0">A web link is optional for every project type, including web apps. Software and mobile apps need at least one screenshot to publish. You can save an incomplete entry as a draft.</p>{% endblock %}
 {% block actions %}{% if project.pk %}<a class="btn btn-soft" href="{{ project.get_absolute_url }}">Preview project</a>{% endif %}{% endblock %}
 {% block manage_content %}
 <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate data-dirty-form>
@@ -14,7 +14,7 @@
         {% include "partials/_field.html" with field=form.summary %}
         {% include "partials/_field.html" with field=form.description %}
         {% include "partials/_field.html" with field=form.tech_stack %}
-        {% include "partials/_field.html" with field=form.project_url %}
+        {% include "partials/_field.html" with field=form.project_url show_optional=True %}
         {% include "partials/_field.html" with field=form.slug %}
       </section>
       <section class="card p-4"><details{% if form.industry.value or form.contribution.value or form.project_year.value or form.challenge.value or form.solution.value or form.outcome.value or form.project_year.errors %} open{% endif %}><summary class="h6 mb-2">Case study details <span class="small text-body-secondary">Optional</span></summary><p class="small text-body-secondary mt-3">Give visitors context about your work, the problem you solved and the result. Empty fields are omitted from the public page.</p><div class="row"><div class="col-md-8">{% include "partials/_field.html" with field=form.industry %}</div><div class="col-md-4">{% include "partials/_field.html" with field=form.project_year %}</div></div>{% include "partials/_field.html" with field=form.contribution %}{% include "partials/_field.html" with field=form.challenge %}{% include "partials/_field.html" with field=form.solution %}{% include "partials/_field.html" with field=form.outcome %}</details></section>

@@ -190,8 +190,11 @@ class PortfolioProjectForm(forms.ModelForm):
         widgets = {"description": forms.Textarea(attrs={"rows": 5}),
                    "challenge": forms.Textarea(attrs={"rows": 3}), "solution": forms.Textarea(attrs={"rows": 3}),
                    "outcome": forms.Textarea(attrs={"rows": 3})}
-        help_texts = {"slug": "Leave blank to generate from the title.",
-                      "is_published": "Only publish descriptions, links and screenshots you have permission to share."}
+        help_texts = {
+            "slug": "Leave blank to generate from the title.",
+            "project_url": "Optional for every project type, including web apps. Add a live or demo address when you have one. Use http:// or https://.",
+            "is_published": "Only publish descriptions, links and screenshots you have permission to share.",
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -214,8 +217,6 @@ class PortfolioProjectForm(forms.ModelForm):
 
     def clean(self):
         data = super().clean()
-        if data.get("is_published") and data.get("project_type") == PortfolioProject.ProjectType.WEB and not data.get("project_url"):
-            self.add_error("project_url", "Add the web application link before publishing this project.")
         project_request, customer = data.get("request"), data.get("customer")
         if project_request:
             if customer and customer.pk != project_request.customer_id:
